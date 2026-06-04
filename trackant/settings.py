@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'django_htmx',
+    'django_filters',
     'widget_tweaks',
     'crispy_forms',
     'crispy_tailwind',
