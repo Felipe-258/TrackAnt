@@ -8,4 +8,5 @@ urlpatterns = [
     path('goals/add/', pages.goal_add, name='goal_add'),
     path('goals/<int:pk>/edit/', pages.goal_edit, name='goal_edit'),
     path('goals/<int:pk>/delete/', pages.goal_delete, name='goal_delete'),
+    path('goals/<int:pk>/add-progress/', pages.goal_add_progress, name='goal_add_progress'),
 ]

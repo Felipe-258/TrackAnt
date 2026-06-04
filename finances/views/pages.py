@@ -5,6 +5,7 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import datetime, date
 from ..models import Transaction, Category, Currency, Tag
+from goals.models import Goal
 from ..forms import TransactionForm, CategoryForm
 
 
@@ -35,7 +36,7 @@ def _monthly_summary():
 def dashboard(request):
     ctx = _monthly_summary()
     ctx['recent_transactions'] = Transaction.objects.select_related('category', 'currency')[:10]
-    ctx['goals_count'] = 0
+    ctx['goals_count'] = Goal.objects.filter(is_achieved=False).count()
 
     today = date.today()
     month_expenses = Transaction.objects.filter(

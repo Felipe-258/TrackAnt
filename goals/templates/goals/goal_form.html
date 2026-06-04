@@ -5,12 +5,58 @@
 {% block content %}
 <div class="mx-auto max-w-2xl">
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
-    <form method="post" class="space-y-4">
+    <form method="post" class="space-y-5">
       {% csrf_token %}
-      <p class="text-center text-sm text-earth-500 dark:text-earth-400">Formulario disponible en Fase 4</p>
-      <div class="flex items-center justify-end gap-3 pt-4">
-        <a href="{% url 'goals:goal_list' %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
-        <button type="submit" class="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gold-600">Guardar</button>
+
+      {% if form.non_field_errors %}
+      <div class="rounded-lg bg-clay-50 p-3 text-sm text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="flex items-center gap-4">
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-100 text-2xl dark:bg-gold-900/50">🎯</span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Nueva meta de ahorro</h3>
+          <p class="text-sm text-earth-500 dark:text-earth-400">Establecé un objetivo y seguí tu progreso</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre de la meta</label>
+        {{ form.name }}
+        {% if form.name.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.name.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto objetivo</label>
+          {{ form.target_amount }}
+          {% if form.target_amount.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.target_amount.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="w-32">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
+          {{ form.currency }}
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha límite <span class="text-earth-400 font-normal">(opcional)</span></label>
+          {{ form.deadline }}
+        </div>
+        <div class="w-24">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Color</label>
+          {{ form.color }}
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+        <a href="{% url 'goals:goal_list' %}"
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+        <button type="submit"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
+          <i data-lucide="check" class="lucide-sm"></i>
+          {% if form.instance.pk %}Actualizar{% else %}Crear meta{% endif %}
+        </button>
       </div>
     </form>
   </div>
