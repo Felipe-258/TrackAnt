@@ -1,17 +1,213 @@
-{% load ant_tags %}
-<div class="flex flex-col items-center space-y-2 py-4">
-  <div class="text-4xl">{% weather_emoji weather %}</div>
-  <div class="flex items-center gap-1 text-2xl">
-    {% for i in worker_count|make_list %}
-    <span class="inline-block animate-bounce" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.2s,0s' }}">🐜</span>
+{% load static ant_tags %}
+
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-b from-earth-50 via-earth-50 to-earth-100 dark:from-earth-900 dark:via-earth-900 dark:to-earth-950 select-none" style="min-height: 300px;">
+
+  <!-- ==================== SVG LANDSCAPE ==================== -->
+  <svg class="colony-landscape" viewBox="0 0 900 300" preserveAspectRatio="none">
+
+    <!-- Weather layer -->
+    {% if weather == 'sunny' or weather == 'clear' %}
+    <g transform="translate(820, 40)">
+      <g class="sun-spin">
+        <circle r="24" fill="#F2D99F" opacity="0.85"/>
+        <circle r="16" fill="#E9C06A"/>
+        {% for a in "12345678" %}
+        <line x1="24" y1="0" x2="33" y2="0" stroke="#E9C06A" stroke-width="2.5" stroke-linecap="round"
+              transform="rotate({% widthratio forloop.counter0 1 45 %})"/>
+        {% endfor %}
+      </g>
+    </g>
+    {% elif weather == 'cloudy' %}
+    <g transform="translate(750, 35)"><g class="cloud-drift">
+      <ellipse cx="0" cy="0" rx="35" ry="16" fill="#E2D1BC" opacity="0.7"/>
+      <ellipse cx="-18" cy="-4" rx="20" ry="11" fill="#E2D1BC" opacity="0.6"/>
+      <ellipse cx="18" cy="2" rx="16" ry="9" fill="#E2D1BC" opacity="0.5"/>
+    </g></g>
+    <g transform="translate(800, 48)"><g class="cloud-drift" style="animation-delay:-4s">
+      <ellipse cx="0" cy="0" rx="22" ry="11" fill="#E2D1BC" opacity="0.4"/>
+    </g></g>
+    {% elif weather == 'rainy' %}
+    <g transform="translate(800, 35)">
+      <ellipse cx="0" cy="0" rx="35" ry="16" fill="#8A6348" opacity="0.35"/>
+    </g>
+    {% for x in '0123456789' %}
+    <line x1="{{ forloop.counter0|mul:45 }}" y1="55" x2="{{ forloop.counter0|mul:42 }}" y2="95"
+          stroke="#8BA864" stroke-width="1.5" opacity="0.3" class="rain-drop"
+          style="animation-delay:{% widthratio forloop.counter0 1 0.35 %}s"/>
     {% endfor %}
-  </div>
-  <div class="text-5xl">{% queen_emoji queen_size %}</div>
-  <div class="mt-1 text-xs text-stone-400 dark:text-stone-500">
-    {% if worker_count == 0 %}
-    Colonia vacía — agregá transacciones
-    {% else %}
-    {{ worker_count }} hormigas obreras · Balance: ${{ balance }}
+    {% elif weather == 'stormy' %}
+    <g transform="translate(800, 35)"><ellipse cx="0" cy="0" rx="38" ry="18" fill="#6E4E38" opacity="0.5"/></g>
+    {% for x in '0123456789' %}
+    <line x1="{{ forloop.counter0|mul:45 }}" y1="50" x2="{{ forloop.counter0|mul:42 }}" y2="95"
+          stroke="#6E4E38" stroke-width="2" opacity="0.4" class="rain-drop"
+          style="animation-delay:{% widthratio forloop.counter0 1 0.35 %}s"/>
+    {% endfor %}
     {% endif %}
+
+    <!-- ===== BACKGROUND GROUND ===== -->
+    <ellipse cx="450" cy="295" rx="460" ry="60" fill="#CEB496" opacity="0.30"/>
+    <ellipse cx="450" cy="288" rx="440" ry="50" fill="#B89472" opacity="0.22"/>
+
+    <!-- Grass tufts (behind mound) -->
+    {% for g in '123456789abcde' %}
+    <g transform="translate({% widthratio forloop.counter0 1 60 %}, 280)">
+      <g class="grass-blade" style="animation-delay:{% if forloop.counter0|divisibleby:2 %}0{% else %}-1.5{% endif %}s">
+        <line x1="0" y1="0" x2="{% widthratio forloop.counter0 1 3 %}" y2="-12" stroke="#8BA864" stroke-width="1.5" opacity="0.4"/>
+        <line x1="0" y1="0" x2="-{% widthratio forloop.counter0 1 2 %}" y2="-8" stroke="#AAC288" stroke-width="1" opacity="0.35"/>
+      </g>
+    </g>
+    {% endfor %}
+
+    <!-- ===== MOUND OUTER SHELL (solid earth) ===== -->
+    <path d="M 60 285 Q 80 125 450 110 Q 820 125 840 285 Z"
+          fill="#543B29" opacity="0.92" class="dark:fill-earth-800 dark:opacity-90"/>
+    <!-- Mound surface highlight -->
+    <path d="M 60 285 Q 80 125 450 110 Q 820 125 840 285 Z"
+          fill="url(#moundGrad)" opacity="0.50"/>
+    <defs>
+      <linearGradient id="moundGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8A6348"/>
+        <stop offset="100%" stop-color="#3A271B"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ===== CROSS-SECTION CUT (dark cave interior) ===== -->
+    <path d="M 150 282 Q 180 180 450 172 Q 720 180 750 282 Z"
+          fill="#1A150D" opacity="0.95" class="dark:fill-black dark:opacity-95"/>
+    <!-- Cave floor -->
+    <ellipse cx="450" cy="278" rx="290" ry="22" fill="#3A271B" opacity="0.6"/>
+
+    <!-- Cave interior details: roots / texture -->
+    <path d="M 200 200 Q 220 240 210 270" stroke="#3A271B" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M 680 210 Q 660 250 670 272" stroke="#3A271B" stroke-width="1" fill="none" opacity="0.35"/>
+    <path d="M 450 185 Q 445 220 450 270" stroke="#3A271B" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+    <!-- Throne (right side of cave interior) -->
+    <rect x="600" y="240" rx="4" width="60" height="20" fill="#2D2416" opacity="0.8"/>
+    <rect x="605" y="230" rx="3" width="50" height="14" fill="#3A271B" opacity="0.9"/>
+    <rect x="610" y="222" rx="2" width="12" height="12" fill="#2D2416" opacity="0.7"/>
+    <rect x="642" y="222" rx="2" width="12" height="12" fill="#2D2416" opacity="0.7"/>
+    <!-- Throne armrests -->
+    <rect x="595" y="232" rx="2" width="8" height="28" fill="#1A150D" opacity="0.8"/>
+    <rect x="655" y="232" rx="2" width="8" height="28" fill="#1A150D" opacity="0.8"/>
+
+    <!-- ===== LEAF PILE (inside cave, center, always visible) ===== -->
+    <g transform="translate(420, 268)">
+      {% for i in "12345"|make_list %}
+      <text x="{{ forloop.counter0|add:-6 }}" y="{{ forloop.counter0|add:'-1' }}" font-size="14" opacity="0.80"
+            transform="rotate({% widthratio forloop.counter0 1 -10 %}, {{ forloop.counter0|add:-4 }}, -{{ forloop.counter0|add:2 }})">🍂</text>
+      {% endfor %}
+      {% for i in "123"|make_list %}
+      <text x="{{ forloop.counter0|add:2 }}" y="{{ forloop.counter0|add:'-3' }}" font-size="12" opacity="0.60"
+            transform="rotate({% widthratio forloop.counter0 1 8 %}, {{ forloop.counter0|add:2 }}, -{{ forloop.counter0 }})">🍃</text>
+      {% endfor %}
+    </g>
+
+    <!-- ===== GROUND SURFACE LINE (ants walk here) ===== -->
+    <path d="M 0 260 Q 30 258 60 256 L 60 256 Q 150 140 450 108 Q 750 140 840 256 Q 870 258 900 260"
+          fill="none" stroke="#CEB496" stroke-width="1.5" opacity="0.5" class="dark:opacity-30"/>
+    <path d="M 0 264 Q 60 260 150 155 Q 450 115 750 155 Q 840 260 900 264 L 900 280 L 0 280 Z"
+          fill="#B89472" opacity="0.18"/>
+
+    <!-- Center tunnel entrance (top of mound) -->
+    <ellipse cx="450" cy="172" rx="14" ry="6" fill="#0D0A06" opacity="0.4" class="tunnel-hole" style="animation-delay:-0.5s"/>
+
+  </svg>
+
+  <!-- ==================== QUEEN ANT (inside cave, on throne) ==================== -->
+  <div class="absolute z-20 flex flex-col items-center" style="left:70%; top:76%; transform:translate(-50%,-50%);">
+    <div class="queen-wiggle" style="color:{{ goal_color|default:'#C4943A' }}">
+      <div class="relative">
+        {% if queen_size == 'large' %}
+        <span class="text-5xl leading-none">🐜</span>
+        <span class="absolute -top-3 -right-3 text-xl">👑</span>
+        {% elif queen_size == 'medium' %}
+        <span class="text-4xl leading-none">🐜</span>
+        <span class="absolute -top-2 -right-2 text-lg">👑</span>
+        {% elif queen_size == 'small' %}
+        <span class="text-3xl leading-none">🐜</span>
+        <span class="absolute -top-1 -right-1 text-base">👑</span>
+        {% else %}
+        <span class="text-2xl leading-none opacity-60">🐛</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="mt-1 rounded-full bg-earth-900/80 px-2.5 py-0.5 text-[10px] font-medium text-earth-100 backdrop-blur-sm dark:bg-earth-100/80 dark:text-earth-900">
+      {% if active_goals > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin meta 👑{% endif %}
+    </div>
   </div>
+
+  <!-- ==================== WORKER ANTS ==================== -->
+  {% for i in worker_ants|range_to %}
+  <div class="ant-walker"
+       style="--speed: 16s; --delay: {{ i|mul:3.5|stringformat:'.1f' }}s;">
+    <div class="ant-body" style="animation: ant-wave-{{ i|mod:3|add:1 }} {{ i|mod:3|add:3 }}s ease-in-out infinite; animation-delay:{{ i|mul:0.5|stringformat:'.1f' }}s;">
+      <div class="relative flex flex-col items-center">
+        <div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 text-xs leading-none drop-shadow"
+             style="animation: leaf-bounce 2.5s ease-in-out infinite, leaf-fade-peak 16s ease-in infinite;
+                    animation-delay: 0s, {{ i|mul:3.5|stringformat:'.1f' }}s;">🍂</div>
+        <span class="text-2xl leading-none" style="transform: scaleX(-1); display:inline-block;">🐜</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Falling leaf (sways down into the pile) -->
+  <div class="absolute pointer-events-none"
+       style="top:34%; left:50%; opacity:0;
+              animation: leaf-drop 16s ease-in-out infinite;
+              animation-delay: {{ i|mul:3.5|stringformat:'.1f' }}s;
+              z-index: 8;">
+    <span class="text-base leading-none drop-shadow-md">🍂</span>
+  </div>
+
+  {% empty %}
+  <div class="absolute flex flex-col items-center opacity-30" style="left:50%; top:50%; transform:translate(-50%,-50%);">
+    <span class="text-3xl">🐜</span>
+  </div>
+  {% endfor %}
+
+  <!-- ==================== SOLDIER ANTS ==================== -->
+  {% for i in soldier_ants|range_to %}
+  <div class="soldier-ant"
+       style="top:{% if i|divisibleby:2 %}80%{% else %}90%{% endif %};
+              left:{% widthratio i 1 45 %}%;
+              animation:{% if i|divisibleby:2 %}soldier-march{% else %}soldier-march-left{% endif %} 1.2s ease-in-out infinite;
+              animation-delay:{{ i }}s">
+    <div class="relative">
+      <span class="absolute -top-1 -left-1 text-[10px]">🛡️</span>
+      <span class="text-xl leading-none" style="filter: hue-rotate(-20deg) saturate(3);">🐜</span>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- ==================== TEXT OVERLAYS ==================== -->
+  <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs font-medium text-earth-700 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-300">
+        {% if worker_ants > 0 %}🐜 {{ worker_ants }} obreras{% else %}Colonia vacía{% endif %}
+      </span>
+      <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs text-earth-600 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-400">
+        {% weather_icon weather %} {{ weather }}
+      </span>
+      {% if soldier_ants > 0 %}
+      <span class="rounded-full bg-clay-100 px-2.5 py-1 text-xs font-medium text-clay-700 backdrop-blur-sm dark:bg-clay-900/60 dark:text-clay-300">
+        🛡️ {{ soldier_ants }} alertas
+      </span>
+      {% endif %}
+    </div>
+    <span class="rounded-full bg-white/80 px-3 py-1 text-sm font-bold backdrop-blur-sm dark:bg-earth-900/80 {% if total_balance >= 0 %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">
+      ${{ total_balance|floatformat:0 }}
+    </span>
+  </div>
+
+  <div class="absolute left-4 top-4">
+    <div class="rounded-lg bg-white/85 px-3 py-1.5 text-[11px] font-medium text-earth-700 shadow-sm backdrop-blur-sm dark:bg-earth-900/85 dark:text-earth-300">
+      {% if active_goals > 0 %}
+      {% queen_label queen_size %} {{ goal_name }} — {{ queen_progress }}%
+      {% else %}
+      🐜 Creá una meta de ahorro para que la reina crezca
+      {% endif %}
+    </div>
+  </div>
+
 </div>

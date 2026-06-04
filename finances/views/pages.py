@@ -37,6 +37,7 @@ def dashboard(request):
     ctx = _monthly_summary()
     ctx['recent_transactions'] = Transaction.objects.select_related('category', 'currency')[:10]
     ctx['goals_count'] = Goal.objects.filter(is_achieved=False).count()
+    ctx['active_goals_list'] = list(Goal.objects.filter(is_achieved=False).only('id', 'name'))
 
     today = date.today()
     month_expenses = Transaction.objects.filter(

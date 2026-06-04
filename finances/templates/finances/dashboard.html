@@ -61,6 +61,7 @@
     </div>
   </div>
 
+  {% load ant_tags %}
   <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <div class="flex items-center gap-3 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
       <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-earth-100 text-sm dark:bg-earth-800">🏠</span>
@@ -69,30 +70,8 @@
         <p class="text-sm text-earth-500 dark:text-earth-400">El estado de tu colonia financiera</p>
       </div>
     </div>
-    <div class="flex flex-col items-center justify-center px-6 py-10 text-center">
-      <div class="relative mb-4">
-        <svg width="240" height="160" viewBox="0 0 240 160" class="text-earth-300 dark:text-earth-700">
-          <ellipse cx="120" cy="140" rx="100" ry="18" fill="currentColor" opacity="0.3"/>
-          <ellipse cx="120" cy="135" rx="85" ry="14" fill="currentColor" opacity="0.2"/>
-          <ellipse cx="120" cy="130" rx="70" ry="10" fill="currentColor" opacity="0.15"/>
-          <circle cx="120" cy="65" r="35" fill="currentColor" opacity="0.12"/>
-          <ellipse cx="120" cy="100" rx="70" ry="25" fill="currentColor" opacity="0.2"/>
-        </svg>
-        {% if total_balance > 0 %}
-        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 space-y-1">
-          <div class="text-2xl">🐜🐜🐜</div>
-          <div class="text-3xl">🏠</div>
-        </div>
-        {% else %}
-        <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl opacity-30 dark:opacity-20">🐜</span>
-        {% endif %}
-      </div>
-      <p class="text-sm font-medium text-earth-500 dark:text-earth-400">
-        {% if total_balance > 0 %}Colonia activa — ${{ total_balance|floatformat:0 }} ahorrados{% else %}Tu colonia está vacía{% endif %}
-      </p>
-      <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">
-        {% if recent_transactions|length > 0 %}{{ recent_transactions|length }} transacciones registradas{% else %}Agregá transacciones para que cobre vida 🐜{% endif %}
-      </p>
+    <div id="colony-section" hx-get="{% url 'ants:colony_view' %}" hx-trigger="load" hx-swap="innerHTML" hx-target="this">
+      {% include 'ants/colony_page.html' %}
     </div>
   </div>
 

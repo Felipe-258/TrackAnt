@@ -1,0 +1,21 @@
+{% load ant_tags %}
+<div id="colony-wrapper">
+  <!-- Goal selector (only if we have multiple goals to choose from) -->
+  {% if active_goals_list and active_goals_list|length > 1 %}
+  <div class="flex items-center justify-end gap-2 mb-3">
+    <span class="text-xs text-earth-500 dark:text-earth-400">Meta:</span>
+    <select class="rounded-lg border border-earth-200 bg-earth-50 px-3 py-1.5 text-xs font-medium text-earth-700 focus:border-gold-400 focus:outline-none dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300"
+            hx-get="{% url 'ants:colony_view' %}"
+            hx-target="#colony-section"
+            hx-trigger="change"
+            name="goal_id"
+            hx-select="#colony-wrapper">
+      {% for g in active_goals_list %}
+      <option value="{{ g.id }}" {% if selected_goal_id == g.id or forloop.first and not selected_goal_id %}selected{% endif %}>{{ g.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  {% include 'ants/colony.html' %}
+</div>

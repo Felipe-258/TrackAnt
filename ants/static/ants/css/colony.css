@@ -1,0 +1,112 @@
+@keyframes ant-path {
+  0%   { left: -8%;  top: 86%; opacity: 0; }
+  5%   { left: 2%;   top: 86%; opacity: 1; }
+  14%  { left: 14%;  top: 82%; }
+  24%  { left: 26%;  top: 72%; }
+  34%  { left: 38%;  top: 56%; }
+  44%  { left: 47%;  top: 38%; }
+  48%  { left: 50%;  top: 34%; } /* peak */
+  58%  { left: 50%;  top: 34%; } /* pause at peak, drop leaf */
+  64%  { left: 55%;  top: 42%; }
+  74%  { left: 65%;  top: 58%; }
+  84%  { left: 78%;  top: 74%; }
+  94%  { left: 90%;  top: 84%; }
+  100% { left: 106%; top: 86%; opacity: 0; }
+}
+
+@keyframes ant-wave-1 {
+  0%, 100% { margin-top: 0px; }
+  25% { margin-top: -4px; }
+  50% { margin-top: 2px; }
+  75% { margin-top: -3px; }
+}
+@keyframes ant-wave-2 {
+  0%, 100% { margin-top: 0px; }
+  20% { margin-top: 3px; }
+  50% { margin-top: -4px; }
+  80% { margin-top: 2px; }
+}
+@keyframes ant-wave-3 {
+  0%, 100% { margin-top: 0px; }
+  30% { margin-top: -2px; }
+  60% { margin-top: 4px; }
+  85% { margin-top: -2px; }
+}
+
+@keyframes leaf-bounce {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  30% { transform: translateY(-3px) scale(1.15); }
+  70% { transform: translateY(0px) scale(0.9); }
+}
+
+@keyframes leaf-fade-peak {
+  0%, 44% { opacity: 1; }
+  47% { opacity: 0; }
+  96% { opacity: 0; }
+  99%, 100% { opacity: 1; }
+}
+
+@keyframes leaf-drop {
+  0%, 47% { opacity: 0; top: 34%; left: 50%; transform: scale(0.5) rotate(0deg); }
+  48% { opacity: 1; top: 34%; left: 50%; transform: scale(1.1) rotate(5deg); }
+  54% { opacity: 1; top: 50%; left: 45%; transform: scale(1) rotate(-20deg); }
+  60% { opacity: 1; top: 64%; left: 53%; transform: scale(0.9) rotate(15deg); }
+  66% { opacity: 0.8; top: 76%; left: 44%; transform: scale(0.7) rotate(-35deg); }
+  74% { opacity: 0.4; top: 85%; left: 50%; transform: scale(0.35) rotate(50deg); }
+  80% { opacity: 0; top: 88%; left: 47%; transform: scale(0.1) rotate(70deg); }
+  81%, 100% { opacity: 0; }
+}
+
+.ant-leaf { }
+.leaf-dropped { animation: leaf-drop 1s ease-in forwards; pointer-events: none; }
+
+/* ---- worker ants ---- */
+.ant-walker {
+  position: absolute;
+  top: 86%;
+  left: -8%;
+  animation: ant-path var(--speed, 14s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+}
+.ant-walker svg { display: block; }
+
+/* ---- queen ---- */
+.queen-glow {
+  animation: queen-glow 3.5s ease-in-out infinite;
+}
+.queen-wiggle {
+  animation: queen-glow 3.5s ease-in-out infinite,
+             queen-wiggle 2.5s ease-in-out infinite;
+}
+
+/* ---- soldiers ---- */
+.soldier-ant {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+}
+.soldier-ant svg { display: block; }
+
+/* ---- weather ---- */
+.rain-drop {
+  animation: rain-drop 1.5s ease-in infinite;
+}
+.rain-drop:nth-child(2n) { animation-delay: 0.4s; }
+.rain-drop:nth-child(3n) { animation-delay: 0.8s; }
+.sun-spin { animation: sun-spin 20s linear infinite; transform-origin: center; }
+.cloud-drift { animation: cloud-drift 8s ease-in-out infinite; }
+.grass-blade { animation: grass-sway 3s ease-in-out infinite; }
+.tunnel-hole { animation: tunnel-pulse 2s ease-in-out infinite; }
+
+/* ---- landscape ---- */
+.colony-landscape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}

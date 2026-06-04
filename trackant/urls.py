@@ -11,6 +11,7 @@ urlpatterns = [
     path('', include('budgets.urls')),
     path('', include('subscriptions.urls')),
     path('', include('splits.urls')),
+    path('', include('ants.urls')),
     path('api/v1/', include('api.urls')),
 ]
 
