@@ -4,20 +4,77 @@
 {% block page_subtitle %}Tus pagos recurrentes{% endblock %}
 
 {% block content %}
-<div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
-  <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
-    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Suscripciones activas</h2>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-sm text-earth-500 dark:text-earth-400">Gasto mensual:</span>
+      <span class="text-lg font-bold text-gold-600 dark:text-gold-400">${{ total_monthly|floatformat:2 }}</span>
+    </div>
     <a href="{% url 'subscriptions:subscription_add' %}"
        class="inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
       <i data-lucide="plus" class="lucide-sm"></i>
       Nueva suscripción
     </a>
   </div>
-  <div class="flex flex-col items-center px-6 py-16 text-center">
-    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold-100 dark:bg-gold-900/50">
-      <i data-lucide="repeat" class="lucide text-gold-500"></i>
+
+  {% if active %}
+  <div class="grid gap-3">
+    {% for s in active %}
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-100 text-lg dark:bg-gold-900/50">🔄</span>
+          <div>
+            <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ s.name }}</h3>
+            <p class="text-xs text-earth-500 dark:text-earth-400">
+              {{ s.currency.symbol }}{{ s.amount|floatformat:2 }}/
+              {% if s.cycle == 'WEEKLY' %}semana
+              {% elif s.cycle == 'MONTHLY' %}mes
+              {% else %}año{% endif %}
+              {% if s.category %} · {{ s.category.icon }} {{ s.category.name }}{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="font-semibold text-gold-600 dark:text-gold-400">{{ s.currency.symbol }}{{ s.amount|floatformat:2 }}</p>
+          <p class="text-xs text-earth-400 dark:text-earth-500">
+            {% if s.days_until_next == 0 %}Hoy 📢
+            {% elif s.days_until_next < 0 %}Vencida
+            {% elif s.days_until_next <= 3 %}En {{ s.days_until_next }} días ⏰
+            {% else %}{{ s.next_date|date:"d/m/Y" }}{% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="mt-2 flex justify-end gap-1">
+        <a href="{% url 'subscriptions:subscription_edit' s.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+        <a href="{% url 'subscriptions:subscription_delete' s.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+      </div>
     </div>
-    <p class="text-sm text-earth-500 dark:text-earth-400">No hay suscripciones registradas.</p>
+    {% endfor %}
   </div>
+  {% else %}
+  <div class="rounded-xl border border-dashed border-earth-300 bg-earth-50 px-6 py-16 text-center dark:border-earth-700 dark:bg-earth-800/50">
+    <div class="mb-3 flex justify-center">
+      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gold-100 dark:bg-gold-900/50">
+        <i data-lucide="repeat" class="lucide text-gold-500"></i>
+      </div>
+    </div>
+    <p class="text-sm font-medium text-earth-500 dark:text-earth-400">Sin suscripciones activas</p>
+    <a href="{% url 'subscriptions:subscription_add' %}" class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gold-600">
+      <i data-lucide="plus" class="lucide-sm"></i> Agregar suscripción
+    </a>
+  </div>
+  {% endif %}
+
+  {% if inactive %}
+  <details class="rounded-xl border border-earth-200 bg-white dark:border-earth-800 dark:bg-earth-900">
+    <summary class="cursor-pointer px-6 py-3 text-sm font-medium text-earth-500 dark:text-earth-400">{{ inactive|length }} inactivas</summary>
+    <div class="border-t border-earth-200 px-6 py-3 dark:border-earth-800">
+      {% for s in inactive %}
+      <div class="flex justify-between py-1 text-sm text-earth-400"><span>{{ s.name }}</span><span>{{ s.currency.symbol }}{{ s.amount|floatformat:2 }}/{{ s.get_cycle_display|lower }}</span></div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
 </div>
 {% endblock %}

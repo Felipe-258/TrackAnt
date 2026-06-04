@@ -1,14 +1,49 @@
 {% extends 'base.html' %}
-{% block page_title %}Nuevo Grupo{% endblock %}
+{% block page_title %}{% if group %}Editar{% else %}Nuevo{% endif %} Grupo{% endblock %}
+{% block page_subtitle %}{% if group %}Agregá o quitá miembros{% else %}Creá un grupo para dividir gastos{% endif %}{% endblock %}
+
 {% block content %}
 <div class="mx-auto max-w-2xl">
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
-    <form method="post" class="space-y-4">
+    <form method="post" class="space-y-5">
       {% csrf_token %}
-      <p class="text-center text-sm text-earth-500 dark:text-earth-400">Formulario disponible en Fase 8</p>
-      <div class="flex items-center justify-end gap-3 pt-4">
-        <a href="{% url 'splits:split_list' %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
-        <button type="submit" class="rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clay-600">Crear grupo</button>
+      <div class="flex items-center gap-4">
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-earth-100 text-2xl dark:bg-earth-800">👥</span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">
+            {% if group %}Editando: {{ group.name }}{% else %}Nuevo grupo{% endif %}
+          </h3>
+          <p class="text-sm text-earth-500 dark:text-earth-400">
+            {% if group %}Miembros actuales: {{ group.members|join:", " }}{% else %}Agregá las personas que van a compartir gastos{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre del grupo</label>
+        {{ form.name }}
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Miembros</label>
+        {{ form.members_list }}
+        {% if form.members_list.help_text %}<p class="mt-1 text-xs text-earth-400">{{ form.members_list.help_text }}</p>{% endif %}
+        {% if form.members_list.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.members_list.errors.0 }}</p>{% endif %}
+        {% if group %}
+        <p class="mt-2 text-xs text-gold-600 dark:text-gold-400">⚠️ Al cambiar los miembros, los gastos existentes se recalcularán en partes iguales entre los nuevos miembros.</p>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+        <a href="{% if group %}{% url 'splits:split_group_detail' group.pk %}{% else %}{% url 'splits:split_list' %}{% endif %}"
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">
+          Cancelar
+        </a>
+        <button type="submit"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+          <i data-lucide="check" class="lucide-sm"></i>
+          {% if group %}Guardar cambios{% else %}Crear grupo{% endif %}
+        </button>
       </div>
     </form>
   </div>

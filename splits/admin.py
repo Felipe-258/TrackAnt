@@ -1,3 +1,13 @@
 from django.contrib import admin
+from .models import SplitGroup, SplitExpense
 
-# Register your models here.
+
+class SplitExpenseInline(admin.TabularInline):
+    model = SplitExpense
+    extra = 0
+
+
+@admin.register(SplitGroup)
+class SplitGroupAdmin(admin.ModelAdmin):
+    list_display = ['name', 'members', 'total_spent', 'created_at']
+    inlines = [SplitExpenseInline]

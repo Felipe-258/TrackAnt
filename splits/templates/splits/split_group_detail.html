@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block page_title %}{{ group.name }}{% endblock %}
+{% block page_subtitle %}Gastos compartidos{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-3">
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-earth-100 text-lg dark:bg-earth-800">👥</span>
+      <div>
+        <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ group.members|join:", " }}</h3>
+        <p class="text-xs text-earth-500 dark:text-earth-400">{{ group.expenses.count }} gastos · ${{ group.total_spent|floatformat:2 }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'splits:split_group_edit' group.pk %}"
+         class="rounded-lg border border-earth-300 px-3 py-1.5 text-xs font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">
+        <i data-lucide="pencil" class="lucide-sm"></i> Editar grupo
+      </a>
+      <a href="{% url 'splits:split_expense_add' group.pk %}"
+         class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clay-600">
+        <i data-lucide="plus" class="lucide-sm"></i> Agregar gasto
+      </a>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <h3 class="text-base font-semibold text-earth-900 dark:text-earth-100">Balances</h3>
+    </div>
+    <div class="divide-y divide-earth-100 dark:divide-earth-800">
+      {% for person, bal in balance.items %}
+      <div class="flex items-center justify-between px-6 py-3">
+        <span class="text-sm font-medium text-earth-700 dark:text-earth-300">{{ person }}</span>
+        <span class="text-sm font-bold {% if bal > 0 %}text-sage-600 dark:text-sage-400{% elif bal < 0 %}text-clay-600 dark:text-clay-400{% else %}text-earth-400{% endif %}">
+          {% if bal > 0 %}+{% endif %}{{ bal|floatformat:2 }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <h3 class="text-base font-semibold text-earth-900 dark:text-earth-100">Gastos</h3>
+    </div>
+    {% if group.expenses.all %}
+    <div class="divide-y divide-earth-100 dark:divide-earth-800">
+      {% for e in group.expenses.all %}
+      <div class="px-6 py-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-sm font-medium text-earth-700 dark:text-earth-300">{{ e.description }}</span>
+            <span class="ml-2 text-xs text-earth-400">{{ e.date|date:"d/m/Y" }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">{{ e.currency.symbol }}{{ e.amount|floatformat:2 }}</span>
+            <a href="{% url 'splits:split_expense_edit' e.pk %}" class="rounded-lg p-1 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300" title="Editar">
+              <i data-lucide="pencil" class="lucide-sm"></i>
+            </a>
+            <a href="{% url 'splits:split_expense_delete' e.pk %}" class="rounded-lg p-1 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400" title="Eliminar">
+              <i data-lucide="trash-2" class="lucide-sm"></i>
+            </a>
+          </div>
+        </div>
+        <div class="mt-1 flex gap-2 text-xs text-earth-400 dark:text-earth-500">
+          <span>Pagó: {{ e.paid_by }}</span>
+          <span>·</span>
+          <span>Dividido entre {{ group.members|length }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-6 py-8 text-center text-sm text-earth-400">Sin gastos registrados</div>
+    {% endif %}
+  </div>
+
+  <div class="flex justify-center">
+    <a href="{% url 'splits:split_group_delete' group.pk %}"
+       class="rounded-lg border border-clay-300 px-4 py-2 text-sm font-medium text-clay-600 hover:bg-clay-50 dark:border-clay-800 dark:text-clay-400 dark:hover:bg-clay-900/30">
+      <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar grupo
+    </a>
+  </div>
+</div>
+{% endblock %}
