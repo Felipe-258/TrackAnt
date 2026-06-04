@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TrackAnt{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        extend: {
+          colors: {
+            earth: {
+              50: '#FAF6F1',
+              100: '#F2EBE0',
+              200: '#E2D1BC',
+              300: '#CEB496',
+              400: '#B89472',
+              500: '#A07858',
+              600: '#8A6348',
+              700: '#6E4E38',
+              800: '#543B29',
+              900: '#3A271B',
+              950: '#1F1410',
+            },
+            clay: {
+              50: '#FDF4EE',
+              100: '#FAE5D7',
+              200: '#F4C8AA',
+              300: '#ECA776',
+              400: '#E4864C',
+              500: '#D4764A',
+              600: '#C16645',
+              700: '#A0522D',
+              800: '#7A3F23',
+              900: '#5C2E19',
+              950: '#32170D',
+            },
+            sage: {
+              50: '#F4F7F0',
+              100: '#E4EDD8',
+              200: '#C9D9B2',
+              300: '#AAC288',
+              400: '#8BA864',
+              500: '#6E8F4C',
+              600: '#5A753F',
+              700: '#485D35',
+              800: '#3A4A2C',
+              900: '#2E3D23',
+              950: '#182110',
+            },
+            gold: {
+              50: '#FDF8EE',
+              100: '#F9EDD0',
+              200: '#F2D99F',
+              300: '#E9C06A',
+              400: '#D4A857',
+              500: '#C4943A',
+              600: '#A1752E',
+              700: '#7D5A27',
+              800: '#654A24',
+              900: '#523D21',
+              950: '#2E210F',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@latest/dist/htmx.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐜</text></svg>">
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    [data-lucide] { display: inline-block; width: 1em; height: 1em; stroke-width: 1.5; }
+    .lucide { width: 1.25em; height: 1.25em; }
+    .lucide-sm { width: 1em; height: 1em; }
+    .lucide-lg { width: 1.5em; height: 1.5em; }
+
+    @keyframes ant-walk {
+      0% { transform: translateX(-10px) scaleX(1); }
+      50% { transform: translateX(10px) scaleX(1); }
+      100% { transform: translateX(-10px) scaleX(1); }
+    }
+    .ant-walk { animation: ant-walk 2s ease-in-out infinite; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .float { animation: float 3s ease-in-out infinite; }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
+
+    ::selection { background: #D4764A33; }
+  </style>
+</head>
+<body class="h-full bg-earth-50 text-earth-900 dark:bg-earth-950 dark:text-earth-200"
+      x-data="{ sidebarOpen: false, darkMode: localStorage.getItem('darkMode') === 'true' }"
+      x-init="
+        $watch('darkMode', val => { localStorage.setItem('darkMode', val); document.documentElement.classList.toggle('dark', val) });
+        document.documentElement.classList.toggle('dark', darkMode);
+      "
+      :class="{ 'dark': darkMode }">
+
+  <div class="flex h-full min-h-screen">
+    {% include 'components/sidebar.html' %}
+
+    <div class="flex flex-1 flex-col">
+      <header class="sticky top-0 z-10 border-b border-earth-200 bg-white/80 backdrop-blur-sm dark:border-earth-800 dark:bg-earth-950/80">
+        <div class="flex h-16 items-center justify-between px-4 sm:px-6">
+          <div class="flex items-center gap-3">
+            <button @click="sidebarOpen = !sidebarOpen" class="-ml-2 rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 lg:hidden dark:hover:bg-earth-800 dark:hover:text-earth-300">
+              <i data-lucide="menu" class="lucide"></i>
+            </button>
+            <div>
+              <h1 class="text-lg font-semibold text-earth-900 dark:text-earth-100">{% block page_title %}Dashboard{% endblock %}</h1>
+              <p class="text-sm text-earth-500 dark:text-earth-400">{% block page_subtitle %}Resumen de tus finanzas{% endblock %}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button @click="darkMode = !darkMode" class="rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:hover:bg-earth-800 dark:hover:text-earth-300" title="Modo oscuro">
+              <i x-show="!darkMode" data-lucide="moon" class="lucide"></i>
+              <i x-show="darkMode" data-lucide="sun" class="lucide"></i>
+            </button>
+            {% include 'components/quick_add.html' %}
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="border-t border-earth-200 px-4 py-3 text-center text-xs text-earth-400 dark:border-earth-800 dark:text-earth-500">
+        TrackAnt 🐜 — Tus finanzas, tu colonia
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+    document.addEventListener('htmx:afterSwap', () => lucide.createIcons());
+    document.addEventListener('htmx:afterSettle', () => lucide.createIcons());
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

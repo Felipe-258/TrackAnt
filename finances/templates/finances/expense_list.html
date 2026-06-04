@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Gastos - TrackAnt{% endblock %}
+{% block page_title %}Gastos{% endblock %}
+{% block page_subtitle %}Tus salidas de dinero{% endblock %}
+
+{% block content %}
+<div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Gastos</h2>
+    <a href="{% url 'finances:transaction_add' %}"
+       class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+      <i data-lucide="plus" class="lucide-sm"></i>
+      Nuevo gasto
+    </a>
+  </div>
+  <div class="flex flex-col items-center px-6 py-16 text-center">
+    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-clay-100 dark:bg-clay-900/50">
+      <i data-lucide="trending-down" class="lucide text-clay-500"></i>
+    </div>
+    <p class="text-sm text-earth-500 dark:text-earth-400">No hay gastos registrados.</p>
+    <a href="{% url 'finances:transaction_add' %}" class="mt-2 text-sm font-medium text-clay-600 hover:text-clay-700 dark:text-clay-400">+ Agregar gasto</a>
+  </div>
+</div>
+{% endblock %}

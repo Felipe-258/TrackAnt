@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Splits - TrackAnt{% endblock %}
+{% block page_title %}Gastos Compartidos{% endblock %}
+{% block page_subtitle %}Dividí gastos con amigos{% endblock %}
+
+{% block content %}
+<div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Grupos</h2>
+    <a href="{% url 'splits:split_group_add' %}"
+       class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+      <i data-lucide="plus" class="lucide-sm"></i>
+      Nuevo grupo
+    </a>
+  </div>
+  <div class="flex flex-col items-center px-6 py-16 text-center">
+    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-earth-100 dark:bg-earth-800">
+      <i data-lucide="users" class="lucide text-earth-400"></i>
+    </div>
+    <p class="text-sm text-earth-500 dark:text-earth-400">No hay grupos de gastos compartidos.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+<tr class="border-b border-earth-100 transition-colors hover:bg-earth-50 dark:border-earth-800 dark:hover:bg-earth-800/50">
+  <td class="whitespace-nowrap px-4 py-3 text-sm text-earth-500 dark:text-earth-400">{{ transaction.date|date:"d/m/Y" }}</td>
+  <td class="px-4 py-3 text-sm">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-earth-100 px-2.5 py-0.5 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
+      {{ transaction.category.icon }} {{ transaction.category.name }}
+    </span>
+  </td>
+  <td class="max-w-xs truncate px-4 py-3 text-sm text-earth-700 dark:text-earth-300">{{ transaction.note|default:"—" }}</td>
+  <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium">
+    {% if transaction.type == 'INCOME' %}
+    <span class="text-sage-600 dark:text-sage-400">
+    {% else %}
+    <span class="text-clay-600 dark:text-clay-400">
+    {% endif %}
+    {% if transaction.type == 'INCOME' %}+{% else %}-{% endif %}
+    {{ transaction.currency.symbol }}{{ transaction.amount|floatformat:2 }}
+    </span>
+  </td>
+  <td class="whitespace-nowrap px-4 py-3 text-right text-sm">
+    <div class="flex items-center justify-end gap-1">
+      <span class="inline-flex gap-1 text-xs">
+        {% for tag in transaction.tags.all %}
+        <span class="rounded bg-earth-100 px-1.5 py-0.5 text-earth-500 dark:bg-earth-800 dark:text-earth-400">{{ tag.name }}</span>
+        {% endfor %}
+        {% for tag in transaction.custom_tags %}
+        <span class="rounded bg-earth-100 px-1.5 py-0.5 text-earth-400 italic dark:bg-earth-800 dark:text-earth-500">{{ tag }}</span>
+        {% endfor %}
+      </span>
+    </div>
+  </td>
+</tr>

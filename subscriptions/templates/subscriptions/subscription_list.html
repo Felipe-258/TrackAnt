@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Suscripciones - TrackAnt{% endblock %}
+{% block page_title %}Suscripciones{% endblock %}
+{% block page_subtitle %}Tus pagos recurrentes{% endblock %}
+
+{% block content %}
+<div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Suscripciones activas</h2>
+    <a href="{% url 'subscriptions:subscription_add' %}"
+       class="inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
+      <i data-lucide="plus" class="lucide-sm"></i>
+      Nueva suscripción
+    </a>
+  </div>
+  <div class="flex flex-col items-center px-6 py-16 text-center">
+    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold-100 dark:bg-gold-900/50">
+      <i data-lucide="repeat" class="lucide text-gold-500"></i>
+    </div>
+    <p class="text-sm text-earth-500 dark:text-earth-400">No hay suscripciones registradas.</p>
+  </div>
+</div>
+{% endblock %}

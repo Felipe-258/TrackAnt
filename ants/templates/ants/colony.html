@@ -1,0 +1,17 @@
+{% load ant_tags %}
+<div class="flex flex-col items-center space-y-2 py-4">
+  <div class="text-4xl">{% weather_emoji weather %}</div>
+  <div class="flex items-center gap-1 text-2xl">
+    {% for i in worker_count|make_list %}
+    <span class="inline-block animate-bounce" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.2s,0s' }}">🐜</span>
+    {% endfor %}
+  </div>
+  <div class="text-5xl">{% queen_emoji queen_size %}</div>
+  <div class="mt-1 text-xs text-stone-400 dark:text-stone-500">
+    {% if worker_count == 0 %}
+    Colonia vacía — agregá transacciones
+    {% else %}
+    {{ worker_count }} hormigas obreras · Balance: ${{ balance }}
+    {% endif %}
+  </div>
+</div>

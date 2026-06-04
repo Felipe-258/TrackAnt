@@ -1,0 +1,96 @@
+<aside class="fixed inset-y-0 z-20 flex w-64 flex-col border-r border-earth-200 bg-white transition-transform duration-300 dark:border-earth-800 dark:bg-earth-950 lg:static lg:translate-x-0"
+       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+  <div class="flex h-16 items-center gap-3 border-b border-earth-200 px-6 dark:border-earth-800">
+    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-clay-100 text-lg dark:bg-clay-900/50">🐜</span>
+    <div>
+      <span class="text-base font-bold text-earth-900 dark:text-earth-100">TrackAnt</span>
+      <p class="text-[10px] leading-tight text-earth-400 dark:text-earth-500">Colonia financiera</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 space-y-1 overflow-y-auto p-3">
+    {% with current=request.resolver_match.view_name %}
+
+    <div class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Principal</div>
+
+    <a href="{% url 'finances:dashboard' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'finances:dashboard' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="layout-dashboard" class="lucide text-clay-500 dark:text-clay-400"></i>
+      <span>Home</span>
+    </a>
+
+    <a href="{% url 'finances:income_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'finances:income_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="trending-up" class="lucide text-sage-500 dark:text-sage-400"></i>
+      <span>Ingresos</span>
+    </a>
+
+    <a href="{% url 'finances:expense_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'finances:expense_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="trending-down" class="lucide text-clay-500 dark:text-clay-400"></i>
+      <span>Gastos</span>
+    </a>
+
+    <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Planificación</div>
+
+    <a href="{% url 'goals:goal_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'goals:goal_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="target" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Metas</span>
+    </a>
+
+    <a href="{% url 'debts:debt_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'debts:debt_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="credit-card" class="lucide text-clay-500 dark:text-clay-400"></i>
+      <span>Deudas</span>
+    </a>
+
+    <a href="{% url 'budgets:budget_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'budgets:budget_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="bar-chart-3" class="lucide text-sage-500 dark:text-sage-400"></i>
+      <span>Presupuestos</span>
+    </a>
+
+    <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Extras</div>
+
+    <a href="{% url 'subscriptions:subscription_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'subscriptions:subscription_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="repeat" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Suscripciones</span>
+    </a>
+
+    <a href="{% url 'splits:split_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+              {% if current == 'splits:split_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="users" class="lucide text-clay-500 dark:text-clay-400"></i>
+      <span>Splits</span>
+    </a>
+
+    {% endwith %}
+  </nav>
+
+  <div class="border-t border-earth-200 p-3 dark:border-earth-800">
+    <a href="/admin/" target="_blank"
+       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
+      <i data-lucide="settings" class="lucide-sm"></i>
+      <span>Configuración</span>
+    </a>
+  </div>
+</aside>
+
+<div x-show="sidebarOpen" @click="sidebarOpen = false"
+     class="fixed inset-0 z-10 bg-earth-900/50 lg:hidden"
+     x-transition:enter="transition-opacity duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+</div>

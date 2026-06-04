@@ -1,0 +1,18 @@
+{% load static %}
+<button type="button"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 focus:outline-none focus:ring-2 focus:ring-clay-400 focus:ring-offset-2 dark:focus:ring-offset-earth-950"
+        hx-get="{% url 'finances:transaction_add' %}"
+        hx-target="#modal-container"
+        hx-trigger="click"
+        x-data
+        @click="$el.click()">
+  <i data-lucide="plus" class="lucide-sm"></i>
+  Agregar
+</button>
+
+<div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" x-data="{ show: false }"
+     x-init="$el.addEventListener('htmx:afterSwap', () => show = true)"
+     x-show="show" @click.away="show = false">
+</div>
+
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>

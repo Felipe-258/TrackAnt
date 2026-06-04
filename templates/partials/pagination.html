@@ -1,0 +1,19 @@
+<div class="mt-4 flex items-center justify-between">
+  <p class="text-sm text-stone-500 dark:text-stone-400">
+    Página {{ page.number }} de {{ page.paginator.num_pages }}
+  </p>
+  <div class="flex gap-2">
+    {% if page.has_previous %}
+    <button hx-get="?page={{ page.previous_page_number }}" hx-target="#transaction-list" hx-swap="innerHTML"
+            class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-400 dark:hover:bg-stone-800">
+      ← Anterior
+    </button>
+    {% endif %}
+    {% if page.has_next %}
+    <button hx-get="?page={{ page.next_page_number }}" hx-target="#transaction-list" hx-swap="innerHTML"
+            class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-400 dark:hover:bg-stone-800">
+      Siguiente →
+    </button>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=TrackAnt
+Comment=Tracker de finanzas personales con colonia de hormigas
+Exec=/home/felipe/Documents/Github/TrackAnt/scripts/run.sh
+Icon=🐜
+Terminal=true
+Type=Application
+Categories=Finance;Utility;
+StartupNotify=true

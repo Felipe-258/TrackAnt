@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block page_title %}{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Suscripción{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <p class="text-center text-sm text-earth-500 dark:text-earth-400">Formulario disponible en Fase 7</p>
+      <div class="flex items-center justify-end gap-3 pt-4">
+        <a href="{% url 'subscriptions:subscription_list' %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+        <button type="submit" class="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gold-600">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
