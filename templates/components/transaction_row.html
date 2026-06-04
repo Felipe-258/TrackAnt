@@ -1,4 +1,4 @@
-<tr class="border-b border-earth-100 transition-colors hover:bg-earth-50 dark:border-earth-800 dark:hover:bg-earth-800/50">
+<tr class="transition-colors hover:bg-earth-50 dark:hover:bg-earth-800/50">
   <td class="whitespace-nowrap px-4 py-3 text-sm text-earth-500 dark:text-earth-400">{{ transaction.date|date:"d/m/Y" }}</td>
   <td class="px-4 py-3 text-sm">
     <span class="inline-flex items-center gap-1.5 rounded-full bg-earth-100 px-2.5 py-0.5 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
@@ -23,9 +23,23 @@
         <span class="rounded bg-earth-100 px-1.5 py-0.5 text-earth-500 dark:bg-earth-800 dark:text-earth-400">{{ tag.name }}</span>
         {% endfor %}
         {% for tag in transaction.custom_tags %}
-        <span class="rounded bg-earth-100 px-1.5 py-0.5 text-earth-400 italic dark:bg-earth-800 dark:text-earth-500">{{ tag }}</span>
+        <span class="rounded bg-clay-50 px-1.5 py-0.5 text-clay-500 italic dark:bg-clay-900/30 dark:text-clay-400">{{ tag }}</span>
         {% endfor %}
       </span>
+    </div>
+  </td>
+  <td class="whitespace-nowrap px-4 py-3 text-right">
+    <div class="flex items-center justify-end gap-1">
+      <a href="{% url 'finances:transaction_edit' transaction.pk %}"
+         class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"
+         title="Editar">
+        <i data-lucide="pencil" class="lucide-sm"></i>
+      </a>
+      <a href="{% url 'finances:transaction_delete' transaction.pk %}"
+         class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"
+         title="Eliminar">
+        <i data-lucide="trash-2" class="lucide-sm"></i>
+      </a>
     </div>
   </td>
 </tr>

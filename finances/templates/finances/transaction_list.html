@@ -9,19 +9,28 @@
     <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Todas las transacciones</h2>
     <div class="flex items-center gap-2">
       <div class="relative">
-        <i data-lucide="search" class="lucide-sm absolute left-3 top-1/2 -translate-y-1/2 text-earth-400"></i>
-        <input type="text" placeholder="Buscar..."
-               class="w-48 rounded-lg border border-earth-200 bg-earth-50 py-1.5 pl-9 pr-3 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-1 focus:ring-clay-400 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 dark:focus:border-clay-500"/>
+        <i data-lucide="search" class="lucide-sm absolute left-3 top-1/2 -translate-y-1/2 text-earth-400 pointer-events-none"></i>
+        <input type="text" name="q" value="{{ search }}" placeholder="Buscar..."
+               class="w-48 rounded-lg border border-earth-200 bg-earth-50 py-1.5 pl-9 pr-3 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-1 focus:ring-clay-400 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
+               hx-get="{% url 'finances:transaction_list' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#transaction-table"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+               hx-select="#transaction-table"
+               autocomplete="off"/>
       </div>
-      <select class="rounded-lg border border-earth-200 bg-white px-3 py-1.5 text-sm text-earth-700 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300">
-        <option>Este mes</option>
-        <option>Últimos 3 meses</option>
-        <option>Este año</option>
-        <option>Todos</option>
-      </select>
+      <input type="month" name="month" value="{{ month }}"
+             class="rounded-lg border border-earth-200 bg-white px-3 py-1.5 text-sm text-earth-700 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300"
+             hx-get="{% url 'finances:transaction_list' %}"
+             hx-trigger="change"
+             hx-target="#transaction-table"
+             hx-swap="outerHTML"
+             hx-push-url="true"
+             hx-select="#transaction-table"/>
     </div>
   </div>
-  <div class="overflow-x-auto">
+  <div class="overflow-x-auto" id="transaction-table">
     <table class="w-full">
       <thead>
         <tr class="border-b border-earth-100 text-left text-[10px] font-semibold uppercase tracking-wider text-earth-500 dark:border-earth-800 dark:text-earth-400">
@@ -30,22 +39,57 @@
           <th class="px-4 py-3">Nota</th>
           <th class="px-4 py-3 text-right">Monto</th>
           <th class="px-4 py-3 text-right">Tags</th>
+          <th class="px-4 py-3 text-right w-20">Acciones</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="divide-y divide-earth-100 dark:divide-earth-800">
+        {% for t in transactions %}
+        {% include 'components/transaction_row.html' with transaction=t %}
+        {% empty %}
         <tr>
-          <td colspan="5" class="px-4 py-16 text-center text-sm text-earth-500 dark:text-earth-400">
+          <td colspan="6" class="px-4 py-16 text-center text-sm text-earth-500 dark:text-earth-400">
             <div class="flex flex-col items-center">
               <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-earth-100 dark:bg-earth-800">
                 <i data-lucide="receipt" class="lucide text-earth-400"></i>
               </div>
               <p>No hay transacciones registradas.</p>
-              <a href="{% url 'finances:transaction_add' %}" class="mt-2 text-sm font-medium text-clay-600 hover:text-clay-700 dark:text-clay-400">+ Agregar primera transacción</a>
+              <a href="{% url 'finances:transaction_add' %}"
+                 class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-clay-600 hover:text-clay-700 dark:text-clay-400">
+                <i data-lucide="plus" class="lucide-sm"></i>
+                Agregar primera transacción
+              </a>
             </div>
           </td>
         </tr>
+        {% endfor %}
       </tbody>
     </table>
+
+    {% if transactions.paginator.num_pages > 1 %}
+    <div class="flex items-center justify-between border-t border-earth-100 px-4 py-3 dark:border-earth-800">
+      <p class="text-sm text-earth-500 dark:text-earth-400">
+        Página {{ transactions.number }} de {{ transactions.paginator.num_pages }}
+      </p>
+      <div class="flex gap-2">
+        {% if transactions.has_previous %}
+        <a href="?page={{ transactions.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if month %}&month={{ month }}{% endif %}"
+           class="rounded-lg border border-earth-300 px-3 py-1.5 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800"
+           hx-get="?page={{ transactions.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if month %}&month={{ month }}{% endif %}"
+           hx-target="#transaction-table" hx-swap="outerHTML" hx-select="#transaction-table">
+          ← Anterior
+        </a>
+        {% endif %}
+        {% if transactions.has_next %}
+        <a href="?page={{ transactions.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if month %}&month={{ month }}{% endif %}"
+           class="rounded-lg border border-earth-300 px-3 py-1.5 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800"
+           hx-get="?page={{ transactions.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if month %}&month={{ month }}{% endif %}"
+           hx-target="#transaction-table" hx-swap="outerHTML" hx-select="#transaction-table">
+          Siguiente →
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

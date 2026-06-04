@@ -5,17 +5,164 @@
 {% block content %}
 <div class="mx-auto max-w-2xl">
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
-    <form method="post" enctype="multipart/form-data" class="space-y-4">
+    <form method="post" enctype="multipart/form-data" class="space-y-5" id="transactionForm"
+          x-data="{
+            type: '{{ form.initial.type|default:'EXPENSE' }}',
+            tagIds: {{ tag_ids|default:'[]' }},
+            customTags: {{ custom_tags|default:'[]' }},
+            tagInput: '',
+            addTag() {
+              const val = this.tagInput.trim();
+              if (!val) return;
+              if (this.customTags.includes(val)) return;
+              this.customTags.push(val);
+              this.tagInput = '';
+            },
+            removeTag(i) { this.customTags.splice(i, 1) },
+            removeTagId(id) { this.tagIds = this.tagIds.filter(t => t !== id) },
+            selectTag(id) {
+              if (!this.tagIds.includes(id)) this.tagIds.push(id);
+              this.tagInput = '';
+              document.getElementById('tag-suggestions').innerHTML = '';
+            }
+          }">
+
       {% csrf_token %}
-      <p class="text-center text-sm text-earth-500 dark:text-earth-400">Formulario disponible en Fase 2</p>
-      <div class="flex items-center justify-end gap-3 pt-4">
-        <a href="{% url 'finances:transaction_list' %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
-        <button type="submit" class="rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clay-600">
+
+      {% if form.non_field_errors %}
+      <div class="rounded-lg bg-clay-50 p-3 text-sm text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <fieldset>
+        <legend class="mb-2 text-sm font-medium text-earth-700 dark:text-earth-300">Tipo</legend>
+        <div class="flex gap-3">
+          {% for radio in form.type %}
+          <label class="relative flex-1 cursor-pointer">
+            {{ radio.tag }}
+            <div class="flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all
+                        peer-checked:font-semibold
+                        {% if radio.data.value == 'INCOME' %}
+                        peer-checked:border-sage-400 peer-checked:bg-sage-50 peer-checked:text-sage-700
+                        dark:peer-checked:border-sage-500 dark:peer-checked:bg-sage-900/30 dark:peer-checked:text-sage-300
+                        {% else %}
+                        peer-checked:border-clay-400 peer-checked:bg-clay-50 peer-checked:text-clay-700
+                        dark:peer-checked:border-clay-500 dark:peer-checked:bg-clay-900/30 dark:peer-checked:text-clay-300
+                        {% endif %}
+                        border-earth-200 bg-white text-earth-600 hover:bg-earth-50
+                        dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700">
+              <span>{{ radio.choice_label }}</span>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
+          {{ form.amount }}
+          {% if form.amount.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.amount.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="w-32">
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
+          {{ form.currency }}
+        </div>
+      </div>
+
+      <div id="category-field">
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría</label>
+        {{ form.category }}
+        {% if form.category.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.category.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Etiquetas</label>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <template x-for="id in tagIds" :key="'tid-' + id">
+            <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2.5 py-1 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
+              <span x-text="'Tag #' + id"></span>
+              <button type="button" @click="removeTagId(id)" class="text-earth-400 hover:text-clay-500">&times;</button>
+            </span>
+          </template>
+          <template x-for="(tag, i) in customTags" :key="'ct-' + i">
+            <span class="inline-flex items-center gap-1 rounded-full bg-clay-50 px-2.5 py-1 text-xs font-medium text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
+              <span x-text="tag"></span>
+              <button type="button" @click="removeTag(i)" class="text-clay-400 hover:text-clay-600">&times;</button>
+            </span>
+          </template>
+        </div>
+
+        <div class="relative flex gap-2">
+          <input type="text" x-model="tagInput"
+                 class="flex-1 rounded-lg border border-earth-300 bg-earth-50 px-3 py-2 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
+                 placeholder="Buscar o crear etiqueta..."
+                 hx-get="/tags/search/"
+                 hx-trigger="keyup changed delay:300ms"
+                 hx-target="#tag-suggestions"
+                 hx-swap="innerHTML"
+                 autocomplete="off"
+                 @keydown.enter.prevent="addTag()">
+          <button type="button" @click="addTag()" class="rounded-lg border border-earth-300 px-3 py-2 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">+</button>
+        </div>
+        <div id="tag-suggestions" class="mt-1 rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900"
+             x-show="tagInput.length > 0" @click.outside="tagInput = ''; $el.innerHTML = ''"></div>
+      </div>
+
+      {{ form.tag_names }}
+      {{ form.new_tags }}
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha</label>
+        {{ form.date }}
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nota</label>
+        {{ form.note }}
+      </div>
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Comprobante</label>
+        {{ form.receipt }}
+      </div>
+
+      <div class="flex items-center gap-2">
+        {{ form.is_recurring }}
+        <label for="{{ form.is_recurring.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Es una transacción recurrente</label>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+        <a href="{% url 'finances:transaction_list' %}"
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+        <button type="submit"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600"
+                id="submitBtn">
           <i data-lucide="check" class="lucide-sm"></i>
-          Guardar
+          {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
         </button>
       </div>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('transactionForm')?.addEventListener('submit', function() {
+  const data = Alpine.$data(document.querySelector('[x-data]'));
+  document.getElementById('id_tag_names').value = data.tagIds.join(',');
+  document.getElementById('id_new_tags').value = data.customTags.join(',');
+});
+
+document.addEventListener('htmx:afterSwap', function(evt) {
+  if (evt.detail.target && evt.detail.target.id === 'tag-suggestions') {
+    document.querySelectorAll('.tag-option').forEach(function(el) {
+      el.addEventListener('click', function() {
+        const data = Alpine.$data(document.querySelector('[x-data]'));
+        data.selectTag(parseInt(this.dataset.tagId));
+      });
+    });
+  }
+});
+</script>
 {% endblock %}

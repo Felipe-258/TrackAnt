@@ -1,0 +1,9 @@
+<div class="animate-fade-in rounded-lg border border-earth-200 bg-white px-4 py-3 shadow-lg dark:border-earth-700 dark:bg-earth-900"
+     x-data="{ show: true }"
+     x-init="setTimeout(() => show = false, 3000)"
+     x-show="show"
+     x-transition:leave="transition-opacity duration-500"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+  <p class="text-sm text-earth-700 dark:text-earth-300">{{ message }}</p>
+</div>

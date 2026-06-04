@@ -1,3 +1,78 @@
 from django.db import models
 
-# Create your models here.
+
+class Currency(models.Model):
+    code = models.CharField(max_length=3, unique=True, verbose_name='Código')
+    symbol = models.CharField(max_length=5, verbose_name='Símbolo')
+    name = models.CharField(max_length=50, verbose_name='Nombre')
+    rate_to_base = models.DecimalField(max_digits=10, decimal_places=4, default=1.0,
+                                       help_text='Tasa respecto a la moneda base (ARS=1.0)')
+
+    class Meta:
+        verbose_name = 'Moneda'
+        verbose_name_plural = 'Monedas'
+        ordering = ['code']
+
+    def __str__(self):
+        return f'{self.symbol} {self.code}'
+
+
+class Category(models.Model):
+    class Type(models.TextChoices):
+        INCOME = 'INCOME', 'Ingreso'
+        EXPENSE = 'EXPENSE', 'Gasto'
+
+    name = models.CharField(max_length=100, verbose_name='Nombre')
+    type = models.CharField(max_length=7, choices=Type.choices, verbose_name='Tipo')
+    icon = models.CharField(max_length=10, blank=True, default='📦', verbose_name='Ícono')
+    color = models.CharField(max_length=7, blank=True, default='#A07858', verbose_name='Color')
+
+    class Meta:
+        verbose_name = 'Categoría'
+        verbose_name_plural = 'Categorías'
+        ordering = ['type', 'name']
+
+    def __str__(self):
+        return f'{self.icon} {self.name}'
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
+    color = models.CharField(max_length=7, blank=True, default='#8A6348', verbose_name='Color')
+
+    class Meta:
+        verbose_name = 'Etiqueta'
+        verbose_name_plural = 'Etiquetas'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Transaction(models.Model):
+    class Type(models.TextChoices):
+        INCOME = 'INCOME', '💰 Ingreso'
+        EXPENSE = 'EXPENSE', '💸 Gasto'
+
+    type = models.CharField(max_length=7, choices=Type.choices, verbose_name='Tipo')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto')
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name='Moneda')
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Categoría',
+                                 limit_choices_to={'type': 'EXPENSE'})
+    tags = models.ManyToManyField(Tag, blank=True, verbose_name='Etiquetas')
+    custom_tags = models.JSONField(default=list, blank=True, verbose_name='Etiquetas personalizadas')
+    date = models.DateField(verbose_name='Fecha')
+    note = models.TextField(blank=True, verbose_name='Nota')
+    receipt = models.ImageField(upload_to='receipts/', blank=True, null=True, verbose_name='Comprobante')
+    is_recurring = models.BooleanField(default=False, verbose_name='Es recurrente')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Transacción'
+        verbose_name_plural = 'Transacciones'
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        sign = '+' if self.type == 'INCOME' else '-'
+        return f'{sign}${self.amount} — {self.category} ({self.date})'
