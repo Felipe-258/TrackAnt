@@ -1,16 +1,18 @@
 @keyframes ant-path {
-  0%   { left: -8%;  top: 86%; opacity: 0; }
-  5%   { left: 2%;   top: 86%; opacity: 1; }
-  14%  { left: 14%;  top: 82%; }
-  24%  { left: 26%;  top: 72%; }
-  34%  { left: 38%;  top: 56%; }
-  44%  { left: 47%;  top: 38%; }
-  48%  { left: 50%;  top: 34%; } /* peak */
-  58%  { left: 50%;  top: 34%; } /* pause at peak, drop leaf */
-  64%  { left: 55%;  top: 42%; }
-  74%  { left: 65%;  top: 58%; }
-  84%  { left: 78%;  top: 74%; }
-  94%  { left: 90%;  top: 84%; }
+  0%   { left: -6%;  top: 84%; opacity: 0; }
+  5%   { left: 2%;   top: 85%; opacity: 1; }
+  14%  { left: 8%;   top: 74%; }
+  24%  { left: 16%;  top: 58%; }
+  34%  { left: 26%;  top: 45%; }
+  38%  { left: 33%;  top: 42%; }
+  42%  { left: 39%;  top: 38%; }
+  46%  { left: 46%;  top: 35%; }
+  48%  { left: 50%;  top: 33%; } /* peak */
+  58%  { left: 50%;  top: 34%; } /* pause — drop leaf */
+  64%  { left: 55%;  top: 38%; }
+  74%  { left: 65%;  top: 41%; }
+  84%  { left: 78%;  top: 54%; }
+  94%  { left: 92%;  top: 77%; opacity: 1; }
   100% { left: 106%; top: 86%; opacity: 0; }
 }
 
@@ -40,8 +42,8 @@
 }
 
 @keyframes leaf-fade-peak {
-  0%, 44% { opacity: 1; }
-  47% { opacity: 0; }
+  0%, 46% { opacity: 1; }
+  48% { opacity: 0; }
   96% { opacity: 0; }
   99%, 100% { opacity: 1; }
 }
@@ -49,10 +51,10 @@
 @keyframes leaf-drop {
   0%, 47% { opacity: 0; top: 34%; left: 50%; transform: scale(0.5) rotate(0deg); }
   48% { opacity: 1; top: 34%; left: 50%; transform: scale(1.1) rotate(5deg); }
-  54% { opacity: 1; top: 50%; left: 45%; transform: scale(1) rotate(-20deg); }
-  60% { opacity: 1; top: 64%; left: 53%; transform: scale(0.9) rotate(15deg); }
-  66% { opacity: 0.8; top: 76%; left: 44%; transform: scale(0.7) rotate(-35deg); }
-  74% { opacity: 0.4; top: 85%; left: 50%; transform: scale(0.35) rotate(50deg); }
+  54% { opacity: 1; top: 48%; left: 45%; transform: scale(1) rotate(-20deg); }
+  60% { opacity: 1; top: 60%; left: 53%; transform: scale(0.9) rotate(15deg); }
+  66% { opacity: 0.8; top: 72%; left: 44%; transform: scale(0.7) rotate(-35deg); }
+  74% { opacity: 0.4; top: 82%; left: 50%; transform: scale(0.35) rotate(50deg); }
   80% { opacity: 0; top: 88%; left: 47%; transform: scale(0.1) rotate(70deg); }
   81%, 100% { opacity: 0; }
 }

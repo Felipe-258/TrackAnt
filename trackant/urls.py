@@ -16,4 +16,6 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
+    from ants.views.pages import playground
+    urlpatterns.insert(0, path('ants/playground/', playground, name='playground'))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

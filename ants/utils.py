@@ -45,6 +45,11 @@ def get_colony_state(goal_id=None):
     weather = _get_weather(monthly_income, monthly_expenses)
     queen_size = _queen_size(goal_progress)
 
+    # Leaf pile: proportional to goal progress
+    leaf_total = max(2, int(goal_progress / 6.25)) if goal_progress > 0 else 2
+    leaf_brown = min(leaf_total, 14)
+    leaf_green = max(0, int(leaf_total * 0.35))
+
     return {
         'total_balance': total_balance,
         'monthly_income': monthly_income,
@@ -62,6 +67,8 @@ def get_colony_state(goal_id=None):
         'goal_target': float(main_goal.target_amount) if main_goal else 0,
         'goal_color': goal_color,
         'leaf_colors': leaf_colors,
+        'leaf_brown_count': leaf_brown,
+        'leaf_green_count': leaf_green,
     }
 
 

@@ -8,6 +8,8 @@ SECRET_KEY = os.environ.get('TRACKANT_SECRET_KEY', 'django-insecure-dev-key-chan
 DEBUG = os.environ.get('TRACKANT_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('TRACKANT_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+if DEBUG:
+    ALLOWED_HOSTS.extend(['*', '.local', '192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',

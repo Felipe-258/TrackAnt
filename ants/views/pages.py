@@ -15,3 +15,8 @@ def colony_view(request):
     state['selected_goal_id'] = goal_id
 
     return render(request, 'ants/colony_page.html', state)
+
+
+def playground(request):
+    state = get_colony_state()
+    return render(request, 'ants/playground.html', state)

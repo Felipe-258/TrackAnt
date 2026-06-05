@@ -92,14 +92,14 @@
     <rect x="655" y="232" rx="2" width="8" height="28" fill="#1A150D" opacity="0.8"/>
 
     <!-- ===== LEAF PILE (inside cave, center, always visible) ===== -->
-    <g transform="translate(420, 268)">
-      {% for i in "12345"|make_list %}
-      <text x="{{ forloop.counter0|add:-6 }}" y="{{ forloop.counter0|add:'-1' }}" font-size="14" opacity="0.80"
-            transform="rotate({% widthratio forloop.counter0 1 -10 %}, {{ forloop.counter0|add:-4 }}, -{{ forloop.counter0|add:2 }})">🍂</text>
+    <g id="leaf-pile-group" transform="translate(442, 268)">
+      {% for i in leaf_brown_count|range_to %}
+      <text x="{{ i|mul:4 }}" y="{{ i|mod:3|add:'-2' }}" font-size="14" opacity="0.80"
+            transform="rotate({% widthratio i 1 -7 %}, {{ i|mul:4 }}, {% widthratio i|mod:3 1 -1 %})">🍂</text>
       {% endfor %}
-      {% for i in "123"|make_list %}
-      <text x="{{ forloop.counter0|add:2 }}" y="{{ forloop.counter0|add:'-3' }}" font-size="12" opacity="0.60"
-            transform="rotate({% widthratio forloop.counter0 1 8 %}, {{ forloop.counter0|add:2 }}, -{{ forloop.counter0 }})">🍃</text>
+      {% for i in leaf_green_count|range_to %}
+      <text x="{{ i|mul:5|add:'-4' }}" y="{{ i|mod:2|add:'-4' }}" font-size="12" opacity="0.60"
+            transform="rotate({% widthratio i 1 6 %}, {{ i|mul:5|add:'-4' }}, {% widthratio i|mod:2 1 -2 %})">🍃</text>
       {% endfor %}
     </g>
 
@@ -110,7 +110,7 @@
           fill="#B89472" opacity="0.18"/>
 
     <!-- Center tunnel entrance (top of mound) -->
-    <ellipse cx="450" cy="172" rx="14" ry="6" fill="#0D0A06" opacity="0.4" class="tunnel-hole" style="animation-delay:-0.5s"/>
+    <ellipse cx="450" cy="172" rx="28" ry="12" fill="#0D0A06" opacity="0.4" class="tunnel-hole" style="animation-delay:-0.5s"/>
 
   </svg>
 

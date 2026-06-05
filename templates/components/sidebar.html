@@ -77,6 +77,13 @@
   </nav>
 
   <div class="border-t border-earth-200 p-3 dark:border-earth-800">
+    {% if debug %}
+    <a href="{% url 'playground' %}"
+       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
+      <i data-lucide="gamepad-2" class="lucide-sm"></i>
+      <span>Playground</span>
+    </a>
+    {% endif %}
     <a href="/admin/" target="_blank"
        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
       <i data-lucide="settings" class="lucide-sm"></i>
