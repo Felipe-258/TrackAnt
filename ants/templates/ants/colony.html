@@ -52,16 +52,9 @@
     <rect x="595" y="232" rx="2" width="8" height="28" fill="#1A150D" opacity="0.8"/>
     <rect x="655" y="232" rx="2" width="8" height="28" fill="#1A150D" opacity="0.8"/>
 
-    <!-- ===== LEAF PILE (inside cave, center, always visible) ===== -->
+    <!-- ===== LEAF PILE (pyramid shape) ===== -->
     <g id="leaf-pile-group" transform="translate(442, 268)">
-      {% for i in leaf_brown_count|range_to %}
-      <text x="{{ i|mul:4|floatformat:0 }}" y="{{ i|mod:3|add:'-2' }}" font-size="14" opacity="0.80"
-            transform="rotate({% widthratio i 1 -7 %}, {{ i|mul:4|floatformat:0 }}, {% widthratio i|mod:3 1 -1 %})">🍂</text>
-      {% endfor %}
-      {% for i in leaf_green_count|range_to %}
-      <text x="{{ i|mul:5|add:'-4'|floatformat:0 }}" y="{{ i|mod:2|add:'-4' }}" font-size="12" opacity="0.60"
-            transform="rotate({% widthratio i 1 6 %}, {{ i|mul:5|add:'-4'|floatformat:0 }}, {% widthratio i|mod:2 1 -2 %})">🍃</text>
-      {% endfor %}
+      {% render_leaf_pile leaf_brown_count leaf_green_count 60 27 %}
     </g>
 
     <!-- ===== GROUND SURFACE LINE (ants walk here) ===== -->
@@ -88,25 +81,25 @@
 
   <!-- ===== WEATHER EFFECTS ===== -->
   {% if weather == 'nublado' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-3' }}%; top:{{ sun_top }}%;">
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <span style="font-size:38px; opacity:0.55;">☁️</span>
-    <span style="font-size:26px; opacity:0.4; position:relative; left:14px;">☁️</span>
+    <span style="font-size:26px; opacity:0.4; position:relative; left:4px;">☁️</span>
   </div>
   {% elif weather == 'lluvioso' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-3' }}%; top:{{ sun_top }}%;">
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <span style="font-size:42px; opacity:0.6;">☁️</span>
-    <span style="font-size:28px; opacity:0.45; position:relative; left:14px;">☁️</span>
+    <span style="font-size:28px; opacity:0.45; position:relative; left:4px;">☁️</span>
   </div>
   <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
-    {% for x in '123456' %}<span class="rain-drop text-[13px] opacity-55">💧</span>{% endfor %}
+    {% for x in '1234' %}<span class="rain-drop text-[13px] opacity-55">💧</span>{% endfor %}
   </div>
   {% elif weather == 'tormenta' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top|add:'-2' }}%;">
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <span style="font-size:46px; opacity:0.7;">☁️</span>
-    <span style="font-size:32px; opacity:0.5; position:relative; left:16px;">☁️</span>
+    <span style="font-size:32px; opacity:0.5; position:relative; left:4px;">☁️</span>
   </div>
   <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
-    {% for x in '123456' %}<span class="rain-drop text-[13px] opacity-5">💧</span>{% endfor %}
+    {% for x in '1234' %}<span class="rain-drop text-[13px] opacity-5">💧</span>{% endfor %}
   </div>
   <div class="absolute z-10" style="left:{{ sun_left|add:'4' }}%; top:{{ sun_top|add:'8' }}%; animation:star-twinkle 0.8s ease-in-out infinite;">
     <span class="text-base">⚡</span>

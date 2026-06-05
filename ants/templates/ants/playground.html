@@ -105,11 +105,11 @@
       </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[9px] text-earth-500">☁️ Offset: L:<span id="cloud-l-val">-3</span> T:<span id="cloud-t-val">-3</span></label>
-          <div class="flex gap-1"><input type="range" id="cloud-l" min="-15" max="15" value="-3" class="w-full h-3" oninput="updateWeatherPosition()">           <input type="range" id="cloud-t" min="-15" max="15" value="0" class="w-full h-3" oninput="updateWeatherPosition()"></div>
+          <label class="text-[9px] text-earth-500">☁️ Offset: L:<span id="cloud-l-val">-4</span> T:<span id="cloud-t-val">0</span></label>
+          <div class="flex gap-1">          <input type="range" id="cloud-l" min="-15" max="15" value="-4" class="w-full h-3" oninput="updateWeatherPosition()">           <input type="range" id="cloud-t" min="-15" max="15" value="0" class="w-full h-3" oninput="updateWeatherPosition()"></div>
         </div>
         <div>
-          <label class="text-[9px] text-earth-500">💧 Offset: L:<span id="rain-l-val">-2</span> T:<span id="rain-t-val">10</span></label>
+          <label class="text-[9px] text-earth-500">💧 Offset: L:<span id="rain-l-val">-6</span> T:<span id="rain-t-val">16</span></label>
           <div class="flex gap-1">          <input type="range" id="rain-l" min="-15" max="15" value="-6" class="w-full h-3" oninput="updateWeatherPosition()"> <input type="range" id="rain-t" min="0" max="25" value="16" class="w-full h-3" oninput="updateWeatherPosition()"></div>
         </div>
       </div>
@@ -132,26 +132,24 @@
           <input type="range" id="pile-y" min="230" max="285" value="268" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍂 Cantidad: <span id="pile-count-val">5</span></label>
-          <input type="range" id="pile-count" min="0" max="20" value="5" class="w-full" oninput="updatePile()">
+          <label class="text-[10px] text-earth-500">🍂 Cantidad: <span id="pile-count-val">20</span></label>
+          <input type="range" id="pile-count" min="0" max="20" value="20" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍃 Cantidad: <span id="pile-green-val">3</span></label>
-          <input type="range" id="pile-green" min="0" max="15" value="3" class="w-full" oninput="updatePile()">
+          <label class="text-[10px] text-earth-500">🍃 Cantidad: <span id="pile-green-val">14</span></label>
+          <input type="range" id="pile-green" min="0" max="15" value="14" class="w-full" oninput="updatePile()">
         </div>
         <div class="col-span-2 grid grid-cols-2 gap-2">
           <div>
-            <label class="text-[10px] text-earth-500">Dispersión X: <span id="pile-spread-x-val">12</span>px</label>
-            <input type="range" id="pile-spread-x" min="2" max="60" value="12" class="w-full" oninput="updatePile()">
-          </div>
-          <div>
-            <label class="text-[10px] text-earth-500">Dispersión Y: <span id="pile-spread-y-val">5</span>px</label>
-            <input type="range" id="pile-spread-y" min="1" max="30" value="5" class="w-full" oninput="updatePile()">
+            <label class="text-[10px] text-earth-500">Dispersión X: <span id="pile-spread-x-val">56</span>px</label>
+            <input type="range" id="pile-spread-x" min="2" max="60" value="56" class="w-full" oninput="updatePile()">
+            <label class="text-[10px] text-earth-500">Dispersión Y: <span id="pile-spread-y-val">27</span>px</label>
+            <input type="range" id="pile-spread-y" min="1" max="30" value="27" class="w-full" oninput="updatePile()">
       </div>
       <div class="grid grid-cols-2 gap-2 mt-2">
         <div>
-          <label class="text-[9px] text-earth-500">☁️ Distancia: <span id="cloud-gap-val">14</span>px</label>
-          <input type="range" id="cloud-gap" min="4" max="40" value="14" class="w-full h-3" oninput="updateWeatherPosition()">
+          <label class="text-[9px] text-earth-500">☁️ Distancia: <span id="cloud-gap-val">4</span>px</label>
+          <input type="range" id="cloud-gap" min="4" max="40" value="4" class="w-full h-3" oninput="updateWeatherPosition()">
         </div>
         <div class="flex items-end">
           <button onclick="exportarPosiciones()" class="w-full rounded-lg border border-earth-300 px-2 py-1.5 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">📋 Exportar posiciones</button>
@@ -353,7 +351,28 @@ function interp(pct) {
   return { left: Math.round(a.left + (b.left - a.left) * t), top: Math.round(a.top + (b.top - a.top) * t) };
 }
 
-// ===== LEAF PILE (uses #leaf-pile-group) =====
+// ===== LEAF PILE — pyramid shape =====
+function buildPyramid(html, count, spreadX, spreadY, emoji, fontSize, opacity, xOff, yOff) {
+  let remaining = count;
+  let rowWidth = Math.min(spreadX, count * 5);
+  let rowY = 0;
+  while (remaining > 0 && rowWidth > 4) {
+    const perRow = Math.max(1, Math.min(Math.ceil(rowWidth / 9), remaining));
+    const rowActualW = (perRow - 1) * 9;
+    for (let i = 0; i < perRow; i++) {
+      const ox = -rowActualW / 2 + i * 9;
+      const oy = -rowY;
+      const rot = (i - (perRow - 1) / 2) * 4;
+      const wiggle = perRow > 3 ? (i % 2 === 0 ? 1 : -1) : 0;
+      html += `<text x="${ox + xOff}" y="${oy + yOff + wiggle}" font-size="${fontSize}" opacity="${opacity}" transform="rotate(${rot}, ${ox + xOff}, ${oy + yOff})">${emoji}</text>`;
+    }
+    remaining -= perRow;
+    rowY += fontSize - 4;
+    rowWidth = Math.max(fontSize + 4, rowWidth - fontSize);
+  }
+  return html;
+}
+
 function updatePile() {
   const x = document.getElementById('pile-x').value;
   const y = document.getElementById('pile-y').value;
@@ -373,20 +392,9 @@ function updatePile() {
   if (!g) return;
   g.setAttribute('transform', `translate(${x}, ${y})`);
 
-  // Rebuild leaves
   let html = '';
-  for (let i = 0; i < brown; i++) {
-    const ox = Math.round((Math.random() - 0.5) * spreadX);
-    const oy = Math.round((Math.random() - 0.5) * spreadY);
-    const rot = Math.round((Math.random() - 0.5) * 20);
-    html += `<text x="${ox - 2}" y="${oy}" font-size="14" opacity="0.80" transform="rotate(${rot}, ${ox}, ${oy})">🍂</text>`;
-  }
-  for (let i = 0; i < green; i++) {
-    const ox = Math.round((Math.random() - 0.3) * spreadX);
-    const oy = Math.round((Math.random() - 0.3) * spreadY);
-    const rot = Math.round((Math.random() - 0.5) * 15);
-    html += `<text x="${ox + 2}" y="${oy - 2}" font-size="12" opacity="0.60" transform="rotate(${rot}, ${ox}, ${oy})">🍃</text>`;
-  }
+  html = buildPyramid(html, brown, spreadX, spreadY, '🍂', 14, '0.80', -2, 0);
+  html = buildPyramid(html, green, spreadX, spreadY, '🍃', 12, '0.60', 2, -2);
   g.innerHTML = html;
 }
 
@@ -407,10 +415,10 @@ function setPileFromProgress() {
 function resetPile() {
   document.getElementById('pile-x').value = 442;
   document.getElementById('pile-y').value = 268;
-  document.getElementById('pile-count').value = 5;
-  document.getElementById('pile-green').value = 3;
-  document.getElementById('pile-spread-x').value = 12;
-  document.getElementById('pile-spread-y').value = 5;
+  document.getElementById('pile-count').value = 20;
+  document.getElementById('pile-green').value = 14;
+  document.getElementById('pile-spread-x').value = 56;
+  document.getElementById('pile-spread-y').value = 27;
   updatePile();
 }
 
@@ -510,7 +518,7 @@ function setWeather(w) {
     colony.appendChild(d);
     const r = document.createElement('div'); r.className='absolute z-10 flex gap-2'; r.setAttribute('data-weather','1');
     r.style.cssText = `left:${sl+rl}%; top:${st+rt}%;`;
-    r.innerHTML='<span class="rain-drop text-[13px] opacity-55">💧</span>'.repeat(6);
+    r.innerHTML='<span class="rain-drop text-[13px] opacity-55">💧</span>'.repeat(4);
     colony.appendChild(r);
   } else if (w === 'tormenta') {
     const d = document.createElement('div'); d.className='absolute z-10'; d.setAttribute('data-weather','1');
@@ -519,7 +527,7 @@ function setWeather(w) {
     colony.appendChild(d);
     const r = document.createElement('div'); r.className='absolute z-10 flex gap-2'; r.setAttribute('data-weather','1');
     r.style.cssText = `left:${sl+rl}%; top:${st+rt}%;`;
-    r.innerHTML='<span class="rain-drop text-[13px] opacity-5">💧</span>'.repeat(6);
+    r.innerHTML='<span class="rain-drop text-[13px] opacity-5">💧</span>'.repeat(4);
     colony.appendChild(r);
     const b = document.createElement('div'); b.className='absolute z-10'; b.setAttribute('data-weather','1');
     b.style.cssText = `left:${sl+4}%; top:${st+8}%; animation:star-twinkle 0.8s ease-in-out infinite`;
