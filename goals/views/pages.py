@@ -1,3 +1,6 @@
+from decimal import Decimal, InvalidOperation
+
+from django.db.models import F
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from ..models import Goal
@@ -44,18 +47,25 @@ def goal_delete(request, pk):
 
 
 def goal_add_progress(request, pk):
-    g = get_object_or_404(Goal, pk=pk)
+    g = get_object_or_404(Goal.objects.select_related('currency'), pk=pk)
     if request.method == 'POST':
         amount = request.POST.get('amount', '0')
         try:
-            amount = float(amount)
+            amount = Decimal(amount)
             if amount > 0:
-                g.current_amount += amount
-                if g.current_amount >= g.target_amount:
-                    g.is_achieved = True
-                g.save()
+                if Goal.objects.filter(pk=pk).filter(current_amount__gte=F('target_amount') - amount).exists():
+                    Goal.objects.filter(pk=pk).update(
+                        current_amount=F('current_amount') + amount,
+                        is_achieved=True,
+                    )
+                else:
+                    Goal.objects.filter(pk=pk).update(
+                        current_amount=F('current_amount') + amount,
+                    )
                 messages.success(request, f'💰 ${amount} agregado a "{g.name}"')
-        except ValueError:
+            else:
+                messages.error(request, 'El monto debe ser mayor a cero')
+        except (ValueError, InvalidOperation):
             messages.error(request, 'Monto inválido')
         return redirect('goals:goal_list')
     return render(request, 'goals/goal_add_progress.html', {'goal': g})

@@ -148,6 +148,19 @@
       </header>
 
       <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-lg border px-4 py-3 text-sm font-medium animate-fade-in
+                      {% if message.tags == 'success' %}border-sage-300 bg-sage-50 text-sage-800 dark:border-sage-700 dark:bg-sage-900/30 dark:text-sage-300
+                      {% elif message.tags == 'error' %}border-clay-300 bg-clay-50 text-clay-800 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300
+                      {% elif message.tags == 'warning' %}border-gold-300 bg-gold-50 text-gold-800 dark:border-gold-700 dark:bg-gold-900/30 dark:text-gold-300
+                      {% else %}border-earth-300 bg-earth-50 text-earth-800 dark:border-earth-700 dark:bg-earth-900/30 dark:text-earth-300{% endif %}">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% block content %}{% endblock %}
       </main>
 

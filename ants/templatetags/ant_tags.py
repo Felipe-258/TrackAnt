@@ -10,6 +10,15 @@ def ant_colony():
 
 
 @register.simple_tag
+def weather_icon(weather):
+    icons = {
+        'despejado': '☀️', 'soleado': '☀️', 'nublado': '⛅',
+        'lluvioso': '🌧️', 'tormenta': '🌩️',
+    }
+    return icons.get(weather, '☀️')
+
+
+@register.simple_tag
 def queen_label(size):
     labels = {'tiny': '🐛', 'small': '🪱', 'medium': '🐜', 'large': '👑'}
     return labels.get(size, '')
@@ -34,6 +43,12 @@ def range_to(end):
         return range(int(end))
     except (TypeError, ValueError):
         return range(0)
+
+
+@register.simple_tag
+def time_of_day_icon(tod):
+    icons = {'amanecer': '☀️', 'dia': '☀️', 'atardecer': '☀️', 'noche': '🌙'}
+    return icons.get(tod, '☀️')
 
 
 @register.filter

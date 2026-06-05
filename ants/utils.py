@@ -44,6 +44,11 @@ def get_colony_state(goal_id=None):
 
     weather = _get_weather(monthly_income, monthly_expenses)
     queen_size = _queen_size(goal_progress)
+    tod, tod_icon, sun_left, sun_top = get_time_of_day()
+
+    # Ant speed based on weather
+    speed_map = {'despejado': 16, 'soleado': 16, 'nublado': 16, 'lluvioso': 22, 'tormenta': 28}
+    ant_speed = speed_map.get(weather, 16)
 
     # Leaf pile: proportional to goal progress
     leaf_total = max(2, int(goal_progress / 6.25)) if goal_progress > 0 else 2
@@ -69,6 +74,11 @@ def get_colony_state(goal_id=None):
         'leaf_colors': leaf_colors,
         'leaf_brown_count': leaf_brown,
         'leaf_green_count': leaf_green,
+        'tod': tod,
+        'tod_icon': tod_icon,
+        'sun_left': int(sun_left),
+        'sun_top': int(sun_top),
+        'ant_speed': ant_speed,
     }
 
 
@@ -85,6 +95,44 @@ def _get_weather(income, expenses):
         return 'lluvioso'
     else:
         return 'tormenta'
+
+
+def get_time_of_day():
+    from datetime import datetime
+    from django.utils import timezone
+    now = timezone.localtime()
+    hour = now.hour
+
+    # Sun position: interpolate between 5am (east, low) → 12pm (center, high) → 8pm (west, low)
+    if 5 <= hour < 12:
+        t = (hour - 5) / 7.0  # 0 → 1
+        left = 8 + (42 * t)    # 8% → 50%
+        top = 55 - (47 * t)    # 55% → 8%
+    elif 12 <= hour < 20:
+        t = (hour - 12) / 8.0  # 0 → 1
+        left = 50 + (42 * t)    # 50% → 92%
+        top = 8 + (47 * t)      # 8% → 55%
+    else:
+        left, top = -10, -10    # hidden (night, moon follows same logic)
+
+    if 5 <= hour < 7:
+        return 'amanecer', '☀️', left, top
+    elif 7 <= hour < 18:
+        return 'dia', '☀️', left, top
+    elif 18 <= hour < 20:
+        return 'atardecer', '☀️', left, top
+    else:
+        # Moon follows same path as sun
+        moon_left, moon_top = left, top
+        if hour >= 20:
+            t = (hour - 20) / 9.0  # 0 at 20h → 1 at 5h
+            moon_left = 92 + (-84 * min(t, 1))
+            moon_top = 55 - (47 * min(t, 1))
+        elif hour < 5:
+            t = (hour + 4) / 9.0
+            moon_left = 8 + (42 * min(t, 1))
+            moon_top = 55 - (47 * min(t, 1))
+        return 'noche', '🌙', moon_left, moon_top
 
 
 def _queen_size(progress):

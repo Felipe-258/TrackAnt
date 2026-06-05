@@ -5,45 +5,6 @@
   <!-- ==================== SVG LANDSCAPE ==================== -->
   <svg class="colony-landscape" viewBox="0 0 900 300" preserveAspectRatio="none">
 
-    <!-- Weather layer -->
-    {% if weather == 'soleado' or weather == 'despejado' %}
-    <g transform="translate(820, 40)">
-      <g class="sun-spin">
-        <circle r="24" fill="#F2D99F" opacity="0.85"/>
-        <circle r="16" fill="#E9C06A"/>
-        {% for a in "12345678" %}
-        <line x1="24" y1="0" x2="33" y2="0" stroke="#E9C06A" stroke-width="2.5" stroke-linecap="round"
-              transform="rotate({% widthratio forloop.counter0 1 45 %})"/>
-        {% endfor %}
-      </g>
-    </g>
-    {% elif weather == 'nublado' %}
-    <g transform="translate(750, 35)"><g class="cloud-drift">
-      <ellipse cx="0" cy="0" rx="35" ry="16" fill="#E2D1BC" opacity="0.7"/>
-      <ellipse cx="-18" cy="-4" rx="20" ry="11" fill="#E2D1BC" opacity="0.6"/>
-      <ellipse cx="18" cy="2" rx="16" ry="9" fill="#E2D1BC" opacity="0.5"/>
-    </g></g>
-    <g transform="translate(800, 48)"><g class="cloud-drift" style="animation-delay:-4s">
-      <ellipse cx="0" cy="0" rx="22" ry="11" fill="#E2D1BC" opacity="0.4"/>
-    </g></g>
-    {% elif weather == 'lluvioso' %}
-    <g transform="translate(800, 35)">
-      <ellipse cx="0" cy="0" rx="35" ry="16" fill="#8A6348" opacity="0.35"/>
-    </g>
-    {% for x in '0123456789' %}
-    <line x1="{{ forloop.counter0|mul:45 }}" y1="55" x2="{{ forloop.counter0|mul:42 }}" y2="95"
-          stroke="#8BA864" stroke-width="1.5" opacity="0.3" class="rain-drop"
-          style="animation-delay:{% widthratio forloop.counter0 1 0.35 %}s"/>
-    {% endfor %}
-    {% elif weather == 'tormenta' %}
-    <g transform="translate(800, 35)"><ellipse cx="0" cy="0" rx="38" ry="18" fill="#6E4E38" opacity="0.5"/></g>
-    {% for x in '0123456789' %}
-    <line x1="{{ forloop.counter0|mul:45 }}" y1="50" x2="{{ forloop.counter0|mul:42 }}" y2="95"
-          stroke="#6E4E38" stroke-width="2" opacity="0.4" class="rain-drop"
-          style="animation-delay:{% widthratio forloop.counter0 1 0.35 %}s"/>
-    {% endfor %}
-    {% endif %}
-
     <!-- ===== BACKGROUND GROUND ===== -->
     <ellipse cx="450" cy="295" rx="460" ry="60" fill="#CEB496" opacity="0.30"/>
     <ellipse cx="450" cy="288" rx="440" ry="50" fill="#B89472" opacity="0.22"/>
@@ -94,12 +55,12 @@
     <!-- ===== LEAF PILE (inside cave, center, always visible) ===== -->
     <g id="leaf-pile-group" transform="translate(442, 268)">
       {% for i in leaf_brown_count|range_to %}
-      <text x="{{ i|mul:4 }}" y="{{ i|mod:3|add:'-2' }}" font-size="14" opacity="0.80"
-            transform="rotate({% widthratio i 1 -7 %}, {{ i|mul:4 }}, {% widthratio i|mod:3 1 -1 %})">🍂</text>
+      <text x="{{ i|mul:4|floatformat:0 }}" y="{{ i|mod:3|add:'-2' }}" font-size="14" opacity="0.80"
+            transform="rotate({% widthratio i 1 -7 %}, {{ i|mul:4|floatformat:0 }}, {% widthratio i|mod:3 1 -1 %})">🍂</text>
       {% endfor %}
       {% for i in leaf_green_count|range_to %}
-      <text x="{{ i|mul:5|add:'-4' }}" y="{{ i|mod:2|add:'-4' }}" font-size="12" opacity="0.60"
-            transform="rotate({% widthratio i 1 6 %}, {{ i|mul:5|add:'-4' }}, {% widthratio i|mod:2 1 -2 %})">🍃</text>
+      <text x="{{ i|mul:5|add:'-4'|floatformat:0 }}" y="{{ i|mod:2|add:'-4' }}" font-size="12" opacity="0.60"
+            transform="rotate({% widthratio i 1 6 %}, {{ i|mul:5|add:'-4'|floatformat:0 }}, {% widthratio i|mod:2 1 -2 %})">🍃</text>
       {% endfor %}
     </g>
 
@@ -113,6 +74,57 @@
     <ellipse cx="450" cy="172" rx="28" ry="12" fill="#0D0A06" opacity="0.4" class="tunnel-hole" style="animation-delay:-0.5s"/>
 
   </svg>
+
+  <!-- ===== CELESTIAL BODY (emoji, time-based, positioned) ===== -->
+  <div class="absolute z-10 {% if tod == 'noche' %}moon-glow{% else %}sun-spin{% endif %}"
+       style="left:{{ sun_left }}%; top:{{ sun_top }}%; font-size: {% if tod == 'noche' %}32px{% else %}38px{% endif %}; line-height:1; transition: left 1s ease, top 1s ease;">
+    <span>{{ tod_icon }}</span>
+    {% if tod == 'noche' %}
+    <span class="absolute text-xs star-twinkle" style="top:-10px; left:-12px;">✨</span>
+    <span class="absolute text-[10px] star-twinkle" style="top:-6px; right:-14px; animation-delay:0.8s;">✨</span>
+    <span class="absolute text-[8px] star-twinkle" style="bottom:-12px; left:8px; animation-delay:1.4s;">✨</span>
+    {% endif %}
+  </div>
+
+  <!-- ===== WEATHER EFFECTS ===== -->
+  {% if weather == 'nublado' %}
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-3' }}%; top:{{ sun_top }}%;">
+    <span style="font-size:38px; opacity:0.55;">☁️</span>
+    <span style="font-size:26px; opacity:0.4; position:relative; left:14px;">☁️</span>
+  </div>
+  {% elif weather == 'lluvioso' %}
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-3' }}%; top:{{ sun_top }}%;">
+    <span style="font-size:42px; opacity:0.6;">☁️</span>
+    <span style="font-size:28px; opacity:0.45; position:relative; left:14px;">☁️</span>
+  </div>
+  <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
+    {% for x in '123456' %}<span class="rain-drop text-[13px] opacity-55">💧</span>{% endfor %}
+  </div>
+  {% elif weather == 'tormenta' %}
+  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top|add:'-2' }}%;">
+    <span style="font-size:46px; opacity:0.7;">☁️</span>
+    <span style="font-size:32px; opacity:0.5; position:relative; left:16px;">☁️</span>
+  </div>
+  <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
+    {% for x in '123456' %}<span class="rain-drop text-[13px] opacity-5">💧</span>{% endfor %}
+  </div>
+  <div class="absolute z-10" style="left:{{ sun_left|add:'4' }}%; top:{{ sun_top|add:'8' }}%; animation:star-twinkle 0.8s ease-in-out infinite;">
+    <span class="text-base">⚡</span>
+  </div>
+  {% endif %}
+
+  <!-- ===== INFO TOOLTIP ===== -->
+  <div class="absolute right-2 top-2 z-30 group">
+    <span class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-earth-200 text-[10px] font-bold text-earth-500 transition-colors hover:bg-clay-200 hover:text-clay-600 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-clay-800 dark:hover:text-clay-300">i</span>
+    <div class="pointer-events-none absolute right-0 top-7 z-40 w-52 rounded-lg border border-earth-200 bg-white/95 p-3 text-[10px] leading-relaxed text-earth-600 shadow-lg opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:pointer-events-auto dark:border-earth-700 dark:bg-earth-900/95 dark:text-earth-300">
+      <p class="font-semibold mb-1">🌤️ Clima = salud financiera</p>
+      <p>☀️ soleado → ingresos &gt; gastos × 1.5</p>
+      <p>⛅ nublado → ingresos ≥ gastos</p>
+      <p>🌧️ lluvioso → gastos &gt; 50% ingresos</p>
+      <p>🌩️ tormenta → gastos descontrolados</p>
+      <p class="mt-1.5 pt-1.5 border-t border-earth-200 dark:border-earth-700">🌅☀️🌙 ciclo día/noche = hora real</p>
+    </div>
+  </div>
 
   <!-- ==================== QUEEN ANT (inside cave, on throne) ==================== -->
   <div class="absolute z-20 flex flex-col items-center" style="left:70%; top:76%; transform:translate(-50%,-50%);">
@@ -140,11 +152,11 @@
   <!-- ==================== WORKER ANTS ==================== -->
   {% for i in worker_ants|range_to %}
   <div class="ant-walker"
-       style="--speed: 16s; --delay: {{ i|mul:3.5|stringformat:'.1f' }}s;">
+       style="--speed: {{ ant_speed }}s; --delay: {{ i|mul:3.5|stringformat:'.1f' }}s;">
     <div class="ant-body" style="animation: ant-wave-{{ i|mod:3|add:1 }} {{ i|mod:3|add:3 }}s ease-in-out infinite; animation-delay:{{ i|mul:0.5|stringformat:'.1f' }}s;">
       <div class="relative flex flex-col items-center">
         <div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 text-xs leading-none drop-shadow"
-             style="animation: leaf-bounce 2.5s ease-in-out infinite, leaf-fade-peak 16s ease-in infinite;
+             style="                    animation: leaf-bounce 2.5s ease-in-out infinite, leaf-fade-peak {{ ant_speed }}s ease-in infinite;
                     animation-delay: 0s, {{ i|mul:3.5|stringformat:'.1f' }}s;">🍂</div>
         <span class="text-2xl leading-none" style="transform: scaleX(-1); display:inline-block;">🐜</span>
       </div>
@@ -154,7 +166,7 @@
   <!-- Falling leaf (sways down into the pile) -->
   <div class="absolute pointer-events-none"
        style="top:34%; left:50%; opacity:0;
-              animation: leaf-drop 16s ease-in-out infinite;
+              animation: leaf-drop {{ ant_speed }}s ease-in-out infinite;
               animation-delay: {{ i|mul:3.5|stringformat:'.1f' }}s;
               z-index: 8;">
     <span class="text-base leading-none drop-shadow-md">🍂</span>
