@@ -74,17 +74,17 @@ def get_colony_state(goal_id=None):
 
 def _get_weather(income, expenses):
     if income == 0 and expenses == 0:
-        return 'clear'
+        return 'despejado'
     if income >= expenses * 1.5:
-        return 'sunny'
+        return 'soleado'
     elif income >= expenses:
-        return 'cloudy'
+        return 'nublado'
     elif expenses == 0 and income > 0:
-        return 'sunny'
+        return 'soleado'
     elif income >= expenses * 0.5:
-        return 'rainy'
+        return 'lluvioso'
     else:
-        return 'stormy'
+        return 'tormenta'
 
 
 def _queen_size(progress):

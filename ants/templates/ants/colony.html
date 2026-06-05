@@ -6,7 +6,7 @@
   <svg class="colony-landscape" viewBox="0 0 900 300" preserveAspectRatio="none">
 
     <!-- Weather layer -->
-    {% if weather == 'sunny' or weather == 'clear' %}
+    {% if weather == 'soleado' or weather == 'despejado' %}
     <g transform="translate(820, 40)">
       <g class="sun-spin">
         <circle r="24" fill="#F2D99F" opacity="0.85"/>
@@ -17,7 +17,7 @@
         {% endfor %}
       </g>
     </g>
-    {% elif weather == 'cloudy' %}
+    {% elif weather == 'nublado' %}
     <g transform="translate(750, 35)"><g class="cloud-drift">
       <ellipse cx="0" cy="0" rx="35" ry="16" fill="#E2D1BC" opacity="0.7"/>
       <ellipse cx="-18" cy="-4" rx="20" ry="11" fill="#E2D1BC" opacity="0.6"/>
@@ -26,7 +26,7 @@
     <g transform="translate(800, 48)"><g class="cloud-drift" style="animation-delay:-4s">
       <ellipse cx="0" cy="0" rx="22" ry="11" fill="#E2D1BC" opacity="0.4"/>
     </g></g>
-    {% elif weather == 'rainy' %}
+    {% elif weather == 'lluvioso' %}
     <g transform="translate(800, 35)">
       <ellipse cx="0" cy="0" rx="35" ry="16" fill="#8A6348" opacity="0.35"/>
     </g>
@@ -35,7 +35,7 @@
           stroke="#8BA864" stroke-width="1.5" opacity="0.3" class="rain-drop"
           style="animation-delay:{% widthratio forloop.counter0 1 0.35 %}s"/>
     {% endfor %}
-    {% elif weather == 'stormy' %}
+    {% elif weather == 'tormenta' %}
     <g transform="translate(800, 35)"><ellipse cx="0" cy="0" rx="38" ry="18" fill="#6E4E38" opacity="0.5"/></g>
     {% for x in '0123456789' %}
     <line x1="{{ forloop.counter0|mul:45 }}" y1="50" x2="{{ forloop.counter0|mul:42 }}" y2="95"
