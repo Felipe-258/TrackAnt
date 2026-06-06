@@ -132,12 +132,12 @@
           <input type="range" id="pile-y" min="230" max="285" value="268" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍂 Cantidad: <span id="pile-count-val">20</span></label>
-          <input type="range" id="pile-count" min="0" max="20" value="20" class="w-full" oninput="updatePile()">
+          <label class="text-[10px] text-earth-500">🍂 Cantidad: <span id="pile-count-val">18</span></label>
+          <input type="range" id="pile-count" min="0" max="20" value="18" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍃 Cantidad: <span id="pile-green-val">14</span></label>
-          <input type="range" id="pile-green" min="0" max="15" value="14" class="w-full" oninput="updatePile()">
+          <label class="text-[10px] text-earth-500">🍃 Cantidad: <span id="pile-green-val">15</span></label>
+          <input type="range" id="pile-green" min="0" max="15" value="15" class="w-full" oninput="updatePile()">
         </div>
         <div class="col-span-2 grid grid-cols-2 gap-2">
           <div>
@@ -415,8 +415,8 @@ function setPileFromProgress() {
 function resetPile() {
   document.getElementById('pile-x').value = 442;
   document.getElementById('pile-y').value = 268;
-  document.getElementById('pile-count').value = 20;
-  document.getElementById('pile-green').value = 14;
+  document.getElementById('pile-count').value = 18;
+  document.getElementById('pile-green').value = 15;
   document.getElementById('pile-spread-x').value = 56;
   document.getElementById('pile-spread-y').value = 27;
   updatePile();

@@ -100,10 +100,6 @@
   0%, 100% { transform: rotate(-5deg); }
   50% { transform: rotate(6deg); }
 }
-@keyframes tunnel-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
 
 .ant-leaf { }
 .leaf-dropped { animation: leaf-drop 1s ease-in forwards; pointer-events: none; }
@@ -151,7 +147,6 @@
 .sunrise-fade { animation: sunrise-fade 12s ease-in-out infinite; }
 .cloud-drift { animation: cloud-drift 8s ease-in-out infinite; }
 .grass-blade { animation: grass-sway 3s ease-in-out infinite; }
-.tunnel-hole { animation: tunnel-pulse 2s ease-in-out infinite; }
 
 /* ---- landscape ---- */
 .colony-landscape {

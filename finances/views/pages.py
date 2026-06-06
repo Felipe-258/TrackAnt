@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import datetime, date
+import json
 from ..models import Transaction, Category, Currency, Tag
 from goals.models import Goal
 from ..forms import TransactionForm, CategoryForm
@@ -46,9 +47,9 @@ def dashboard(request):
         date__month=today.month,
     ).values('category__name', 'category__color').annotate(total=Sum('amount'))
 
-    ctx['category_labels'] = [e['category__name'] for e in month_expenses]
-    ctx['category_values'] = [float(e['total']) for e in month_expenses]
-    ctx['category_colors'] = [e['category__color'] for e in month_expenses]
+    ctx['category_labels'] = json.dumps([e['category__name'] for e in month_expenses])
+    ctx['category_values'] = json.dumps([float(e['total']) for e in month_expenses])
+    ctx['category_colors'] = json.dumps([e['category__color'] for e in month_expenses])
 
     months_data = []
     for m in range(1, today.month + 1):
@@ -56,8 +57,8 @@ def dashboard(request):
         m_expenses = Transaction.objects.filter(type='EXPENSE', date__year=today.year, date__month=m).aggregate(s=Sum('amount'))['s'] or 0
         months_data.append({'income': float(m_incomes), 'expense': float(m_expenses)})
 
-    ctx['monthly_incomes'] = [m['income'] for m in months_data]
-    ctx['monthly_expenses_data'] = [m['expense'] for m in months_data]
+    ctx['monthly_incomes'] = json.dumps([m['income'] for m in months_data])
+    ctx['monthly_expenses_data'] = json.dumps([m['expense'] for m in months_data])
 
     return render(request, 'finances/dashboard.html', ctx)
 
@@ -87,6 +88,7 @@ def _transaction_list(request, type_filter=None):
         'page': page,
         'search': search,
         'month': month or date.today().strftime('%Y-%m'),
+        'list_type': type_filter or 'all',
     })
 
 

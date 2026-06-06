@@ -32,3 +32,8 @@ class SubscriptionForm(forms.ModelForm):
                 'class': 'h-4 w-4 rounded border-earth-300 text-gold-600 focus:ring-gold-500 dark:border-earth-600 dark:bg-earth-800',
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from finances.models import Category
+        self.fields['category'].queryset = Category.objects.filter(type='EXPENSE')

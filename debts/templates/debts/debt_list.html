@@ -4,9 +4,9 @@
 {% block page_subtitle %}Lo que debés y te deben{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ tab: 'owe' }">
   <div class="flex items-center justify-between">
-    <div class="flex gap-2" x-data="{ tab: 'owe' }">
+    <div class="flex gap-2">
       <button @click="tab = 'owe'"
               class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               :class="tab === 'owe' ? 'bg-clay-500 text-white' : 'bg-earth-100 text-earth-600 hover:bg-earth-200 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
@@ -29,7 +29,7 @@
     </a>
   </div>
 
-  <div x-data="{ tab: 'owe' }">
+  <div>
     <div x-show="tab === 'owe'" class="space-y-4">
       <h2 class="text-sm font-semibold text-clay-700 dark:text-clay-300">Deudas que tenés que pagar</h2>
       {% if debts_owe %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% block title %}Transacciones - TrackAnt{% endblock %}
-{% block page_title %}Transacciones{% endblock %}
-{% block page_subtitle %}Todas tus entradas y salidas de dinero{% endblock %}
+{% block title %}{% if list_type == 'INCOME' %}Ingresos{% elif list_type == 'EXPENSE' %}Gastos{% else %}Transacciones{% endif %} - TrackAnt{% endblock %}
+{% block page_title %}{% if list_type == 'INCOME' %}Ingresos{% elif list_type == 'EXPENSE' %}Gastos{% else %}Transacciones{% endif %}{% endblock %}
+{% block page_subtitle %}{% if list_type == 'INCOME' %}Tus entradas de dinero{% elif list_type == 'EXPENSE' %}Tus salidas de dinero{% else %}Todas tus entradas y salidas de dinero{% endif %}{% endblock %}
 
 {% block content %}
 <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
