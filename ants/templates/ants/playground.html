@@ -2,7 +2,7 @@
 {% load static ant_tags %}
 
 {% block title %}Playground - TrackAnt{% endblock %}
-{% block page_title %}Playground 🎮{% endblock %}
+{% block page_title %}Playground{% endblock %}
 {% block page_subtitle %}Arrastrá los puntos o usá las crucetas para ajustar el recorrido{% endblock %}
 
 {% block content %}
@@ -39,7 +39,7 @@
     <div class="border-b border-earth-200 px-4 py-3 dark:border-earth-800 flex items-center justify-between">
       <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">Vista previa</span>
       <div class="flex items-center gap-3 text-xs text-earth-400">
-        <span>🐜 1 hormiga</span>
+        <span><img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> 1 hormiga</span>
         <span id="wp-count">13 puntos</span>
         <span id="fps-display"></span>
       </div>
@@ -49,7 +49,7 @@
       <div id="wp-dots"></div>
     </div>
     <div class="border-t border-earth-200 px-4 py-2 text-[10px] text-earth-400 dark:border-earth-800">
-      💡 Arrastrá los puntos naranjas en el mapa o usá las crucetas ↓ para ajuste fino. Los puntos dorados son el pico.
+      <i data-lucide="lightbulb" class="lucide-sm inline-block"></i> Arrastrá los puntos naranjas en el mapa o usá las crucetas ↓ para ajuste fino. Los puntos dorados son el pico.
     </div>
   </div>
 
@@ -58,7 +58,7 @@
     <!-- Path controls -->
     <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" x-data="{ open: true }">
       <button @click="open = !open" class="flex w-full items-center justify-between px-4 pt-4 pb-2 text-sm font-semibold text-earth-700 dark:text-earth-300">
-        <span>🐜 Recorrido</span>
+        <span><img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> Recorrido</span>
         <span x-text="open ? '▲' : '▼'" class="text-earth-400 text-xs"></span>
       </button>
       <div x-show="open" class="px-4 pb-4">
@@ -74,42 +74,42 @@
     <!-- Time & Weather controls -->
     <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" x-data="{ open: true }">
       <button @click="open = !open" class="flex w-full items-center justify-between px-4 pt-4 pb-2 text-sm font-semibold text-earth-700 dark:text-earth-300">
-        <span>🕐🌤️ Hora y Clima</span>
+        <span><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""><img src="{% static 'icons/colony/moon.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> Hora y Clima</span>
         <span x-text="open ? '▲' : '▼'" class="text-earth-400 text-xs"></span>
       </button>
       <div x-show="open" class="px-4 pb-4">
       <div class="grid grid-cols-4 gap-1.5 mb-3">
-        <button onclick="setTimeOfDay('amanecer')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-gold-50 hover:border-gold-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-gold-900/30">☀️<br>Amanecer</button>
-        <button onclick="setTimeOfDay('dia')" class="rounded-lg border border-gold-300 bg-gold-50 px-2 py-1.5 text-xs font-medium text-gold-700 dark:bg-gold-900/30 dark:text-gold-300 dark:border-gold-700">☀️<br>Día</button>
-        <button onclick="setTimeOfDay('atardecer')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-gold-50 hover:border-gold-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-gold-900/30">☀️<br>Atardecer</button>
-        <button onclick="setTimeOfDay('noche')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-indigo-50 hover:border-indigo-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-indigo-900/30">🌙<br>Noche</button>
+        <button onclick="setTimeOfDay('amanecer')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-gold-50 hover:border-gold-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-gold-900/30"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""><br>Amanecer</button>
+        <button onclick="setTimeOfDay('dia')" class="rounded-lg border border-gold-300 bg-gold-50 px-2 py-1.5 text-xs font-medium text-gold-700 dark:bg-gold-900/30 dark:text-gold-300 dark:border-gold-700"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""><br>Dia</button>
+        <button onclick="setTimeOfDay('atardecer')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-gold-50 hover:border-gold-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-gold-900/30"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""><br>Atardecer</button>
+        <button onclick="setTimeOfDay('noche')" class="rounded-lg border border-earth-200 px-2 py-1.5 text-xs text-earth-600 hover:bg-indigo-50 hover:border-indigo-300 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-indigo-900/30"><img src="{% static 'icons/colony/moon.svg' %}" class="inline-block w-4 h-4" alt=""><br>Noche</button>
       </div>
       <div class="grid grid-cols-2 gap-2 mb-2">
         <div>
-          <label class="text-[9px] text-earth-500">☀️ Amanecer: L:<span id="sun-am-l-val">8</span> T:<span id="sun-am-t-val">55</span></label>
+          <label class="text-[9px] text-earth-500"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-3 h-3" alt=""> Amanecer: L:<span id="sun-am-l-val">8</span> T:<span id="sun-am-t-val">55</span></label>
           <div class="flex gap-1"><input type="range" id="sun-am-l" min="0" max="40" value="8" class="w-full h-3" oninput="updateSunPositions()"> <input type="range" id="sun-am-t" min="20" max="70" value="55" class="w-full h-3" oninput="updateSunPositions()"></div>
         </div>
         <div>
-          <label class="text-[9px] text-earth-500">☀️ Atardecer: L:<span id="sun-pm-l-val">92</span> T:<span id="sun-pm-t-val">55</span></label>
+          <label class="text-[9px] text-earth-500"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-3 h-3" alt=""> Atardecer: L:<span id="sun-pm-l-val">92</span> T:<span id="sun-pm-t-val">55</span></label>
           <div class="flex gap-1"><input type="range" id="sun-pm-l" min="60" max="100" value="92" class="w-full h-3" oninput="updateSunPositions()"> <input type="range" id="sun-pm-t" min="20" max="70" value="55" class="w-full h-3" oninput="updateSunPositions()"></div>
         </div>
       </div>
 
-      <h3 class="text-sm font-semibold text-earth-700 dark:text-earth-300 mb-2 mt-3">🌤️ Clima financiero</h3>
+      <h3 class="text-sm font-semibold text-earth-700 dark:text-earth-300 mb-2 mt-3">Clima financiero</h3>
       <div class="grid grid-cols-5 gap-1 mb-2">
-        <button onclick="setWeather('despejado')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-gold-50 dark:border-earth-700 dark:text-earth-400" title="Sin transacciones">☀️</button>
-        <button onclick="setWeather('soleado')" class="rounded-lg border border-gold-300 bg-gold-50 px-1.5 py-1.5 text-[10px] font-medium text-gold-700 dark:bg-gold-900/30 dark:text-gold-300 dark:border-gold-700" title="Ingresos > Gastos × 1.5">☀️</button>
-        <button onclick="setWeather('nublado')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400" title="Ingresos ≥ Gastos">⛅</button>
-        <button onclick="setWeather('lluvioso')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-sky-50 dark:border-earth-700 dark:text-earth-400" title="Gastos > 50% ingresos">🌧️</button>
-        <button onclick="setWeather('tormenta')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-stone-100 dark:border-earth-700 dark:text-earth-400" title="Gastos descontrolados">🌩️</button>
+        <button onclick="setWeather('despejado')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-gold-50 dark:border-earth-700 dark:text-earth-400" title="Sin transacciones"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""></button>
+        <button onclick="setWeather('soleado')" class="rounded-lg border border-gold-300 bg-gold-50 px-1.5 py-1.5 text-[10px] font-medium text-gold-700 dark:bg-gold-900/30 dark:text-gold-300 dark:border-gold-700" title="Ingresos > Gastos x 1.5"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""></button>
+        <button onclick="setWeather('nublado')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400" title="Ingresos >= Gastos"><img src="{% static 'icons/colony/cloud.svg' %}" class="inline-block w-4 h-4" alt=""></button>
+        <button onclick="setWeather('lluvioso')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-sky-50 dark:border-earth-700 dark:text-earth-400" title="Gastos > 50% ingresos"><img src="{% static 'icons/colony/raining.svg' %}" class="inline-block w-4 h-4" alt=""></button>
+        <button onclick="setWeather('tormenta')" class="rounded-lg border border-earth-200 px-1.5 py-1.5 text-[10px] text-earth-600 hover:bg-stone-100 dark:border-earth-700 dark:text-earth-400" title="Gastos descontrolados"><img src="{% static 'icons/colony/lightning.svg' %}" class="inline-block w-4 h-4" alt=""></button>
       </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[9px] text-earth-500">☁️ Offset: L:<span id="cloud-l-val">-4</span> T:<span id="cloud-t-val">0</span></label>
+          <label class="text-[9px] text-earth-500"><img src="{% static 'icons/colony/cloud.svg' %}" class="inline-block w-3 h-3" alt=""> Offset: L:<span id="cloud-l-val">-4</span> T:<span id="cloud-t-val">0</span></label>
           <div class="flex gap-1">          <input type="range" id="cloud-l" min="-15" max="15" value="-4" class="w-full h-3" oninput="updateWeatherPosition()">           <input type="range" id="cloud-t" min="-15" max="15" value="0" class="w-full h-3" oninput="updateWeatherPosition()"></div>
         </div>
         <div>
-          <label class="text-[9px] text-earth-500">💧 Offset: L:<span id="rain-l-val">-6</span> T:<span id="rain-t-val">16</span></label>
+          <label class="text-[9px] text-earth-500"><img src="{% static 'icons/colony/raining.svg' %}" class="inline-block w-3 h-3" alt=""> Offset: L:<span id="rain-l-val">-6</span> T:<span id="rain-t-val">16</span></label>
           <div class="flex gap-1">          <input type="range" id="rain-l" min="-15" max="15" value="-6" class="w-full h-3" oninput="updateWeatherPosition()"> <input type="range" id="rain-t" min="0" max="25" value="16" class="w-full h-3" oninput="updateWeatherPosition()"></div>
         </div>
       </div>
@@ -118,7 +118,7 @@
     <!-- Leaf pile controls -->
     <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" x-data="{ open: true }">
       <button @click="open = !open" class="flex w-full items-center justify-between px-4 pt-4 pb-2 text-sm font-semibold text-earth-700 dark:text-earth-300">
-        <span>🍂 Montón de hojas</span>
+        <span><img src="{% static 'icons/colony/brown-leaf.svg' %}" class="inline-block w-4 h-4" alt=""> Montón de hojas</span>
         <span x-text="open ? '▲' : '▼'" class="text-earth-400 text-xs"></span>
       </button>
       <div x-show="open" class="px-4 pb-4">
@@ -132,11 +132,11 @@
           <input type="range" id="pile-y" min="230" max="285" value="268" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍂 Cantidad: <span id="pile-count-val">18</span></label>
+          <label class="text-[10px] text-earth-500"><img src="{% static 'icons/colony/brown-leaf.svg' %}" class="inline-block w-3 h-3" alt=""> Cantidad: <span id="pile-count-val">18</span></label>
           <input type="range" id="pile-count" min="0" max="20" value="18" class="w-full" oninput="updatePile()">
         </div>
         <div>
-          <label class="text-[10px] text-earth-500">🍃 Cantidad: <span id="pile-green-val">15</span></label>
+          <label class="text-[10px] text-earth-500"><img src="{% static 'icons/colony/green-leaf.svg' %}" class="inline-block w-3 h-3" alt=""> Cantidad: <span id="pile-green-val">15</span></label>
           <input type="range" id="pile-green" min="0" max="15" value="15" class="w-full" oninput="updatePile()">
         </div>
         <div class="col-span-2 grid grid-cols-2 gap-2">
@@ -148,17 +148,17 @@
       </div>
       <div class="grid grid-cols-2 gap-2 mt-2">
         <div>
-          <label class="text-[9px] text-earth-500">☁️ Distancia: <span id="cloud-gap-val">4</span>px</label>
+          <label class="text-[9px] text-earth-500"><img src="{% static 'icons/colony/cloud.svg' %}" class="inline-block w-3 h-3" alt=""> Distancia: <span id="cloud-gap-val">4</span>px</label>
           <input type="range" id="cloud-gap" min="4" max="40" value="4" class="w-full h-3" oninput="updateWeatherPosition()">
         </div>
         <div class="flex items-end">
-          <button onclick="exportarPosiciones()" class="w-full rounded-lg border border-earth-300 px-2 py-1.5 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">📋 Exportar posiciones</button>
+          <button onclick="exportarPosiciones()" class="w-full rounded-lg border border-earth-300 px-2 py-1.5 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800"><i data-lucide="clipboard" class="lucide-sm inline-block"></i> Exportar posiciones</button>
         </div>
       </div>
     </div>
       </div>
       <div class="mt-2 flex gap-2">
-        <button onclick="setPileFromProgress()" class="flex-1 rounded-lg border border-gold-300 px-2 py-1 text-[10px] text-gold-600 hover:bg-gold-50 dark:border-gold-800 dark:text-gold-400 dark:hover:bg-gold-900/30">📊 Según meta (0-100%)</button>
+        <button onclick="setPileFromProgress()" class="flex-1 rounded-lg border border-gold-300 px-2 py-1 text-[10px] text-gold-600 hover:bg-gold-50 dark:border-gold-800 dark:text-gold-400 dark:hover:bg-gold-900/30"><i data-lucide="bar-chart" class="lucide-sm inline-block"></i> Segun meta (0-100%)</button>
         <button onclick="resetPile()" class="flex-1 rounded-lg border border-earth-300 px-2 py-1 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400">↺ Reset</button>
       </div>
     </div>
@@ -166,20 +166,32 @@
     <!-- Export -->
     <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" x-data="{ open: true }">
       <button @click="open = !open" class="flex w-full items-center justify-between px-4 pt-4 pb-2 text-sm font-semibold text-earth-700 dark:text-earth-300">
-        <span>📋 Exportar</span>
+        <span><i data-lucide="clipboard" class="lucide-sm inline-block"></i> Exportar</span>
         <span x-text="open ? '▲' : '▼'" class="text-earth-400 text-xs"></span>
       </button>
       <div x-show="open" class="px-4 pb-4">
       <pre id="css-output" class="rounded-lg bg-earth-50 p-3 text-[10px] text-earth-700 overflow-auto dark:bg-earth-800 dark:text-earth-300" style="max-height:180px"></pre>
       <div class="mt-2 flex gap-2">
-        <button onclick="copyCSS()" class="flex-1 rounded-lg bg-clay-500 px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-clay-600">📋 CSS keyframe</button>
-        <button onclick="copyPileSVG()" class="flex-1 rounded-lg border border-earth-300 px-3 py-1.5 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400">📋 SVG pila</button>
+        <button onclick="copyCSS()" class="flex-1 rounded-lg bg-clay-500 px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-clay-600"><i data-lucide="clipboard" class="lucide-sm inline-block"></i> CSS keyframe</button>
+        <button onclick="copyPileSVG()" class="flex-1 rounded-lg border border-earth-300 px-3 py-1.5 text-[10px] text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400"><i data-lucide="clipboard" class="lucide-sm inline-block"></i> SVG pila</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+const STATIC = '{% static "icons/colony/" %}';
+const SVG = {
+  ant: STATIC + 'ant.svg',
+  leaf: STATIC + 'brown-leaf.svg',
+  greenLeaf: STATIC + 'green-leaf.svg',
+  sun: STATIC + 'sun.svg',
+  moon: STATIC + 'moon.svg',
+  cloud: STATIC + 'cloud.svg',
+  rain: STATIC + 'raining.svg',
+  lightning: STATIC + 'lightning.svg',
+  stars: STATIC + 'stars.svg',
+};
 // ===== STATE =====
 const defaults = [
   { pct: 0,  left: -6,  top: 84 },
@@ -212,7 +224,7 @@ function init() {
   if (!antEl) {
     antEl = document.createElement('div');
     antEl.className = 'ant-walker';
-    antEl.innerHTML = '<div class="ant-body"><div class="relative flex flex-col items-center"><div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 text-xs leading-none drop-shadow">🍂</div><span class="text-2xl leading-none" style="transform:scaleX(-1);display:inline-block">🐜</span></div></div>';
+    antEl.innerHTML = `<div class="ant-body"><div class="relative flex flex-col items-center"><div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 leading-none drop-shadow"><img src="${SVG.leaf}" class="w-3 h-3" alt=""></div><img src="${SVG.ant}" class="w-6 h-6" style="transform:scaleX(-1);" alt=""></div></div>`;
     colonyEl.appendChild(antEl);
   }
   antEl.style.cssText = 'animation:none; position:absolute; left:-8%; top:86%; opacity:1; z-index:5; pointer-events:none; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25))';
@@ -352,7 +364,7 @@ function interp(pct) {
 }
 
 // ===== LEAF PILE — pyramid shape =====
-function buildPyramid(html, count, spreadX, spreadY, emoji, fontSize, opacity, xOff, yOff) {
+function buildPyramid(html, count, spreadX, spreadY, svgPath, fontSize, opacity, xOff, yOff) {
   let remaining = count;
   let rowWidth = Math.min(spreadX, count * 5);
   let rowY = 0;
@@ -364,7 +376,7 @@ function buildPyramid(html, count, spreadX, spreadY, emoji, fontSize, opacity, x
       const oy = -rowY;
       const rot = (i - (perRow - 1) / 2) * 4;
       const wiggle = perRow > 3 ? (i % 2 === 0 ? 1 : -1) : 0;
-      html += `<text x="${ox + xOff}" y="${oy + yOff + wiggle}" font-size="${fontSize}" opacity="${opacity}" transform="rotate(${rot}, ${ox + xOff}, ${oy + yOff})">${emoji}</text>`;
+      html += `<image href="${SVG.leaf}" x="${ox + xOff - 7}" y="${oy + yOff + wiggle - 7}" width="14" height="14" opacity="${opacity}" transform="rotate(${rot}, ${ox + xOff}, ${oy + yOff})" />`;
     }
     remaining -= perRow;
     rowY += fontSize - 4;
@@ -393,8 +405,8 @@ function updatePile() {
   g.setAttribute('transform', `translate(${x}, ${y})`);
 
   let html = '';
-  html = buildPyramid(html, brown, spreadX, spreadY, '🍂', 14, '0.80', -2, 0);
-  html = buildPyramid(html, green, spreadX, spreadY, '🍃', 12, '0.60', 2, -2);
+  html = buildPyramid(html, brown, spreadX, spreadY, SVG.leaf, 14, '0.80', -2, 0);
+  html = buildPyramid(html, green, spreadX, spreadY, SVG.greenLeaf, 12, '0.60', 2, -2);
   g.innerHTML = html;
 }
 
@@ -464,22 +476,23 @@ function setTimeOfDay(tod) {
     noche:     { left: nocL, top: nocT },
   };
   const pos = positions[tod] || {left: diaL, top: diaT};
-  const icon = tod === 'noche' ? '🌙' : '☀️';
+  const icon = tod === 'noche' ? SVG.moon : SVG.sun;
   const size = tod === 'noche' ? '28px' : '30px';
 
   const div = document.createElement('div');
   div.className = 'absolute z-10 ' + (tod === 'noche' ? 'moon-glow' : 'sun-spin');
-  div.style.cssText = `left:${pos.left}%; top:${pos.top}%; font-size:${size}; line-height:1; transition:left 1s ease,top 1s ease;`;
-  const span = document.createElement('span');
-  span.textContent = icon;
-  div.appendChild(span);
+  div.style.cssText = `left:${pos.left}%; top:${pos.top}%; width:${size}; height:${size}; transition:left 1s ease,top 1s ease;`;
+  const img = document.createElement('img');
+  img.src = icon;
+  img.className = 'w-full h-full';
+  div.appendChild(img);
 
   if (tod === 'noche') {
-    [{c:'text-xs',s:'top:-10px;left:-12px',d:'0s'},{c:'text-[10px]',s:'top:-6px;right:-14px',d:'0.8s'},{c:'text-[8px]',s:'bottom:-12px;left:8px',d:'1.4s'}].forEach(s => {
-      const star = document.createElement('span');
-      star.className = `absolute ${s.c} star-twinkle`;
-      star.style.cssText = `animation-delay:${s.d};${s.s}`;
-      star.textContent = '✨';
+    [{c:'w-3 h-3',s:'top:-10px;left:-12px',d:'0s'},{c:'w-2.5 h-2.5',s:'top:-6px;right:-14px',d:'0.8s'},{c:'w-2 h-2',s:'bottom:-12px;left:8px',d:'1.4s'}].forEach(st => {
+      const star = document.createElement('img');
+      star.src = SVG.stars;
+      star.className = `absolute ${st.c} star-twinkle`;
+      star.style.cssText = `animation-delay:${st.d};${st.s}`;
       div.appendChild(star);
     });
   }
@@ -504,41 +517,41 @@ function setWeather(w) {
   const rt = parseInt(document.getElementById('rain-t').value);
   const cg = parseInt(document.getElementById('cloud-gap').value);
 
-  const icons = {despejado:'☀️',soleado:'☀️',nublado:'⛅',lluvioso:'🌧️',tormenta:'🌩️'};
+  const icons = {despejado: SVG.sun, soleado: SVG.sun, nublado: SVG.cloud, lluvioso: SVG.rain, tormenta: SVG.lightning};
 
   if (w === 'nublado') {
     const d = document.createElement('div'); d.className='absolute z-10'; d.setAttribute('data-weather','1');
     d.style.cssText = `left:${sl+cl}%; top:${st+ct}%;`;
-    d.innerHTML='<span style="font-size:38px;opacity:0.55">☁️</span><span style="font-size:26px;opacity:0.4;position:relative;left:'+cg+'px">☁️</span>';
+    d.innerHTML=`<img src="${SVG.cloud}" class="w-10 h-10 opacity-55" alt=""><img src="${SVG.cloud}" class="w-7 h-7 opacity-40 relative" style="left:${cg}px" alt="">`;
     colony.appendChild(d);
   } else if (w === 'lluvioso') {
     const d = document.createElement('div'); d.className='absolute z-10'; d.setAttribute('data-weather','1');
     d.style.cssText = `left:${sl+cl}%; top:${st+ct}%;`;
-    d.innerHTML='<span style="font-size:42px;opacity:0.6">☁️</span><span style="font-size:28px;opacity:0.45;position:relative;left:'+cg+'px">☁️</span>';
+    d.innerHTML=`<img src="${SVG.cloud}" class="w-11 h-11 opacity-60" alt=""><img src="${SVG.cloud}" class="w-7 h-7 opacity-45 relative" style="left:${cg}px" alt="">`;
     colony.appendChild(d);
     const r = document.createElement('div'); r.className='absolute z-10 flex gap-2'; r.setAttribute('data-weather','1');
     r.style.cssText = `left:${sl+rl}%; top:${st+rt}%;`;
-    r.innerHTML='<span class="rain-drop text-[13px] opacity-55">💧</span>'.repeat(4);
+    r.innerHTML=`<img src="${SVG.rain}" class="rain-drop w-3.5 h-3.5 opacity-55" alt="">`.repeat(4);
     colony.appendChild(r);
   } else if (w === 'tormenta') {
     const d = document.createElement('div'); d.className='absolute z-10'; d.setAttribute('data-weather','1');
     d.style.cssText = `left:${sl+cl}%; top:${st+ct}%;`;
-    d.innerHTML='<span style="font-size:46px;opacity:0.7">☁️</span><span style="font-size:32px;opacity:0.5;position:relative;left:'+cg+'px">☁️</span>';
+    d.innerHTML=`<img src="${SVG.cloud}" class="w-12 h-12 opacity-70" alt=""><img src="${SVG.cloud}" class="w-8 h-8 opacity-50 relative" style="left:${cg}px" alt="">`;
     colony.appendChild(d);
     const r = document.createElement('div'); r.className='absolute z-10 flex gap-2'; r.setAttribute('data-weather','1');
     r.style.cssText = `left:${sl+rl}%; top:${st+rt}%;`;
-    r.innerHTML='<span class="rain-drop text-[13px] opacity-5">💧</span>'.repeat(4);
+    r.innerHTML=`<img src="${SVG.rain}" class="rain-drop w-3.5 h-3.5 opacity-50" alt="">`.repeat(4);
     colony.appendChild(r);
     const b = document.createElement('div'); b.className='absolute z-10'; b.setAttribute('data-weather','1');
     b.style.cssText = `left:${sl+4}%; top:${st+8}%; animation:star-twinkle 0.8s ease-in-out infinite`;
-    b.innerHTML='<span class="text-base">⚡</span>';
+    b.innerHTML=`<img src="${SVG.lightning}" class="w-4 h-4" alt="">`;
     colony.appendChild(b);
   }
 
   colony.querySelectorAll('.rounded-full.bg-earth-200\\/80').forEach(b => {
     const t = b.textContent;
     if (t.includes('soleado')||t.includes('nublado')||t.includes('lluvioso')||t.includes('tormenta')||t.includes('despejado')) {
-      b.innerHTML = (icons[w]||'☀️') + ' ' + w;
+      b.innerHTML = `<img src="${icons[w]||SVG.sun}" class="inline-block w-3.5 h-3.5" alt=""> ${w}`;
     }
   });
 
@@ -552,17 +565,17 @@ function setWeather(w) {
 function exportarPosiciones() {
   const g = (id) => document.getElementById(id);
   const lines = [
-    '=== 🕐 Hora del día ===',
+    '=== Hora del día ===',
     `amanecer:  left:${g('sun-am-l').value}% top:${g('sun-am-t').value}%`,
     `dia:       left:50% top:8%`,
     `atardecer: left:${g('sun-pm-l').value}% top:${g('sun-pm-t').value}%`,
     `noche:     moon follows atardecer path`,
     '',
-    '=== 🌤️ Clima ===',
+    '=== Clima ===',
     `cloud: offset L:${g('cloud-l').value} T:${g('cloud-t').value} gap:${g('cloud-gap').value}px`,
     `rain:  offset L:${g('rain-l').value} T:${g('rain-t').value}`,
     '',
-    '=== 🍂 Hojas ===',
+    '=== Hojas ===',
     `pile: translate(${g('pile-x').value}, ${g('pile-y').value})`,
     `brown: ${g('pile-count').value}  green: ${g('pile-green').value}`,
     `spread: X:${g('pile-spread-x').value}px Y:${g('pile-spread-y').value}px`,
@@ -570,7 +583,7 @@ function exportarPosiciones() {
   navigator.clipboard.writeText(lines).then(() => {
     const btn = document.querySelector('[onclick*="exportarPosiciones"]');
     const orig = btn.textContent;
-    btn.textContent = '✅ Copiado!';
+    btn.textContent = 'Copiado!';
     setTimeout(() => btn.textContent = orig, 1500);
   });
 }
@@ -590,12 +603,12 @@ function updateCSS() {
 }
 
 function copyCSS() {
-  navigator.clipboard.writeText(document.getElementById('css-output').textContent).then(() => alert('✅ CSS copiado'));
+  navigator.clipboard.writeText(document.getElementById('css-output').textContent).then(() => alert('CSS copiado'));
 }
 function copyPileSVG() {
   const x = document.getElementById('pile-x').value;
   const y = document.getElementById('pile-y').value;
-  navigator.clipboard.writeText(`<g id="leaf-pile-group" transform="translate(${x}, ${y})">`).then(() => alert('✅ SVG copiado'));
+  navigator.clipboard.writeText(`<g id="leaf-pile-group" transform="translate(${x}, ${y})">`).then(() => alert('SVG copiado'));
 }
 
 // ===== START =====

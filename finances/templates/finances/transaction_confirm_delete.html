@@ -17,7 +17,7 @@
         {% if transaction.type == 'INCOME' %}+{% else %}-{% endif %}
         {{ transaction.currency.symbol }}{{ transaction.amount|floatformat:2 }}
       </p>
-      <p class="mt-1 text-sm text-earth-600 dark:text-earth-400">{{ transaction.category.icon }} {{ transaction.category.name }}</p>
+      <p class="mt-1 text-sm text-earth-600 dark:text-earth-400"><i data-lucide="{{ transaction.category.icon }}" class="lucide-sm"></i> {{ transaction.category.name }}</p>
       {% if transaction.note %}
       <p class="mt-1 text-xs text-earth-500">"{{ transaction.note }}"</p>
       {% endif %}

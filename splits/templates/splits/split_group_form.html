@@ -8,7 +8,7 @@
     <form method="post" class="space-y-5">
       {% csrf_token %}
       <div class="flex items-center gap-4">
-        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-earth-100 text-2xl dark:bg-earth-800">👥</span>
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-earth-100 text-2xl dark:bg-earth-800"><i data-lucide="users" class="lucide-lg"></i></span>
         <div>
           <h3 class="font-semibold text-earth-900 dark:text-earth-100">
             {% if group %}Editando: {{ group.name }}{% else %}Nuevo grupo{% endif %}
@@ -30,7 +30,7 @@
         {% if form.members_list.help_text %}<p class="mt-1 text-xs text-earth-400">{{ form.members_list.help_text }}</p>{% endif %}
         {% if form.members_list.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.members_list.errors.0 }}</p>{% endif %}
         {% if group %}
-        <p class="mt-2 text-xs text-gold-600 dark:text-gold-400">⚠️ Al cambiar los miembros, los gastos existentes se recalcularán en partes iguales entre los nuevos miembros.</p>
+        <p class="mt-2 text-xs text-gold-600 dark:text-gold-400"><i data-lucide="alert-triangle" class="lucide-sm"></i> Al cambiar los miembros, los gastos existentes se recalcularan</p>
         {% endif %}
       </div>
 

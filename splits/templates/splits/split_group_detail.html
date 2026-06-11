@@ -6,7 +6,7 @@
 <div class="space-y-6">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex items-center gap-3">
-      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-earth-100 text-lg dark:bg-earth-800">👥</span>
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-earth-100 text-lg dark:bg-earth-800"><i data-lucide="users" class="lucide"></i></span>
       <div>
         <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ group.members|join:", " }}</h3>
         <p class="text-xs text-earth-500 dark:text-earth-400">{{ group.expenses.count }} gastos · ${{ group.total_spent|floatformat:2 }}</p>

@@ -1,8 +1,14 @@
 from django import template
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from ants.utils import get_colony_state
 
 register = template.Library()
+STATIC = settings.STATIC_URL
+
+
+def _img(icon, css_class='inline-block h-4 w-4'):
+    return f'<img src="{STATIC}icons/colony/{icon}" class="{css_class}" alt="">'
 
 
 @register.inclusion_tag('ants/colony.html')
@@ -13,16 +19,17 @@ def ant_colony():
 @register.simple_tag
 def weather_icon(weather):
     icons = {
-        'despejado': '☀️', 'soleado': '☀️', 'nublado': '⛅',
-        'lluvioso': '🌧️', 'tormenta': '🌩️',
+        'despejado': 'sun.svg', 'soleado': 'sun.svg', 'nublado': 'cloud.svg',
+        'lluvioso': 'raining.svg', 'tormenta': 'lightning.svg',
     }
-    return icons.get(weather, '☀️')
+    return mark_safe(_img(icons.get(weather, 'sun.svg')))
 
 
 @register.simple_tag
 def queen_label(size):
-    labels = {'tiny': '🐛', 'small': '🪱', 'medium': '🐜', 'large': '👑'}
-    return labels.get(size, '')
+    labels = {'tiny': 'bug.svg', 'small': 'ant.svg', 'medium': 'ant.svg', 'large': 'crown.svg'}
+    icon = labels.get(size, '')
+    return mark_safe(_img(icon, 'inline-block h-5 w-5')) if icon else ''
 
 
 @register.filter
@@ -48,8 +55,8 @@ def range_to(end):
 
 @register.simple_tag
 def time_of_day_icon(tod):
-    icons = {'amanecer': '☀️', 'dia': '☀️', 'atardecer': '☀️', 'noche': '🌙'}
-    return icons.get(tod, '☀️')
+    icons = {'amanecer': 'sun.svg', 'dia': 'sun.svg', 'atardecer': 'sun.svg', 'noche': 'moon.svg'}
+    return mark_safe(_img(icons.get(tod, 'sun.svg'), 'inline-block h-5 w-5'))
 
 
 @register.simple_tag
@@ -69,7 +76,7 @@ def render_leaf_pile(brown, green, spread_x, spread_y):
     for n, xs, y, rots in rows:
         taken = min(n, c)
         for j in range(taken):
-            html += f'<text x="{xs[j]}" y="{y}" font-size="14" opacity="0.80" transform="rotate({rots[j]}, {xs[j]}, {y})">🍂</text>'
+            html += f'<image href="{STATIC}icons/colony/brown-leaf.svg" x="{xs[j]-7}" y="{y-7}" width="14" height="14" opacity="0.80" transform="rotate({rots[j]}, {xs[j]}, {y})" />'
         c -= taken
         if c <= 0:
             break
@@ -82,7 +89,7 @@ def render_leaf_pile(brown, green, spread_x, spread_y):
     for n, xs, y, rots in rows_g:
         taken = min(n, c)
         for j in range(taken):
-            html += f'<text x="{xs[j]}" y="{y}" font-size="12" opacity="0.60" transform="rotate({rots[j]}, {xs[j]}, {y})">🍃</text>'
+            html += f'<image href="{STATIC}icons/colony/green-leaf.svg" x="{xs[j]-6}" y="{y-6}" width="12" height="12" opacity="0.60" transform="rotate({rots[j]}, {xs[j]}, {y})" />'
         c -= taken
         if c <= 0:
             break

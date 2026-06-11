@@ -68,41 +68,41 @@
 
   </svg>
 
-  <!-- ===== CELESTIAL BODY (emoji, time-based, positioned) ===== -->
+  <!-- ===== CELESTIAL BODY (SVG, time-based, positioned) ===== -->
   <div class="absolute z-10 {% if tod == 'noche' %}moon-glow{% else %}sun-spin{% endif %}"
-       style="left:{{ sun_left }}%; top:{{ sun_top }}%; font-size: {% if tod == 'noche' %}32px{% else %}38px{% endif %}; line-height:1; transition: left 1s ease, top 1s ease;">
-    <span>{{ tod_icon }}</span>
+       style="left:{{ sun_left }}%; top:{{ sun_top }}%; width: {% if tod == 'noche' %}32px{% else %}38px{% endif %}; height: {% if tod == 'noche' %}32px{% else %}38px{% endif %}; transition: left 1s ease, top 1s ease;">
+    <img src="{% static 'icons/colony/' %}{{ tod_icon }}" class="w-full h-full" alt="">
     {% if tod == 'noche' %}
-    <span class="absolute text-xs star-twinkle" style="top:-10px; left:-12px;">✨</span>
-    <span class="absolute text-[10px] star-twinkle" style="top:-6px; right:-14px; animation-delay:0.8s;">✨</span>
-    <span class="absolute text-[8px] star-twinkle" style="bottom:-12px; left:8px; animation-delay:1.4s;">✨</span>
+    <img src="{% static 'icons/colony/stars.svg' %}" class="absolute w-3 h-3 star-twinkle" style="top:-10px; left:-12px;" alt="">
+    <img src="{% static 'icons/colony/stars.svg' %}" class="absolute w-2.5 h-2.5 star-twinkle" style="top:-6px; right:-14px; animation-delay:0.8s;" alt="">
+    <img src="{% static 'icons/colony/stars.svg' %}" class="absolute w-2 h-2 star-twinkle" style="bottom:-12px; left:8px; animation-delay:1.4s;" alt="">
     {% endif %}
   </div>
 
   <!-- ===== WEATHER EFFECTS ===== -->
   {% if weather == 'nublado' %}
   <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
-    <span style="font-size:38px; opacity:0.55;">☁️</span>
-    <span style="font-size:26px; opacity:0.4; position:relative; left:4px;">☁️</span>
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-10 h-10 opacity-55" alt="">
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-7 h-7 opacity-40 relative" style="left:4px;" alt="">
   </div>
   {% elif weather == 'lluvioso' %}
   <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
-    <span style="font-size:42px; opacity:0.6;">☁️</span>
-    <span style="font-size:28px; opacity:0.45; position:relative; left:4px;">☁️</span>
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-11 h-11 opacity-60" alt="">
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-7 h-7 opacity-45 relative" style="left:4px;" alt="">
   </div>
   <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
-    {% for x in '1234' %}<span class="rain-drop text-[13px] opacity-55">💧</span>{% endfor %}
+    {% for x in '1234' %}<img src="{% static 'icons/colony/raining.svg' %}" class="rain-drop w-3.5 h-3.5 opacity-55" alt="">{% endfor %}
   </div>
   {% elif weather == 'tormenta' %}
   <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
-    <span style="font-size:46px; opacity:0.7;">☁️</span>
-    <span style="font-size:32px; opacity:0.5; position:relative; left:4px;">☁️</span>
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-12 h-12 opacity-70" alt="">
+    <img src="{% static 'icons/colony/cloud.svg' %}" class="w-8 h-8 opacity-50 relative" style="left:4px;" alt="">
   </div>
   <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
-    {% for x in '1234' %}<span class="rain-drop text-[13px] opacity-5">💧</span>{% endfor %}
+    {% for x in '1234' %}<img src="{% static 'icons/colony/raining.svg' %}" class="rain-drop w-3.5 h-3.5 opacity-50" alt="">{% endfor %}
   </div>
   <div class="absolute z-10" style="left:{{ sun_left|add:'4' }}%; top:{{ sun_top|add:'8' }}%; animation:star-twinkle 0.8s ease-in-out infinite;">
-    <span class="text-base">⚡</span>
+    <img src="{% static 'icons/colony/lightning.svg' %}" class="w-4 h-4" alt="">
   </div>
   {% endif %}
 
@@ -110,12 +110,12 @@
   <div class="absolute right-2 top-2 z-30 group">
     <span class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-earth-200 text-[10px] font-bold text-earth-500 transition-colors hover:bg-clay-200 hover:text-clay-600 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-clay-800 dark:hover:text-clay-300">i</span>
     <div class="pointer-events-none absolute right-0 top-7 z-40 w-52 rounded-lg border border-earth-200 bg-white/95 p-3 text-[10px] leading-relaxed text-earth-600 shadow-lg opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:pointer-events-auto dark:border-earth-700 dark:bg-earth-900/95 dark:text-earth-300">
-      <p class="font-semibold mb-1">🌤️ Clima = salud financiera</p>
-      <p>☀️ soleado → ingresos &gt; gastos × 1.5</p>
-      <p>⛅ nublado → ingresos ≥ gastos</p>
-      <p>🌧️ lluvioso → gastos &gt; 50% ingresos</p>
-      <p>🌩️ tormenta → gastos descontrolados</p>
-      <p class="mt-1.5 pt-1.5 border-t border-earth-200 dark:border-earth-700">🌅☀️🌙 ciclo día/noche = hora real</p>
+      <p class="font-semibold mb-1"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-4 h-4" alt=""> Clima = salud financiera</p>
+      <p><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> soleado → ingresos &gt; gastos × 1.5</p>
+      <p><img src="{% static 'icons/colony/cloud.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> nublado → ingresos ≥ gastos</p>
+      <p><img src="{% static 'icons/colony/raining.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> lluvioso → gastos &gt; 50% ingresos</p>
+      <p><img src="{% static 'icons/colony/lightning.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> tormenta → gastos descontrolados</p>
+      <p class="mt-1.5 pt-1.5 border-t border-earth-200 dark:border-earth-700"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-3 h-3" alt=""><img src="{% static 'icons/colony/moon.svg' %}" class="inline-block w-3 h-3" alt=""> ciclo día/noche = hora real</p>
     </div>
   </div>
 
@@ -124,21 +124,21 @@
     <div class="queen-wiggle" style="color:{{ goal_color|default:'#C4943A' }}">
       <div class="relative">
         {% if queen_size == 'large' %}
-        <span class="text-5xl leading-none">🐜</span>
-        <span class="absolute -top-3 -right-3 text-xl">👑</span>
+        <img src="{% static 'icons/colony/ant.svg' %}" class="w-12 h-12" alt="">
+        <img src="{% static 'icons/colony/crown.svg' %}" class="absolute -top-3 -right-3 w-5 h-5" alt="">
         {% elif queen_size == 'medium' %}
-        <span class="text-4xl leading-none">🐜</span>
-        <span class="absolute -top-2 -right-2 text-lg">👑</span>
+        <img src="{% static 'icons/colony/ant.svg' %}" class="w-10 h-10" alt="">
+        <img src="{% static 'icons/colony/crown.svg' %}" class="absolute -top-2 -right-2 w-4 h-4" alt="">
         {% elif queen_size == 'small' %}
-        <span class="text-3xl leading-none">🐜</span>
-        <span class="absolute -top-1 -right-1 text-base">👑</span>
+        <img src="{% static 'icons/colony/ant.svg' %}" class="w-8 h-8" alt="">
+        <img src="{% static 'icons/colony/crown.svg' %}" class="absolute -top-1 -right-1 w-3.5 h-3.5" alt="">
         {% else %}
-        <span class="text-2xl leading-none opacity-60">🐛</span>
+        <img src="{% static 'icons/colony/bug.svg' %}" class="w-6 h-6 opacity-60" alt="">
         {% endif %}
       </div>
     </div>
     <div class="mt-1 rounded-full bg-earth-900/80 px-2.5 py-0.5 text-[10px] font-medium text-earth-100 backdrop-blur-sm dark:bg-earth-100/80 dark:text-earth-900">
-      {% if active_goals > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin meta 👑{% endif %}
+      {% if active_goals > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin meta{% endif %}
     </div>
   </div>
 
@@ -148,10 +148,12 @@
        style="--speed: {{ ant_speed }}s; --delay: {{ i|mul:3.5|stringformat:'.1f' }}s;">
     <div class="ant-body" style="animation: ant-wave-{{ i|mod:3|add:1 }} {{ i|mod:3|add:3 }}s ease-in-out infinite; animation-delay:{{ i|mul:0.5|stringformat:'.1f' }}s;">
       <div class="relative flex flex-col items-center">
-        <div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 text-xs leading-none drop-shadow"
-             style="                    animation: leaf-bounce 2.5s ease-in-out infinite, leaf-fade-peak {{ ant_speed }}s ease-in infinite;
-                    animation-delay: 0s, {{ i|mul:3.5|stringformat:'.1f' }}s;">🍂</div>
-        <span class="text-2xl leading-none" style="transform: scaleX(-1); display:inline-block;">🐜</span>
+        <div class="ant-leaf absolute -top-4 left-1/2 -translate-x-1/2 leading-none drop-shadow"
+             style="animation: leaf-bounce 2.5s ease-in-out infinite, leaf-fade-peak {{ ant_speed }}s ease-in infinite;
+                    animation-delay: 0s, {{ i|mul:3.5|stringformat:'.1f' }}s;">
+          <img src="{% static 'icons/colony/brown-leaf.svg' %}" class="w-3 h-3" alt="">
+        </div>
+        <img src="{% static 'icons/colony/ant.svg' %}" class="w-6 h-6" style="transform: scaleX(-1);" alt="">
       </div>
     </div>
   </div>
@@ -162,12 +164,12 @@
               animation: leaf-drop {{ ant_speed }}s ease-in-out infinite;
               animation-delay: {{ i|mul:3.5|stringformat:'.1f' }}s;
               z-index: 8;">
-    <span class="text-base leading-none drop-shadow-md">🍂</span>
+    <img src="{% static 'icons/colony/falling-leaf.svg' %}" class="w-4 h-4 drop-shadow-md" alt="">
   </div>
 
   {% empty %}
   <div class="absolute flex flex-col items-center opacity-30" style="left:50%; top:50%; transform:translate(-50%,-50%);">
-    <span class="text-3xl">🐜</span>
+    <img src="{% static 'icons/colony/ant.svg' %}" class="w-8 h-8" alt="">
   </div>
   {% endfor %}
 
@@ -179,8 +181,7 @@
               animation:{% if i|divisibleby:2 %}soldier-march{% else %}soldier-march-left{% endif %} 1.2s ease-in-out infinite;
               animation-delay:{{ i }}s">
     <div class="relative">
-      <span class="absolute -top-1 -left-1 text-[10px]">🛡️</span>
-      <span class="text-xl leading-none" style="filter: hue-rotate(-20deg) saturate(3);">🐜</span>
+      <img src="{% static 'icons/colony/ant.svg' %}" class="w-5 h-5" style="filter: hue-rotate(-20deg) saturate(3);" alt="">
     </div>
   </div>
   {% endfor %}
@@ -189,14 +190,14 @@
   <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
     <div class="flex items-center gap-2">
       <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs font-medium text-earth-700 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-300">
-        {% if worker_ants > 0 %}🐜 {{ worker_ants }} obreras{% else %}Colonia vacía{% endif %}
+        {% if worker_ants > 0 %}<img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> {{ worker_ants }} obreras{% else %}Colonia vacía{% endif %}
       </span>
       <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs text-earth-600 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-400">
         {% weather_icon weather %} {{ weather }}
       </span>
       {% if soldier_ants > 0 %}
       <span class="rounded-full bg-clay-100 px-2.5 py-1 text-xs font-medium text-clay-700 backdrop-blur-sm dark:bg-clay-900/60 dark:text-clay-300">
-        🛡️ {{ soldier_ants }} alertas
+        {{ soldier_ants }} alertas
       </span>
       {% endif %}
     </div>
@@ -210,7 +211,7 @@
       {% if active_goals > 0 %}
       {% queen_label queen_size %} {{ goal_name }} — {{ queen_progress }}%
       {% else %}
-      🐜 Creá una meta de ahorro para que la reina crezca
+      <img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> Creá una meta de ahorro para que la reina crezca
       {% endif %}
     </div>
   </div>

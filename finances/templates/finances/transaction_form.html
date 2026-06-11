@@ -7,26 +7,10 @@
 <div class="mx-auto max-w-2xl">
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <form method="post" enctype="multipart/form-data" class="space-y-5" id="transactionForm"
-          x-data="{
-            type: '{{ form.initial.type|default:'EXPENSE' }}',
-            tagIds: {{ tag_ids|default:'[]' }},
-            customTags: {{ custom_tags|default:'[]' }},
-            tagInput: '',
-            addTag() {
-              const val = this.tagInput.trim();
-              if (!val) return;
-              if (this.customTags.includes(val)) return;
-              this.customTags.push(val);
-              this.tagInput = '';
-            },
-            removeTag(i) { this.customTags.splice(i, 1) },
-            removeTagId(id) { this.tagIds = this.tagIds.filter(t => t !== id) },
-            selectTag(id) {
-              if (!this.tagIds.includes(id)) this.tagIds.push(id);
-              this.tagInput = '';
-              document.getElementById('tag-suggestions').innerHTML = '';
-            }
-          }">
+          x-data="transactionForm()"
+          data-initial-type="{{ form.initial.type|default:'EXPENSE' }}"
+          data-tag-ids="{{ tag_ids|default:'[]' }}"
+          data-custom-tags="{{ custom_tags|default:'[]' }}">
 
       {% csrf_token %}
 
@@ -38,6 +22,7 @@
         <legend class="mb-2 text-sm font-medium text-earth-700 dark:text-earth-300">Tipo</legend>
         <div class="flex gap-3">
           {% for radio in form.type %}
+          {% if radio.data.value %}
           <label class="relative flex-1 cursor-pointer">
             {{ radio.tag }}
             <div class="flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all
@@ -51,9 +36,16 @@
                         {% endif %}
                         border-earth-200 bg-white text-earth-600 hover:bg-earth-50
                         dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700">
-              <span>{{ radio.choice_label }}</span>
+              {% if radio.data.value == 'INCOME' %}
+              <i data-lucide="trending-up" class="lucide text-sage-500"></i>
+              <span>Ingreso</span>
+              {% else %}
+              <i data-lucide="trending-down" class="lucide text-clay-500"></i>
+              <span>Gasto</span>
+              {% endif %}
             </div>
           </label>
+          {% endif %}
           {% endfor %}
         </div>
       </fieldset>
@@ -70,9 +62,32 @@
         </div>
       </div>
 
-      <div id="category-field">
+      <div id="category-field" x-data="categoryDropdown()"
+           data-initial-category="{{ form.initial.category|default:'' }}"
+           data-initial-category-name="{{ form.initial.category.name|default:'Seleccionar categoría' }}"
+           data-initial-category-icon="{{ form.initial.category.icon|default:'' }}">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría</label>
-        {{ form.category }}
+        <div class="relative">
+          <button type="button" @click="toggle()" @click.outside="open = false"
+                  class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+            <template x-if="selectedIcon">
+              <i :data-lucide="selectedIcon" class="lucide-sm"></i>
+            </template>
+            <span x-text="selectedName" class="flex-1 text-left"></span>
+            <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
+          </button>
+          <div x-show="open" x-transition
+               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
+            <template x-for="cat in categories" :key="cat.id">
+              <button type="button" @click="select(cat)"
+                      class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
+                <i :data-lucide="cat.icon" class="lucide-sm"></i>
+                <span x-text="cat.name"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+        <input type="hidden" name="category" id="id_category" value="{{ form.initial.category|default:'' }}" required>
         {% if form.category.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.category.errors.0 }}</p>{% endif %}
       </div>
 
@@ -149,8 +164,99 @@
 
 {% block extra_scripts %}
 <script>
+function transactionForm() {
+  const el = document.getElementById('transactionForm');
+  return {
+    type: el?.dataset.initialType || 'EXPENSE',
+    tagIds: JSON.parse(el?.dataset.tagIds || '[]'),
+    customTags: JSON.parse(el?.dataset.customTags || '[]'),
+    tagInput: '',
+    addTag() {
+      const val = this.tagInput.trim();
+      if (!val) return;
+      if (this.customTags.includes(val)) return;
+      this.customTags.push(val);
+      this.tagInput = '';
+    },
+    removeTag(i) { this.customTags.splice(i, 1) },
+    removeTagId(id) { this.tagIds = this.tagIds.filter(t => t !== id) },
+    selectTag(id) {
+      if (!this.tagIds.includes(id)) this.tagIds.push(id);
+      this.tagInput = '';
+      document.getElementById('tag-suggestions').innerHTML = '';
+    },
+    init() {
+      document.querySelectorAll('input[name="type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const catField = document.querySelector('#category-field');
+          if (catField) {
+            const catData = Alpine.$data(catField);
+            if (catData) catData.loadCategories();
+          }
+        });
+      });
+    }
+  };
+}
+
+function categoryDropdown() {
+  const el = document.getElementById('category-field');
+  return {
+    open: false,
+    selectedId: el?.dataset.initialCategory || '',
+    selectedName: el?.dataset.initialCategoryName || 'Seleccionar categoría',
+    selectedIcon: el?.dataset.initialCategoryIcon || '',
+    categories: [],
+    init() {
+      this.loadCategories();
+    },
+    loadCategories() {
+      const type = document.querySelector('input[name="type"]:checked')?.value || 'EXPENSE';
+      fetch(`/transactions/category-options/?type=${type}`)
+        .then(r => r.text())
+        .then(html => {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const options = temp.querySelectorAll('option');
+          this.categories = Array.from(options).map(opt => ({
+            id: opt.value,
+            name: opt.textContent.trim(),
+            icon: opt.dataset.icon || ''
+          })).filter(c => c.id);
+          if (this.selectedId && !this.categories.find(c => c.id === this.selectedId)) {
+            this.selectedId = '';
+            this.selectedName = 'Seleccionar categoría';
+            this.selectedIcon = '';
+          }
+          // Renderizar íconos Lucide después de actualizar el DOM
+          this.$nextTick(() => {
+            if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
+            }
+          });
+        });
+    },
+    select(cat) {
+      this.selectedId = cat.id;
+      this.selectedName = cat.name;
+      this.selectedIcon = cat.icon;
+      this.open = false;
+      document.getElementById('id_category').value = cat.id;
+      // Renderizar ícono Lucide en el botón
+      this.$nextTick(() => {
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      });
+    },
+    toggle() {
+      this.open = !this.open;
+    }
+  };
+}
+
 document.getElementById('transactionForm')?.addEventListener('submit', function() {
-  const data = Alpine.$data(document.querySelector('[x-data]'));
+  const data = Alpine.$data(document.querySelector('[x-data="transactionForm()"]'));
   document.getElementById('id_tag_names').value = data.tagIds.join(',');
   document.getElementById('id_new_tags').value = data.customTags.join(',');
 });
@@ -159,10 +265,21 @@ document.addEventListener('htmx:afterSwap', function(evt) {
   if (evt.detail.target && evt.detail.target.id === 'tag-suggestions') {
     document.querySelectorAll('.tag-option').forEach(function(el) {
       el.addEventListener('click', function() {
-        const data = Alpine.$data(document.querySelector('[x-data]'));
+        const data = Alpine.$data(document.querySelector('[x-data="transactionForm()"]'));
         data.selectTag(parseInt(this.dataset.tagId));
       });
     });
+  }
+  if (evt.detail.target && evt.detail.target.id === 'category-field') {
+    const catData = Alpine.$data(document.querySelector('#category-field'));
+    if (catData) catData.loadCategories();
+  }
+});
+
+document.addEventListener('htmx:afterSettle', function(evt) {
+  if (evt.detail.target && evt.detail.target.id === 'category-field') {
+    const catData = Alpine.$data(document.querySelector('#category-field'));
+    if (catData) catData.loadCategories();
   }
 });
 </script>

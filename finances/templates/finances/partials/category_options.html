@@ -2,8 +2,8 @@
         class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
   <option value="">Seleccionar categoría</option>
   {% for cat in categories %}
-  <option value="{{ cat.id }}" {% if selected|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>
-    {{ cat.icon }} {{ cat.name }}
+  <option value="{{ cat.id }}" data-icon="{{ cat.icon }}" {% if selected|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>
+    {{ cat.name }}
   </option>
   {% endfor %}
 </select>

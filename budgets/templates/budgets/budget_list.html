@@ -34,7 +34,7 @@
               {% if b.status == 'danger' %}bg-clay-100 dark:bg-clay-900/50
               {% elif b.status == 'warning' %}bg-gold-100 dark:bg-gold-900/50
               {% else %}bg-sage-100 dark:bg-sage-900/50{% endif %}">
-              {{ b.category.icon }}
+              <i data-lucide="{{ b.category.icon }}" class="lucide-sm"></i>
             </span>
             <div>
               <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ b.category.name }}</h3>
@@ -57,9 +57,9 @@
             style="width: {{ pct }}%"></div>
         </div>
         {% if b.status == 'warning' %}
-        <p class="mt-2 text-xs text-gold-600 dark:text-gold-400">⚠️ Estás por llegar al límite ({{ 80|add:"0" }}%)</p>
+        <p class="mt-2 text-xs text-gold-600 dark:text-gold-400"><i data-lucide="alert-triangle" class="lucide-sm"></i> Estas por llegar al limite</p>
         {% elif b.status == 'danger' %}
-        <p class="mt-2 text-xs text-clay-600 dark:text-clay-400">🚨 ¡Presupuesto excedido!</p>
+        <p class="mt-2 text-xs text-clay-600 dark:text-clay-400"><i data-lucide="siren" class="lucide-sm inline-block"></i> ¡Presupuesto excedido!</p>
         {% endif %}
       </div>
       {% endwith %}
