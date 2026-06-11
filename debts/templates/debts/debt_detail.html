@@ -7,11 +7,12 @@
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <span class="flex h-14 w-14 items-center justify-center rounded-xl text-2xl {% if debt.debt_type == 'OWE' %}bg-clay-100 dark:bg-clay-900/50{% else %}bg-sage-100 dark:bg-sage-900/50{% endif %}">💳</span>
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl text-2xl {% if debt.debt_type == 'OWE' %}bg-clay-100 dark:bg-clay-900/50{% else %}bg-sage-100 dark:bg-sage-900/50{% endif %}"><i data-lucide="credit-card" class="lucide-lg"></i></span>
         <div>
           <h3 class="text-xl font-bold text-earth-900 dark:text-earth-100">{{ debt.person }}</h3>
           <p class="text-sm text-earth-500 dark:text-earth-400">
             {{ debt.date|date:"d/m/Y" }}
+            {% if debt.deadline %} · Vence {{ debt.deadline|date:"d/m/Y" }}{% if debt.time_until_deadline %} · {{ debt.time_until_deadline }}{% endif %}{% endif %}
             {% if debt.interest_rate %} · {{ debt.interest_rate }}% interés{% endif %}
             {% if debt.note %} · {{ debt.note }}{% endif %}
           </p>

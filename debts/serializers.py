@@ -14,14 +14,15 @@ class DebtSerializer(serializers.ModelSerializer):
     paid_total = serializers.SerializerMethodField()
     remaining = serializers.SerializerMethodField()
     progress_pct = serializers.IntegerField(read_only=True)
+    time_until_deadline = serializers.SerializerMethodField()
 
     class Meta:
         model = Debt
         fields = [
             'id', 'person', 'amount', 'currency', 'debt_type',
-            'date', 'interest_rate', 'note', 'is_settled',
+            'date', 'deadline', 'interest_rate', 'note', 'is_settled',
             'payments', 'paid_total', 'remaining', 'progress_pct',
-            'created_at', 'updated_at',
+            'time_until_deadline', 'created_at', 'updated_at',
         ]
         read_only_fields = ['created_at', 'updated_at']
 
@@ -30,3 +31,6 @@ class DebtSerializer(serializers.ModelSerializer):
 
     def get_remaining(self, obj):
         return float(obj.remaining())
+
+    def get_time_until_deadline(self, obj):
+        return obj.time_until_deadline()

@@ -9,7 +9,7 @@ class DebtPaymentInline(admin.TabularInline):
 
 @admin.register(Debt)
 class DebtAdmin(admin.ModelAdmin):
-    list_display = ['person', 'amount', 'debt_type', 'currency', 'date', 'is_settled', 'remaining']
-    list_filter = ['debt_type', 'is_settled', 'date']
+    list_display = ['person', 'amount', 'debt_type', 'currency', 'date', 'deadline', 'is_settled', 'remaining', 'colony']
+    list_filter = ['debt_type', 'is_settled', 'date', 'colony']
     search_fields = ['person', 'note']
     inlines = [DebtPaymentInline]

@@ -1,11 +1,12 @@
 from django import forms
+from django.db.models import Q
 from .models import Debt, DebtPayment
 
 
 class DebtForm(forms.ModelForm):
     class Meta:
         model = Debt
-        fields = ['person', 'amount', 'currency', 'debt_type', 'date', 'interest_rate', 'note']
+        fields = ['person', 'amount', 'currency', 'debt_type', 'date', 'deadline', 'interest_rate', 'note']
         widgets = {
             'person': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
@@ -25,7 +26,11 @@ class DebtForm(forms.ModelForm):
             'date': forms.DateInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'type': 'date',
-            }),
+            }, format='%Y-%m-%d'),
+            'deadline': forms.DateInput(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
+                'type': 'date',
+            }, format='%Y-%m-%d'),
             'interest_rate': forms.NumberInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
                 'step': '0.01',
@@ -38,9 +43,14 @@ class DebtForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, colony=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['debt_type'].empty_label = None
+        self.fields['debt_type'].choices = Debt.Type.choices
+        self.fields['currency'].empty_label = None
+        if colony:
+            from finances.models import Currency
+            colony_filter = Q(colony=colony) | Q(colony__isnull=True)
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
 
 
 class DebtPaymentForm(forms.ModelForm):
@@ -56,7 +66,7 @@ class DebtPaymentForm(forms.ModelForm):
             'date': forms.DateInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'type': 'date',
-            }),
+            }, format='%Y-%m-%d'),
             'note': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
                 'placeholder': 'Nota opcional',

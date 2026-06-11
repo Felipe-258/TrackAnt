@@ -4,9 +4,16 @@
 {% block page_subtitle %}Lo que debés y te deben{% endblock %}
 
 {% block content %}
-<div class="space-y-6" x-data="{ tab: 'owe' }">
+<div class="space-y-6" x-data="{ tab: 'all' }">
   <div class="flex items-center justify-between">
     <div class="flex gap-2">
+      <button @click="tab = 'all'"
+              class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+              :class="tab === 'all' ? 'bg-earth-500 text-white' : 'bg-earth-100 text-earth-600 hover:bg-earth-200 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
+        <i data-lucide="list" class="lucide-sm inline"></i>
+        Todas
+        <span class="ml-1 rounded-full bg-white/20 px-1.5 py-0.5 text-xs">{{ debts_all|length }}</span>
+      </button>
       <button @click="tab = 'owe'"
               class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               :class="tab === 'owe' ? 'bg-clay-500 text-white' : 'bg-earth-100 text-earth-600 hover:bg-earth-200 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
@@ -30,17 +37,17 @@
   </div>
 
   <div>
-    <div x-show="tab === 'owe'" class="space-y-4">
+    <div x-show="tab === 'owe' || tab === 'all'" class="space-y-4" :class="tab === 'all' ? 'mb-6' : ''">
       <h2 class="text-sm font-semibold text-clay-700 dark:text-clay-300">Deudas que tenés que pagar</h2>
       {% if debts_owe %}
         {% for d in debts_owe %}
         <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-earth-800 dark:bg-earth-900">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-clay-100 text-lg dark:bg-clay-900/50">💳</span>
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-clay-100 text-lg dark:bg-clay-900/50"><i data-lucide="credit-card" class="lucide"></i></span>
               <div>
                 <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ d.person }}</h3>
-                <p class="text-xs text-earth-500 dark:text-earth-400">{{ d.date|date:"d/m/Y" }}{% if d.note %} · {{ d.note|truncatechars:30 }}{% endif %}</p>
+                <p class="text-xs text-earth-500 dark:text-earth-400">{{ d.date|date:"d/m/Y" }}{% if d.deadline %} · Vence {{ d.deadline|date:"d/m/Y" }}{% if d.time_until_deadline %} · {{ d.time_until_deadline }}{% endif %}{% endif %}{% if d.note %} · {{ d.note|truncatechars:30 }}{% endif %}</p>
               </div>
             </div>
             <div class="text-right">
@@ -53,31 +60,35 @@
               <div class="h-full rounded-full bg-clay-400" style="width: {{ d.progress_pct }}%"></div>
             </div>
           </div>
-          <div class="mt-3 flex justify-end gap-2">
-            <a href="{% url 'debts:debt_detail' d.pk %}" class="rounded-lg border border-earth-300 px-3 py-1 text-xs font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Ver detalle</a>
-            <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
-            <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+          <div class="mt-3 flex items-center justify-between">
+            <a href="{% url 'debts:debt_detail' d.pk %}" class="inline-flex items-center gap-1.5 rounded-lg border border-clay-200 bg-clay-50 px-3 py-1.5 text-xs font-medium text-clay-700 transition-colors hover:bg-clay-100 dark:border-clay-800 dark:bg-clay-900/30 dark:text-clay-300 dark:hover:bg-clay-900/50">
+              <i data-lucide="eye" class="lucide-sm"></i> Ver detalle
+            </a>
+            <div class="flex gap-1">
+              <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+              <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            </div>
           </div>
         </div>
         {% endfor %}
       {% else %}
       <div class="rounded-xl border border-dashed border-earth-300 bg-earth-50 px-6 py-12 text-center dark:border-earth-700 dark:bg-earth-800/50">
-        <p class="text-sm text-earth-500 dark:text-earth-400">No tenés deudas pendientes 🎉</p>
+        <p class="text-sm text-earth-500 dark:text-earth-400">No tenés deudas pendientes <i data-lucide="party-popper" class="lucide-sm inline-block"></i></p>
       </div>
       {% endif %}
     </div>
 
-    <div x-show="tab === 'owed'" class="space-y-4">
+    <div x-show="tab === 'owed' || tab === 'all'" class="space-y-4">
       <h2 class="text-sm font-semibold text-sage-700 dark:text-sage-300">Deudas que te tienen que pagar</h2>
       {% if debts_owed %}
         {% for d in debts_owed %}
         <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-earth-800 dark:bg-earth-900">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-sage-100 text-lg dark:bg-sage-900/50">💰</span>
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-sage-100 text-lg dark:bg-sage-900/50"><i data-lucide="hand-coins" class="lucide"></i></span>
               <div>
                 <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ d.person }}</h3>
-                <p class="text-xs text-earth-500 dark:text-earth-400">{{ d.date|date:"d/m/Y" }}{% if d.note %} · {{ d.note|truncatechars:30 }}{% endif %}</p>
+                <p class="text-xs text-earth-500 dark:text-earth-400">{{ d.date|date:"d/m/Y" }}{% if d.deadline %} · Vence {{ d.deadline|date:"d/m/Y" }}{% if d.time_until_deadline %} · {{ d.time_until_deadline }}{% endif %}{% endif %}{% if d.note %} · {{ d.note|truncatechars:30 }}{% endif %}</p>
               </div>
             </div>
             <div class="text-right">
@@ -90,10 +101,14 @@
               <div class="h-full rounded-full bg-sage-400" style="width: {{ d.progress_pct }}%"></div>
             </div>
           </div>
-          <div class="mt-3 flex justify-end gap-2">
-            <a href="{% url 'debts:debt_detail' d.pk %}" class="rounded-lg border border-earth-300 px-3 py-1 text-xs font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Ver detalle</a>
-            <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
-            <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+          <div class="mt-3 flex items-center justify-between">
+            <a href="{% url 'debts:debt_detail' d.pk %}" class="inline-flex items-center gap-1.5 rounded-lg border border-sage-200 bg-sage-50 px-3 py-1.5 text-xs font-medium text-sage-700 transition-colors hover:bg-sage-100 dark:border-sage-800 dark:bg-sage-900/30 dark:text-sage-300 dark:hover:bg-sage-900/50">
+              <i data-lucide="eye" class="lucide-sm"></i> Ver detalle
+            </a>
+            <div class="flex gap-1">
+              <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+              <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            </div>
           </div>
         </div>
         {% endfor %}
@@ -108,7 +123,7 @@
   {% if settled %}
   <details class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <summary class="cursor-pointer px-6 py-3 text-sm font-medium text-earth-500 hover:text-earth-700 dark:text-earth-400 dark:hover:text-earth-200">
-      💰 Deudas saldadas ({{ settled|length }})
+      <i data-lucide="hand-coins" class="lucide-sm"></i> Deudas saldadas ({{ settled|length }})
     </summary>
     <div class="border-t border-earth-200 divide-y divide-earth-100 dark:border-earth-800 dark:divide-earth-800">
       {% for d in settled %}
