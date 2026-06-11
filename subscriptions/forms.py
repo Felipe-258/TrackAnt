@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import Subscription
 
 
@@ -33,7 +34,14 @@ class SubscriptionForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, colony=None, **kwargs):
         super().__init__(*args, **kwargs)
-        from finances.models import Category
-        self.fields['category'].queryset = Category.objects.filter(type='EXPENSE')
+        self.fields['currency'].empty_label = None
+        if colony:
+            from finances.models import Currency, Category
+            colony_filter = Q(colony=colony) | Q(colony__isnull=True)
+            self.fields['category'].queryset = Category.objects.filter(colony_filter, type='EXPENSE')
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
+        else:
+            from finances.models import Category
+            self.fields['category'].queryset = Category.objects.filter(type='EXPENSE')

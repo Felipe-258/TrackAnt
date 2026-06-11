@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import Transaction, Category, Tag
 
 
@@ -39,11 +40,11 @@ class TransactionForm(forms.ModelForm):
             'date': forms.DateInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'type': 'date',
-            }),
+            }, format='%Y-%m-%d'),
             'note': forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
                 'rows': 2,
-                'placeholder': 'Agregá una nota opcional...',
+                'placeholder': 'Agrega una nota opcional...',
             }),
             'receipt': forms.FileInput(attrs={
                 'class': 'w-full text-sm text-earth-500 file:mr-3 file:rounded-lg file:border-0 file:bg-clay-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-clay-700 hover:file:bg-clay-100 dark:file:bg-clay-900/30 dark:file:text-clay-300',
@@ -53,16 +54,23 @@ class TransactionForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, colony=None, **kwargs):
+        self.colony = colony
         super().__init__(*args, **kwargs)
         self.fields['type'].empty_label = None
+        self.fields['currency'].empty_label = None
+        self.fields['category'].empty_label = None
         type_val = self.initial.get('type')
         if self.data.get('type'):
             type_val = self.data.get('type')
+        colony_filter = Q(colony=colony) | Q(colony__isnull=True) if colony else Q(colony__isnull=True)
         if type_val:
-            self.fields['category'].queryset = Category.objects.filter(type=type_val)
+            self.fields['category'].queryset = Category.objects.filter(colony_filter, type=type_val)
         else:
-            self.fields['category'].queryset = Category.objects.filter(type='EXPENSE')
+            self.fields['category'].queryset = Category.objects.filter(colony_filter, type='EXPENSE')
+        if colony:
+            from .models import Currency
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -74,7 +82,8 @@ class TransactionForm(forms.ModelForm):
 
         if tag_ids:
             ids = [int(i) for i in tag_ids.split(',') if i.isdigit()]
-            instance.tags.set(Tag.objects.filter(id__in=ids))
+            tag_filter = Q(colony=self.colony) | Q(colony__isnull=True) if self.colony else Q(colony__isnull=True)
+            instance.tags.set(Tag.objects.filter(tag_filter, id__in=ids))
 
         if new_tags_raw:
             existing = [t.strip() for t in new_tags_raw.split(',') if t.strip()]
@@ -104,7 +113,7 @@ class CategoryForm(forms.ModelForm):
             }),
             'icon': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
-                'placeholder': '🛒',
+                'placeholder': 'Nombre del icono Lucide (ej: wallet)',
             }),
             'color': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',

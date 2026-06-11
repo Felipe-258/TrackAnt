@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import Budget
 
 
@@ -28,6 +29,14 @@ class BudgetForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, colony=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].queryset = self.fields['category'].queryset.filter(type='EXPENSE')
+        self.fields['category'].empty_label = None
+        self.fields['currency'].empty_label = None
+        if colony:
+            from finances.models import Currency, Category
+            colony_filter = Q(colony=colony) | Q(colony__isnull=True)
+            self.fields['category'].queryset = Category.objects.filter(colony_filter, type='EXPENSE')
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
+        else:
+            self.fields['category'].queryset = self.fields['category'].queryset.filter(type='EXPENSE')

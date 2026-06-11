@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import SplitGroup, SplitExpense
 
 
@@ -7,7 +8,7 @@ class SplitGroupForm(forms.ModelForm):
         label='Miembros',
         widget=forms.TextInput(attrs={
             'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
-            'placeholder': 'Juan, María, Pedro...',
+            'placeholder': 'Juan, Maria, Pedro...',
         }),
         help_text='Nombres separados por coma',
     )
@@ -69,9 +70,15 @@ class SplitExpenseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         group = kwargs.pop('group', None)
+        colony = kwargs.pop('colony', None)
         super().__init__(*args, **kwargs)
+        self.fields['currency'].empty_label = None
         if group:
             choices = [(m, m) for m in group.members]
             self.fields['paid_by'] = forms.ChoiceField(choices=choices, widget=forms.Select(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
             }))
+        if colony:
+            from finances.models import Currency
+            colony_filter = Q(colony=colony) | Q(colony__isnull=True)
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)

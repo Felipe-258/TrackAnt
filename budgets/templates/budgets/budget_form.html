@@ -8,7 +8,7 @@
     <form method="post" class="space-y-5">
       {% csrf_token %}
       <div class="flex items-center gap-4">
-        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-sage-100 text-2xl dark:bg-sage-900/50">📊</span>
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-sage-100 text-2xl dark:bg-sage-900/50"><i data-lucide="bar-chart-3" class="lucide-lg"></i></span>
         <div>
           <h3 class="font-semibold text-earth-900 dark:text-earth-100">Nuevo presupuesto</h3>
           <p class="text-sm text-earth-500 dark:text-earth-400">Establecé cuánto querés gastar por categoría</p>
@@ -16,9 +16,32 @@
       </div>
 
       <div class="flex gap-4">
-        <div class="flex-1">
+        <div class="flex-1" x-data="categoryDropdown()" id="category-field-budget"
+             data-initial-category="{{ form.initial.category|default:'' }}"
+             data-initial-category-name="{{ form.initial.category.name|default:'Seleccionar categoría' }}"
+             data-initial-category-icon="{{ form.initial.category.icon|default:'' }}">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría</label>
-          {{ form.category }}
+          <div class="relative">
+            <button type="button" @click="toggle()" @click.outside="open = false"
+                    class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-sage-400 focus:outline-none focus:ring-2 focus:ring-sage-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+              <template x-if="selectedIcon">
+                <i :data-lucide="selectedIcon" class="lucide-sm"></i>
+              </template>
+              <span x-text="selectedName" class="flex-1 text-left"></span>
+              <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
+            </button>
+            <div x-show="open" x-transition
+                 class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
+              <template x-for="cat in categories" :key="cat.id">
+                <button type="button" @click="select(cat)"
+                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
+                  <i :data-lucide="cat.icon" class="lucide-sm"></i>
+                  <span x-text="cat.name"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+          <input type="hidden" name="category" id="id_category" value="{{ form.initial.category|default:'' }}" required>
         </div>
         <div class="w-36">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Límite</label>
@@ -53,4 +76,50 @@
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function categoryDropdown() {
+  const el = document.getElementById('category-field-budget');
+  return {
+    open: false,
+    selectedId: el?.dataset.initialCategory || '',
+    selectedName: el?.dataset.initialCategoryName || 'Seleccionar categoría',
+    selectedIcon: el?.dataset.initialCategoryIcon || '',
+    categories: [],
+    init() {
+      this.loadCategories();
+    },
+    loadCategories() {
+      fetch('/transactions/category-options/?type=EXPENSE')
+        .then(r => r.text())
+        .then(html => {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const options = temp.querySelectorAll('option');
+          this.categories = Array.from(options).map(opt => ({
+            id: opt.value,
+            name: opt.textContent.trim(),
+            icon: opt.dataset.icon || ''
+          })).filter(c => c.id);
+          this.$nextTick(() => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          });
+        });
+    },
+    select(cat) {
+      this.selectedId = cat.id;
+      this.selectedName = cat.name;
+      this.selectedIcon = cat.icon;
+      this.open = false;
+      document.getElementById('id_category').value = cat.id;
+      this.$nextTick(() => {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+    },
+    toggle() { this.open = !this.open; }
+  };
+}
+</script>
 {% endblock %}
