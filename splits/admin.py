@@ -9,5 +9,6 @@ class SplitExpenseInline(admin.TabularInline):
 
 @admin.register(SplitGroup)
 class SplitGroupAdmin(admin.ModelAdmin):
-    list_display = ['name', 'members', 'total_spent', 'created_at']
+    list_display = ['name', 'members', 'total_spent', 'created_at', 'colony']
+    list_filter = ['colony']
     inlines = [SplitExpenseInline]

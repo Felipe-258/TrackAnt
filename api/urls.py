@@ -10,13 +10,18 @@ from debts.models import Debt
 from subscriptions.models import Subscription
 
 
+def _get_colony(request):
+    return request.colony
+
+
 @api_view(['GET'])
 def api_stats(request):
+    colony = _get_colony(request)
     today = date.today()
-    month_transactions = Transaction.objects.filter(date__year=today.year, date__month=today.month)
+    month_transactions = Transaction.objects.filter(colony=colony, date__year=today.year, date__month=today.month)
     monthly_income = float(month_transactions.filter(type='INCOME').aggregate(s=Sum('amount'))['s'] or 0)
     monthly_expenses = float(month_transactions.filter(type='EXPENSE').aggregate(s=Sum('amount'))['s'] or 0)
-    total = Transaction.objects.aggregate(
+    total = Transaction.objects.filter(colony=colony).aggregate(
         i=Sum('amount', filter=Q(type='INCOME')),
         e=Sum('amount', filter=Q(type='EXPENSE')),
     )
@@ -26,17 +31,19 @@ def api_stats(request):
         'balance': balance,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
-        'goals_count': Goal.objects.filter(is_achieved=False).count(),
-        'debts_owe_count': Debt.objects.filter(debt_type='OWE', is_settled=False).count(),
-        'debts_owed_count': Debt.objects.filter(debt_type='OWED', is_settled=False).count(),
-        'active_subscriptions': Subscription.objects.filter(is_active=True).count(),
+        'goals_count': Goal.objects.filter(colony=colony, is_achieved=False).count(),
+        'debts_owe_count': Debt.objects.filter(colony=colony, debt_type='OWE', is_settled=False).count(),
+        'debts_owed_count': Debt.objects.filter(colony=colony, debt_type='OWED', is_settled=False).count(),
+        'active_subscriptions': Subscription.objects.filter(colony=colony, is_active=True).count(),
     })
 
 
 @api_view(['GET'])
 def api_stats_by_category(request):
+    colony = _get_colony(request)
     today = date.today()
     expenses = Transaction.objects.filter(
+        colony=colony,
         type='EXPENSE',
         date__year=today.year,
         date__month=today.month,
@@ -57,14 +64,15 @@ def api_stats_by_category(request):
 
 @api_view(['GET'])
 def api_stats_monthly(request):
+    colony = _get_colony(request)
     today = date.today()
     data = []
     for m in range(1, today.month + 1):
         income = float(Transaction.objects.filter(
-            type='INCOME', date__year=today.year, date__month=m
+            colony=colony, type='INCOME', date__year=today.year, date__month=m
         ).aggregate(s=Sum('amount'))['s'] or 0)
         expense = float(Transaction.objects.filter(
-            type='EXPENSE', date__year=today.year, date__month=m
+            colony=colony, type='EXPENSE', date__year=today.year, date__month=m
         ).aggregate(s=Sum('amount'))['s'] or 0)
         data.append({'month': m, 'income': income, 'expense': expense})
     return Response(data)

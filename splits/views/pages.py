@@ -5,16 +5,19 @@ from ..forms import SplitGroupForm, SplitExpenseForm
 
 
 def split_list(request):
-    groups = SplitGroup.objects.all()
+    groups = SplitGroup.objects.filter(colony=request.colony)
     return render(request, 'splits/split_list.html', {'groups': groups})
 
 
 def split_group_add(request):
+    colony = request.colony
     if request.method == 'POST':
         form = SplitGroupForm(request.POST)
         if form.is_valid():
-            g = form.save()
-            messages.success(request, f'👥 Grupo creado: {g.name}')
+            g = form.save(commit=False)
+            g.colony = colony
+            g.save()
+            messages.success(request, f'Grupo creado: {g.name}')
             return redirect('splits:split_list')
     else:
         form = SplitGroupForm()
@@ -22,7 +25,8 @@ def split_group_add(request):
 
 
 def split_group_edit(request, pk):
-    group = get_object_or_404(SplitGroup, pk=pk)
+    colony = request.colony
+    group = get_object_or_404(SplitGroup, pk=pk, colony=colony)
     if request.method == 'POST':
         form = SplitGroupForm(request.POST, instance=group)
         if form.is_valid():
@@ -35,16 +39,17 @@ def split_group_edit(request, pk):
 
 
 def split_group_delete(request, pk):
-    group = get_object_or_404(SplitGroup, pk=pk)
+    group = get_object_or_404(SplitGroup, pk=pk, colony=request.colony)
     if request.method == 'POST':
         group.delete()
-        messages.success(request, '🗑️ Grupo eliminado')
+        messages.success(request, 'Grupo eliminado')
         return redirect('splits:split_list')
     return render(request, 'splits/split_group_confirm_delete.html', {'group': group})
 
 
 def split_group_detail(request, pk):
-    group = get_object_or_404(SplitGroup.objects.prefetch_related('expenses'), pk=pk)
+    colony = request.colony
+    group = get_object_or_404(SplitGroup.objects.filter(colony=colony).prefetch_related('expenses'), pk=pk)
     balance = group.balance()
     return render(request, 'splits/split_group_detail.html', {
         'group': group,
@@ -53,28 +58,31 @@ def split_group_detail(request, pk):
 
 
 def split_expense_add(request, group_id):
-    group = get_object_or_404(SplitGroup, pk=group_id)
+    colony = request.colony
+    group = get_object_or_404(SplitGroup, pk=group_id, colony=colony)
     if request.method == 'POST':
-        form = SplitExpenseForm(request.POST, group=group)
+        form = SplitExpenseForm(request.POST, group=group, colony=colony)
         if form.is_valid():
             e = form.save(commit=False)
             e.group = group
+            e.colony = colony
             num_members = len(group.members)
             share_amount = float(e.amount) / num_members if num_members > 0 else 0
             e.shares = {m: share_amount for m in group.members}
             e.save()
-            messages.success(request, f'💰 Gasto agregado: {e.description}')
+            messages.success(request, f'Gasto agregado: {e.description}')
             return redirect('splits:split_group_detail', pk=group_id)
     else:
-        form = SplitExpenseForm(initial={'date': __import__('datetime').date.today()}, group=group)
+        form = SplitExpenseForm(initial={'date': __import__('datetime').date.today()}, group=group, colony=colony)
     return render(request, 'splits/split_expense_form.html', {'form': form, 'group': group})
 
 
 def split_expense_edit(request, pk):
-    expense = get_object_or_404(SplitExpense, pk=pk)
+    colony = request.colony
+    expense = get_object_or_404(SplitExpense, pk=pk, colony=colony)
     group = expense.group
     if request.method == 'POST':
-        form = SplitExpenseForm(request.POST, instance=expense, group=group)
+        form = SplitExpenseForm(request.POST, instance=expense, group=group, colony=colony)
         if form.is_valid():
             e = form.save(commit=False)
             num_members = len(group.members)
@@ -84,15 +92,16 @@ def split_expense_edit(request, pk):
             messages.success(request, f'Gasto actualizado: {e.description}')
             return redirect('splits:split_group_detail', pk=group.pk)
     else:
-        form = SplitExpenseForm(instance=expense, group=group)
+        form = SplitExpenseForm(instance=expense, group=group, colony=colony)
     return render(request, 'splits/split_expense_form.html', {'form': form, 'group': group, 'expense': expense})
 
 
 def split_expense_delete(request, pk):
-    expense = get_object_or_404(SplitExpense, pk=pk)
+    colony = request.colony
+    expense = get_object_or_404(SplitExpense, pk=pk, colony=colony)
     group_pk = expense.group.pk
     if request.method == 'POST':
         expense.delete()
-        messages.success(request, '🗑️ Gasto eliminado')
+        messages.success(request, 'Gasto eliminado')
         return redirect('splits:split_group_detail', pk=group_pk)
     return render(request, 'splits/split_expense_confirm_delete.html', {'expense': expense})

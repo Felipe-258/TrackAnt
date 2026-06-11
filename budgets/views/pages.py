@@ -6,6 +6,7 @@ from ..forms import BudgetForm
 
 
 def budget_list(request):
+    colony = request.colony
     now = timezone.now()
     month = request.GET.get('month', now.month)
     year = request.GET.get('year', now.year)
@@ -16,7 +17,7 @@ def budget_list(request):
         month = now.month
         year = now.year
 
-    budgets = Budget.objects.filter(month=month, year=year).select_related('category', 'currency')
+    budgets = Budget.objects.filter(colony=colony, month=month, year=year).select_related('category', 'currency')
     return render(request, 'budgets/budget_list.html', {
         'budgets': budgets,
         'month': month,
@@ -25,35 +26,39 @@ def budget_list(request):
 
 
 def budget_add(request):
+    colony = request.colony
     if request.method == 'POST':
-        form = BudgetForm(request.POST)
+        form = BudgetForm(request.POST, colony=colony)
         if form.is_valid():
-            b = form.save()
-            messages.success(request, f'📊 Presupuesto creado: {b.category.name}')
+            b = form.save(commit=False)
+            b.colony = colony
+            b.save()
+            messages.success(request, f'Presupuesto creado: {b.category.name}')
             return redirect('budgets:budget_list')
     else:
         now = timezone.now()
-        form = BudgetForm(initial={'month': now.month, 'year': now.year})
+        form = BudgetForm(initial={'month': now.month, 'year': now.year}, colony=colony)
     return render(request, 'budgets/budget_form.html', {'form': form})
 
 
 def budget_edit(request, pk):
-    b = get_object_or_404(Budget, pk=pk)
+    colony = request.colony
+    b = get_object_or_404(Budget, pk=pk, colony=colony)
     if request.method == 'POST':
-        form = BudgetForm(request.POST, instance=b)
+        form = BudgetForm(request.POST, instance=b, colony=colony)
         if form.is_valid():
             form.save()
             messages.success(request, 'Presupuesto actualizado')
             return redirect('budgets:budget_list')
     else:
-        form = BudgetForm(instance=b)
+        form = BudgetForm(instance=b, colony=colony)
     return render(request, 'budgets/budget_form.html', {'form': form, 'budget': b})
 
 
 def budget_delete(request, pk):
-    b = get_object_or_404(Budget, pk=pk)
+    b = get_object_or_404(Budget, pk=pk, colony=request.colony)
     if request.method == 'POST':
         b.delete()
-        messages.success(request, '🗑️ Presupuesto eliminado')
+        messages.success(request, 'Presupuesto eliminado')
         return redirect('budgets:budget_list')
     return render(request, 'budgets/budget_confirm_delete.html', {'budget': b})

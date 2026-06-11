@@ -5,41 +5,41 @@ from goals.models import Goal
 from budgets.models import Budget
 
 
-def get_colony_state(goal_id=None):
+def get_colony_state(colony, goal_id=None):
     today = date.today()
     year, month = today.year, today.month
 
-    month_qs = Transaction.objects.filter(date__year=year, date__month=month)
+    month_qs = Transaction.objects.filter(colony=colony, date__year=year, date__month=month)
     monthly_income = float(month_qs.filter(type='INCOME').aggregate(s=Sum('amount'))['s'] or 0)
     monthly_expenses = float(month_qs.filter(type='EXPENSE').aggregate(s=Sum('amount'))['s'] or 0)
 
-    total = Transaction.objects.aggregate(
+    total = Transaction.objects.filter(colony=colony).aggregate(
         i=Sum('amount', filter=Q(type='INCOME')),
         e=Sum('amount', filter=Q(type='EXPENSE')),
     )
     total_balance = float((total['i'] or 0) - (total['e'] or 0))
 
-    transaction_count = Transaction.objects.count()
-    active_goals = Goal.objects.filter(is_achieved=False).count()
+    transaction_count = Transaction.objects.filter(colony=colony).count()
+    active_goals = Goal.objects.filter(colony=colony, is_achieved=False).count()
 
+    main_goal = None
     if goal_id:
-        main_goal = Goal.objects.filter(id=goal_id, is_achieved=False).first()
-    if not goal_id or not main_goal:
-        main_goal = Goal.objects.filter(is_achieved=False).first()
+        main_goal = Goal.objects.filter(id=goal_id, colony=colony, is_achieved=False).first()
+    if main_goal is None:
+        main_goal = Goal.objects.filter(colony=colony, is_achieved=False).first()
 
     goal_progress = main_goal.progress_pct() if main_goal else 0
     goal_color = main_goal.color if main_goal else '#C4943A'
 
     over_budget = Budget.objects.filter(
-        month=month, year=year
+        colony=colony, month=month, year=year
     ).select_related('category').all()
     budget_alerts = sum(1 for b in over_budget if b.pct() >= 80)
 
     worker_ants = min(transaction_count, 12)
     soldier_ants = min(budget_alerts, 4)
 
-    # Build leaf colors array
-    recent = list(Transaction.objects.order_by('-date')[:worker_ants])
+    recent = list(Transaction.objects.filter(colony=colony).order_by('-date')[:worker_ants])
     leaf_colors = ['#6E8F4C' if t.type == 'INCOME' else '#D4764A' for t in recent]
 
     weather = _get_weather(monthly_income, monthly_expenses)
@@ -116,11 +116,11 @@ def get_time_of_day():
         left, top = -10, -10    # hidden (night, moon follows same logic)
 
     if 5 <= hour < 7:
-        return 'amanecer', '☀️', left, top
+        return 'amanecer', 'sun.svg', left, top
     elif 7 <= hour < 18:
-        return 'dia', '☀️', left, top
+        return 'dia', 'sun.svg', left, top
     elif 18 <= hour < 20:
-        return 'atardecer', '☀️', left, top
+        return 'atardecer', 'sun.svg', left, top
     else:
         # Moon follows same path as sun
         moon_left, moon_top = left, top
@@ -132,7 +132,7 @@ def get_time_of_day():
             t = (hour + 4) / 9.0
             moon_left = 8 + (42 * min(t, 1))
             moon_top = 55 - (47 * min(t, 1))
-        return 'noche', '🌙', moon_left, moon_top
+        return 'noche', 'moon.svg', moon_left, moon_top
 
 
 def _queen_size(progress):

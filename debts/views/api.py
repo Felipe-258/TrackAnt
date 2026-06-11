@@ -4,14 +4,24 @@ from ..serializers import DebtSerializer, DebtPaymentSerializer
 
 
 class DebtViewSet(viewsets.ModelViewSet):
-    queryset = Debt.objects.select_related('currency').prefetch_related('payments')
     serializer_class = DebtSerializer
     filterset_fields = ['debt_type', 'is_settled']
     ordering = ['-date']
 
+    def get_queryset(self):
+        return Debt.objects.filter(colony=self.request.colony).select_related('currency').prefetch_related('payments')
+
+    def perform_create(self, serializer):
+        serializer.save(colony=self.request.colony)
+
 
 class DebtPaymentViewSet(viewsets.ModelViewSet):
-    queryset = DebtPayment.objects.select_related('debt')
     serializer_class = DebtPaymentSerializer
     filterset_fields = ['debt']
     ordering = ['-date']
+
+    def get_queryset(self):
+        return DebtPayment.objects.filter(debt__colony=self.request.colony).select_related('debt')
+
+    def perform_create(self, serializer):
+        serializer.save()
