@@ -6,7 +6,7 @@
 {% block content %}
 <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
   <div class="flex flex-col gap-3 border-b border-earth-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-earth-800">
-    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Todas las transacciones</h2>
+    <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Todos los movimientos</h2>
     <div class="flex items-center gap-2">
       <div class="relative">
         <i data-lucide="search" class="lucide-sm absolute left-3 top-1/2 -translate-y-1/2 text-earth-400 pointer-events-none"></i>
@@ -28,6 +28,25 @@
              hx-swap="outerHTML"
              hx-push-url="true"
              hx-select="#transaction-table"/>
+      {% if list_type == 'INCOME' %}
+      <a href="{% url 'finances:transaction_add' %}?type=INCOME"
+         class="inline-flex items-center gap-1.5 rounded-lg bg-sage-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-sage-700 dark:bg-sage-500 dark:hover:bg-sage-600">
+        <i data-lucide="plus" class="lucide-sm"></i>
+        Nuevo ingreso
+      </a>
+      {% elif list_type == 'EXPENSE' %}
+      <a href="{% url 'finances:transaction_add' %}?type=EXPENSE"
+         class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-clay-600 dark:bg-clay-400 dark:hover:bg-clay-500">
+        <i data-lucide="plus" class="lucide-sm"></i>
+        Nuevo gasto
+      </a>
+      {% else %}
+      <a href="{% url 'finances:transaction_add' %}"
+         class="inline-flex items-center gap-1.5 rounded-lg bg-earth-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-earth-700 dark:bg-earth-500 dark:hover:bg-earth-600">
+        <i data-lucide="plus" class="lucide-sm"></i>
+        Nueva transacción
+      </a>
+      {% endif %}
     </div>
   </div>
   <div class="overflow-x-auto" id="transaction-table">
