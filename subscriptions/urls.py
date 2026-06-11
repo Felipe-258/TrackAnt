@@ -8,4 +8,5 @@ urlpatterns = [
     path('subscriptions/add/', pages.subscription_add, name='subscription_add'),
     path('subscriptions/<int:pk>/edit/', pages.subscription_edit, name='subscription_edit'),
     path('subscriptions/<int:pk>/delete/', pages.subscription_delete, name='subscription_delete'),
+    path('subscriptions/payments/<int:pk>/toggle/', pages.subscription_toggle_paid, name='payment_toggle'),
 ]
