@@ -1,7 +1,10 @@
+from datetime import date
+
 from django.db import models
 
 
 class Goal(models.Model):
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     name = models.CharField(max_length=200, verbose_name='Nombre')
     target_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto objetivo')
     current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Progreso actual')
@@ -28,3 +31,24 @@ class Goal(models.Model):
     def remaining(self):
         remaining = self.target_amount - self.current_amount
         return max(remaining, 0)
+
+    def time_until_deadline(self):
+        if not self.deadline or self.is_achieved:
+            return None
+        days = (self.deadline - date.today()).days
+        if days < 0:
+            return 'Vencida'
+        if days == 0:
+            return 'Hoy'
+        if days == 1:
+            return 'Mañana'
+        if days <= 7:
+            return f'{days} días'
+        if days <= 30:
+            weeks = days // 7
+            return f'{weeks} {"semana" if weeks == 1 else "semanas"}'
+        if days <= 365:
+            months = days // 30
+            return f'{months} {"mes" if months == 1 else "meses"}'
+        years = days // 365
+        return f'{years} {"año" if years == 1 else "años"}'

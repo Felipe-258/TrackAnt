@@ -23,13 +23,13 @@
       <div class="flex items-start justify-between mb-3">
         <div class="flex items-center gap-3">
           <span class="flex h-10 w-10 items-center justify-center rounded-lg text-lg" style="background-color: {{ g.color }}20;">
-            {% if g.is_achieved %}🏆{% else %}🎯{% endif %}
+            {% if g.is_achieved %}<i data-lucide="trophy" class="lucide"></i>{% else %}<i data-lucide="target" class="lucide"></i>{% endif %}
           </span>
           <div>
             <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ g.name }}</h3>
             <p class="text-xs text-earth-500 dark:text-earth-400">
               {{ g.currency.symbol }}{{ g.current_amount|floatformat:0 }} de {{ g.currency.symbol }}{{ g.target_amount|floatformat:0 }}
-              {% if g.deadline %} · {{ g.deadline|date:"d/m/Y" }}{% endif %}
+               {% if g.deadline %} · {{ g.deadline|date:"d/m/Y" }}{% if g.time_until_deadline %} · {{ g.time_until_deadline }}{% endif %}{% endif %}
             </p>
           </div>
         </div>
@@ -48,7 +48,7 @@
 
       {% if g.is_achieved %}
       <div class="rounded-lg bg-sage-100 px-3 py-2 text-center text-sm font-medium text-sage-700 dark:bg-sage-900/30 dark:text-sage-300">
-        🎉 ¡Meta alcanzada!
+        <i data-lucide="party-popper" class="lucide-sm inline-block"></i> ¡Meta alcanzada!
       </div>
       {% else %}
       <div class="space-y-1.5">

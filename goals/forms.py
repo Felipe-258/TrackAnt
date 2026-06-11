@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import Goal
 
 
@@ -22,9 +23,17 @@ class GoalForm(forms.ModelForm):
             'deadline': forms.DateInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'type': 'date',
-            }),
+            }, format='%Y-%m-%d'),
             'color': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'type': 'color',
             }),
         }
+
+    def __init__(self, *args, colony=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].empty_label = None
+        if colony:
+            from finances.models import Currency
+            colony_filter = Q(colony=colony) | Q(colony__isnull=True)
+            self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
