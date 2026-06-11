@@ -4,6 +4,7 @@ from django.utils import timezone
 
 
 class Budget(models.Model):
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     category = models.ForeignKey('finances.Category', on_delete=models.CASCADE, verbose_name='Categoría',
                                  limit_choices_to={'type': 'EXPENSE'})
     limit_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Límite mensual')
@@ -15,13 +16,14 @@ class Budget(models.Model):
         verbose_name = 'Presupuesto'
         verbose_name_plural = 'Presupuestos'
         ordering = ['-year', '-month', 'category__name']
-        unique_together = ['category', 'month', 'year']
+        unique_together = ['colony', 'category', 'month', 'year']
 
     def __str__(self):
         return f'{self.category.name} — {self.currency.symbol}{self.limit_amount} ({self.month}/{self.year})'
 
     def spent(self):
         total = self.category.transaction_set.filter(
+            colony=self.colony,
             type='EXPENSE',
             date__year=self.year,
             date__month=self.month,

@@ -8,6 +8,7 @@ class Subscription(models.Model):
         MONTHLY = 'MONTHLY', 'Mensual'
         YEARLY = 'YEARLY', 'Anual'
 
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     name = models.CharField(max_length=200, verbose_name='Nombre')
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Monto')
     currency = models.ForeignKey('finances.Currency', on_delete=models.PROTECT, verbose_name='Moneda')
@@ -37,3 +38,33 @@ class Subscription(models.Model):
     def days_until_next(self):
         delta = self.next_date - timezone.now().date()
         return delta.days
+
+
+class SubscriptionPayment(models.Model):
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Suscripción'
+    )
+    due_date = models.DateField(verbose_name='Fecha de cobro')
+    is_paid = models.BooleanField(default=False, verbose_name='Pagado')
+    paid_date = models.DateField(null=True, blank=True, verbose_name='Fecha de pago')
+    transaction = models.ForeignKey(
+        'finances.Transaction',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='subscription_payment',
+        verbose_name='Transacción'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Pago de suscripción'
+        verbose_name_plural = 'Pagos de suscripciones'
+        ordering = ['-due_date']
+
+    def __str__(self):
+        status = 'Pagado' if self.is_paid else 'Pendiente'
+        return f'{self.subscription.name} — {self.subscription.currency.symbol}{self.subscription.amount} — {self.due_date} ({status})'

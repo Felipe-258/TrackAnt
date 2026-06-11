@@ -2,6 +2,8 @@ from django.db import models
 
 
 class Currency(models.Model):
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name='Colonia')
     code = models.CharField(max_length=3, unique=True, verbose_name='Código')
     symbol = models.CharField(max_length=5, verbose_name='Símbolo')
     name = models.CharField(max_length=50, verbose_name='Nombre')
@@ -22,9 +24,11 @@ class Category(models.Model):
         INCOME = 'INCOME', 'Ingreso'
         EXPENSE = 'EXPENSE', 'Gasto'
 
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name='Colonia')
     name = models.CharField(max_length=100, verbose_name='Nombre')
     type = models.CharField(max_length=7, choices=Type.choices, verbose_name='Tipo')
-    icon = models.CharField(max_length=10, blank=True, default='📦', verbose_name='Ícono')
+    icon = models.CharField(max_length=50, blank=True, default='package', verbose_name='Ícono')
     color = models.CharField(max_length=7, blank=True, default='#A07858', verbose_name='Color')
 
     class Meta:
@@ -33,11 +37,13 @@ class Category(models.Model):
         ordering = ['type', 'name']
 
     def __str__(self):
-        return f'{self.icon} {self.name}'
+        return self.name
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name='Colonia')
+    name = models.CharField(max_length=50, verbose_name='Nombre')
     color = models.CharField(max_length=7, blank=True, default='#8A6348', verbose_name='Color')
 
     class Meta:
@@ -51,14 +57,14 @@ class Tag(models.Model):
 
 class Transaction(models.Model):
     class Type(models.TextChoices):
-        INCOME = 'INCOME', '💰 Ingreso'
-        EXPENSE = 'EXPENSE', '💸 Gasto'
+        INCOME = 'INCOME', 'Ingreso'
+        EXPENSE = 'EXPENSE', 'Gasto'
 
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     type = models.CharField(max_length=7, choices=Type.choices, verbose_name='Tipo')
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto')
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name='Moneda')
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Categoría',
-                                 limit_choices_to={'type': 'EXPENSE'})
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Categoría')
     tags = models.ManyToManyField(Tag, blank=True, verbose_name='Etiquetas')
     custom_tags = models.JSONField(default=list, blank=True, verbose_name='Etiquetas personalizadas')
     date = models.DateField(verbose_name='Fecha')

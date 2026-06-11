@@ -2,6 +2,7 @@ from django.db import models
 
 
 class SplitGroup(models.Model):
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     name = models.CharField(max_length=200, verbose_name='Nombre')
     members = models.JSONField(default=list, verbose_name='Miembros')
     created_at = models.DateTimeField(auto_now_add=True)

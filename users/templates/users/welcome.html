@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrackAnt — Bienvenido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        extend: {
+          colors: {
+            earth: {50:'#FAF6F1',100:'#F2EBE0',200:'#E2D1BC',300:'#CEB496',400:'#B89472',500:'#A07858',600:'#8A6348',700:'#6E4E38',800:'#543B29',900:'#3A271B',950:'#1F1410'},
+            clay:  {50:'#FDF4EE',100:'#FAE5D7',200:'#F4C8AA',300:'#ECA776',400:'#E4864C',500:'#D4764A',600:'#C16645',700:'#A0522D',800:'#7A3F23',900:'#5C2E19',950:'#32170D'},
+            sage:  {50:'#F4F7F0',100:'#E4EDD8',200:'#C9D9B2',300:'#AAC288',400:'#8BA864',500:'#6E8F4C',600:'#5A753F',700:'#485D35',800:'#3A4A2C',900:'#2E3D23',950:'#182110'},
+            gold:  {50:'#FDF8EE',100:'#F9EDD0',200:'#F2D99F',300:'#E9C06A',400:'#D4A857',500:'#C4943A',600:'#A1752E',700:'#7D5A27',800:'#654A24',900:'#523D21',950:'#2E210F'},
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <link rel="icon" type="image/svg+xml" href="/static/icons/colony/ant.svg">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    [data-lucide] { display: inline-block; width: 1em; height: 1em; stroke-width: 1.5; }
+    .lucide { width: 1.25em; height: 1.25em; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .float { animation: float 4s ease-in-out infinite; }
+  </style>
+</head>
+<body class="h-full bg-earth-50 dark:bg-earth-950">
+  <div class="flex min-h-screen flex-col items-center justify-center px-4">
+    <div class="w-full max-w-md text-center">
+      <div class="mb-8">
+        <span class="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-clay-100 shadow-lg float dark:bg-clay-900/50"><img src="{% static 'icons/colony/ant.svg' %}" class="h-16 w-16" alt="hormiga"></span>
+      </div>
+      <h1 class="mb-2 text-4xl font-bold text-earth-900 dark:text-earth-100">TrackAnt</h1>
+      <p class="mb-10 text-lg text-earth-500 dark:text-earth-400">Tus finanzas, tu colonia</p>
+
+      <form method="post" class="space-y-3">
+        {% csrf_token %}
+        <button type="submit" name="action" value="guest"
+                class="w-full rounded-xl bg-earth-100 px-6 py-3.5 text-base font-semibold text-earth-800 transition-all hover:bg-earth-200 dark:bg-earth-800 dark:text-earth-200 dark:hover:bg-earth-700">
+          <i data-lucide="ant" class="lucide mr-2 -mt-0.5 inline-block"></i>
+          Continuar como invitado
+        </button>
+        <button type="submit" name="action" value="register"
+                formaction="{% url 'users:registro' %}"
+                class="w-full rounded-xl bg-gold-500 px-6 py-3.5 text-base font-semibold text-white transition-all hover:bg-gold-600">
+          <i data-lucide="user-plus" class="lucide mr-2 -mt-0.5 inline-block"></i>
+          Crear cuenta
+        </button>
+        <a href="{% url 'users:login' %}"
+           class="block w-full rounded-xl border-2 border-earth-200 bg-transparent px-6 py-3.5 text-center text-base font-semibold text-earth-700 transition-all hover:border-earth-300 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-300 dark:hover:border-earth-600 dark:hover:bg-earth-900">
+          <i data-lucide="log-in" class="lucide mr-2 -mt-0.5 inline-block"></i>
+          Iniciar sesion
+        </a>
+      </form>
+
+      <p class="mt-8 text-xs text-earth-400 dark:text-earth-500">
+        Sin registro obligatorio. Tus datos se guardan en tu navegador.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+  </script>
+</body>
+</html>
