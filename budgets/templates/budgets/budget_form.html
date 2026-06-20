@@ -15,8 +15,8 @@
         </div>
       </div>
 
-      <div class="flex gap-4">
-        <div class="flex-1" x-data="categoryDropdown()" id="category-field-budget"
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-1" x-data="categoryDropdown()" id="category-field-budget"
              data-initial-category="{{ form.initial.category|default:'' }}"
              data-initial-category-name="{{ form.initial.category.name|default:'Seleccionar categoría' }}"
              data-initial-category-icon="{{ form.initial.category.icon|default:'' }}">
@@ -43,32 +43,32 @@
           </div>
           <input type="hidden" name="category" id="id_category" value="{{ form.initial.category|default:'' }}" required>
         </div>
-        <div class="w-36">
+        <div class="sm:w-36">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Límite</label>
           {{ form.limit_amount }}
         </div>
-        <div class="w-28">
+        <div class="sm:w-28">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
           {{ form.currency }}
         </div>
       </div>
 
-      <div class="flex gap-4">
-        <div class="flex-1">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Mes</label>
           {{ form.month }}
         </div>
-        <div class="w-28">
+        <div class="sm:w-28">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Año</label>
           {{ form.year }}
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+      <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
         <a href="{% url 'budgets:budget_list' %}"
-           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
         <button type="submit"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-sage-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-700">
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-700">
           <i data-lucide="check" class="lucide-sm"></i>
           {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %}
         </button>

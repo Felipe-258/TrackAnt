@@ -20,16 +20,16 @@
         {{ form.name }}
       </div>
 
-      <div class="flex gap-4">
-        <div class="flex-1">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
           {{ form.amount }}
         </div>
-        <div class="w-32">
+        <div class="sm:w-32">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
           {{ form.currency }}
         </div>
-        <div class="w-36">
+        <div class="sm:w-36">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Ciclo</label>
           {{ form.cycle }}
         </div>
@@ -79,9 +79,9 @@
         <label for="{{ form.is_active.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Suscripción activa</label>
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
-        <a href="{% url 'subscriptions:subscription_list' %}" class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
-        <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gold-600"><i data-lucide="check" class="lucide-sm"></i> Guardar</button>
+      <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+        <a href="{% url 'subscriptions:subscription_list' %}" class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+        <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gold-600"><i data-lucide="check" class="lucide-sm"></i> Guardar</button>
       </div>
     </form>
   </div>

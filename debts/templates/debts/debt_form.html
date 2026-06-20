@@ -33,31 +33,31 @@
         </div>
       </fieldset>
 
-      <div class="flex gap-4">
-        <div class="flex-[2]">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-[2]">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Persona</label>
           {{ form.person }}
         </div>
-        <div class="flex-1">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha inicio</label>
           {{ form.date }}
         </div>
-        <div class="flex-1">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha límite <span class="text-earth-400 dark:text-earth-500">(opcional)</span></label>
           {{ form.deadline }}
         </div>
       </div>
 
-      <div class="flex gap-4">
-        <div class="flex-1">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto total</label>
           {{ form.amount }}
         </div>
-        <div class="w-32">
+        <div class="sm:w-32">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
           {{ form.currency }}
         </div>
-        <div class="w-32">
+        <div class="sm:w-32">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Interés %</label>
           {{ form.interest_rate }}
         </div>
@@ -68,11 +68,11 @@
         {{ form.note }}
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+      <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
         <a href="{% url 'debts:debt_list' %}"
-           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
         <button type="submit"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
           <i data-lucide="check" class="lucide-sm"></i>
           {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
         </button>

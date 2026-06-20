@@ -188,6 +188,30 @@ def transaction_add(request):
     return render(request, 'finances/transaction_form.html', {'form': form, 'tag_ids': '[]', 'custom_tags': '[]'})
 
 
+def transaction_quick_add(request):
+    colony = request.colony
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        if not post_data.get('currency'):
+            default_currency = Currency.objects.filter(
+                Q(colony=colony) | Q(colony__isnull=True)
+            ).first()
+            if default_currency:
+                post_data['currency'] = default_currency.pk
+        form = TransactionForm(post_data, colony=colony)
+        if form.is_valid():
+            t = form.save(commit=False)
+            t.colony = colony
+            t.save()
+            messages.success(request, f'Transaccion registrada: {t}')
+            if request.htmx:
+                return render(request, 'components/toast.html', {'message': 'Transaccion guardada'}, status=201)
+            return redirect('finances:transaction_list')
+        if request.htmx:
+            return render(request, 'components/toast.html', {'message': 'Error en el formulario'}, status=400)
+    return redirect('finances:transaction_add')
+
+
 def transaction_edit(request, pk):
     colony = request.colony
     t = get_object_or_404(Transaction, pk=pk, colony=colony)

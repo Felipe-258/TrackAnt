@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="space-y-6">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-wrap items-stretch justify-between gap-2">
     <div class="flex items-center gap-2">
       <input type="month" name="period" value="{{ year }}-{{ month|stringformat:'02d' }}"
              class="rounded-lg border border-earth-200 bg-white px-3 py-1.5 text-sm text-earth-700 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300"
@@ -14,12 +14,12 @@
              hx-target="#budget-list"
              hx-swap="outerHTML"
              hx-push-url="true"/>
-      <span class="text-sm text-earth-500 dark:text-earth-400">{{ budgets|length }} presupuestos</span>
+      <span class="hidden sm:inline text-sm text-earth-500 dark:text-earth-400">{{ budgets|length }} presupuestos</span>
     </div>
     <a href="{% url 'budgets:budget_add' %}"
-       class="inline-flex items-center gap-1.5 rounded-lg bg-sage-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-700">
+       class="inline-flex items-center gap-1.5 rounded-lg bg-sage-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-700">
       <i data-lucide="plus" class="lucide-sm"></i>
-      Nuevo presupuesto
+      <span class="hidden sm:inline">Nuevo </span>Presupuesto
     </a>
   </div>
 
@@ -47,8 +47,25 @@
             <span class="text-sm font-bold {% if b.status == 'danger' %}text-clay-600 dark:text-clay-400{% elif b.status == 'warning' %}text-gold-600 dark:text-gold-400{% else %}text-sage-600 dark:text-sage-400{% endif %}">
               {{ pct }}%
             </span>
-            <a href="{% url 'budgets:budget_edit' b.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
-            <a href="{% url 'budgets:budget_delete' b.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            <div class="hidden sm:flex items-center gap-1">
+              <a href="{% url 'budgets:budget_edit' b.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+              <a href="{% url 'budgets:budget_delete' b.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            </div>
+            <div class="sm:hidden relative" x-data="{ open: false, yPos: 0 }">
+              <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300">
+                <i data-lucide="ellipsis-vertical" class="lucide-sm"></i>
+              </button>
+              <div x-show="open" @click.outside="open = false" x-transition
+                   :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+                   class="z-50 w-40 overflow-hidden rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900">
+                <a href="{% url 'budgets:budget_edit' b.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-earth-700 hover:bg-earth-50 dark:text-earth-300 dark:hover:bg-earth-800">
+                  <i data-lucide="pencil" class="lucide-sm text-earth-400"></i> Editar
+                </a>
+                <a href="{% url 'budgets:budget_delete' b.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-clay-600 hover:bg-clay-50 dark:text-clay-400 dark:hover:bg-clay-900/30">
+                  <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar
+                </a>
+              </div>
+            </div>
           </div>
         </div>
         <div class="h-3 w-full overflow-hidden rounded-full bg-earth-100 dark:bg-earth-800">

@@ -50,13 +50,13 @@
         </div>
       </fieldset>
 
-      <div class="flex gap-4">
-        <div class="flex-1">
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <div class="sm:flex-1">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
           {{ form.amount }}
           {% if form.amount.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.amount.errors.0 }}</p>{% endif %}
         </div>
-        <div class="w-32">
+        <div class="sm:w-32">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Moneda</label>
           {{ form.currency }}
         </div>
@@ -95,30 +95,33 @@
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Etiquetas</label>
         <div class="flex flex-wrap gap-1.5 mb-2">
           <template x-for="id in tagIds" :key="'tid-' + id">
-            <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2.5 py-1 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
-              <span x-text="'Tag #' + id"></span>
-              <button type="button" @click="removeTagId(id)" class="text-earth-400 hover:text-clay-500">&times;</button>
+              <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2.5 py-1 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
+                <span x-text="'Tag #' + id"></span>
+                <button type="button" @click="removeTagId(id)" class="touch-target flex items-center justify-center rounded p-1 text-earth-400 hover:text-clay-500 active:scale-95">&times;</button>
             </span>
           </template>
           <template x-for="(tag, i) in customTags" :key="'ct-' + i">
-            <span class="inline-flex items-center gap-1 rounded-full bg-clay-50 px-2.5 py-1 text-xs font-medium text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
-              <span x-text="tag"></span>
-              <button type="button" @click="removeTag(i)" class="text-clay-400 hover:text-clay-600">&times;</button>
+              <span class="inline-flex items-center gap-1 rounded-full bg-clay-50 px-2.5 py-1 text-xs font-medium text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
+                <span x-text="tag"></span>
+                <button type="button" @click="removeTag(i)" class="touch-target flex items-center justify-center rounded p-1 text-clay-400 hover:text-clay-600 active:scale-95">&times;</button>
             </span>
           </template>
         </div>
 
         <div class="relative flex gap-2">
           <input type="text" x-model="tagInput"
-                 class="flex-1 rounded-lg border border-earth-300 bg-earth-50 px-3 py-2 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
+                 class="flex-1 rounded-lg border border-earth-300 bg-earth-50 px-3 py-2 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm"
                  placeholder="Buscar o crear etiqueta..."
                  hx-get="/tags/search/"
                  hx-trigger="keyup changed delay:300ms"
                  hx-target="#tag-suggestions"
                  hx-swap="innerHTML"
                  autocomplete="off"
+                 inputmode="text"
+                 enterkeyhint="done"
+                 autocapitalize="none"
                  @keydown.enter.prevent="addTag()">
-          <button type="button" @click="addTag()" class="rounded-lg border border-earth-300 px-3 py-2 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">+</button>
+          <button type="button" @click="addTag()" class="touch-target flex items-center justify-center rounded-lg border border-earth-300 px-4 py-2 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">+</button>
         </div>
         <div id="tag-suggestions" class="mt-1 rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900"
              x-show="tagInput.length > 0" @click.outside="tagInput = ''; $el.innerHTML = ''"></div>
@@ -147,11 +150,11 @@
         <label for="{{ form.is_recurring.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Es una transacción recurrente</label>
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+      <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
         <a href="{% url 'finances:transaction_list' %}"
-           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
         <button type="submit"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600"
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600"
                 id="submitBtn">
           <i data-lucide="check" class="lucide-sm"></i>
           {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}

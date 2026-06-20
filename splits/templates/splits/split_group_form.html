@@ -34,13 +34,13 @@
         {% endif %}
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
+      <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
         <a href="{% if group %}{% url 'splits:split_group_detail' group.pk %}{% else %}{% url 'splits:split_list' %}{% endif %}"
-           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">
           Cancelar
         </a>
         <button type="submit"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
           <i data-lucide="check" class="lucide-sm"></i>
           {% if group %}Guardar cambios{% else %}Crear grupo{% endif %}
         </button>

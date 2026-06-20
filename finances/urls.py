@@ -7,6 +7,7 @@ urlpatterns = [
     path('', pages.dashboard, name='dashboard'),
     path('transactions/', pages.transaction_list, name='transaction_list'),
     path('transactions/add/', pages.transaction_add, name='transaction_add'),
+    path('transactions/quick-add/', pages.transaction_quick_add, name='transaction_quick_add'),
     path('transactions/<int:pk>/edit/', pages.transaction_edit, name='transaction_edit'),
     path('transactions/<int:pk>/delete/', pages.transaction_delete, name='transaction_delete'),
     path('transactions/category-options/', pages.transaction_category_options, name='transaction_category_options'),

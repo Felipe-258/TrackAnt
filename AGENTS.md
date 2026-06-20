@@ -119,10 +119,12 @@ Modelos: `SplitGroup`, `SplitExpense`
 Sin modelos. Solo vistas, template tags, CSS, y utils.
 
 - `ants/utils.py`: Computa estado de la colonia desde datos reales (transacciones, metas, presupuestos)
-- Hormigas obreras = transacciones, hormigas soldado = alertas de presupuesto, tamaño reina = progreso de meta
-- Clima = relación ingresos/gastos, ciclo día/noche = hora real
+- Hormigas obreras = cantidad de transacciones (máx 12), hormigas soldado = alertas de presupuesto (máx 4)
+- Tamaño reina = progreso de meta (large ≥75%, medium ≥50%, small ≥25%, tiny <25%)
+- Clima = relación ingresos/gastos (despejado/soleado/nublado/lluvioso/tormenta)
+- Ciclo día/noche = hora real del sistema
 - `ants/templatetags/ant_tags.py`: Tags/filtros custom para templates
-- `ants/static/ants/css/colony.css`: 163 líneas de animaciones CSS keyframe
+- `ants/static/ants/css/colony.css`: Animaciones CSS keyframe
 
 ### `api` — Router API
 Sin modelos. Agrega todos los routers de las apps + 3 endpoints de stats:
@@ -177,6 +179,7 @@ Sin autenticación. Filtros: `DjangoFilterBackend`, `SearchFilter`, `OrderingFil
 ```
 /                          → finances:dashboard
 /transactions/             → finances:transaction_list (+ add, edit, delete)
+/transactions/quick-add/   → finances:transaction_quick_add (POST-only, HTMX)
 /incomes/                  → finances:income_list
 /expenses/                 → finances:expense_list
 /categories/               → finances:category_list
@@ -205,9 +208,11 @@ Sin autenticación. Filtros: `DjangoFilterBackend`, `SearchFilter`, `OrderingFil
 Estrategia `class`-based. Toggle Alpine.js, persistido en localStorage.
 
 ### Layout
-- Sidebar fijo (`w-64`) con slide transition en mobile
-- Header sticky con backdrop blur, título de página, toggle dark mode, botón quick-add
+- Sidebar fijo (`w-64`) con slide transition en mobile, safe area padding (`padding-top: var(--safe-top)`)
+- Header sticky con backdrop blur, título de página, toggle dark mode, botón quick-add (desktop)
 - Footer fijo
+- **PWA Standalone**: Bottom tab bar (Home, Ingresos, Gastos, Metas, Más), sin FAB, safe area insets
+- **Quick Add Modal**: Alpine.js slide-up modal (bottom sheet en mobile, centered en desktop), type/amount/category/date, trigger via `$dispatch('open-quick-add')`
 
 ### Iconos
 Lucide via CDN, renderizados como `<i data-lucide="icon-name" class="lucide"></i>`.
@@ -245,8 +250,10 @@ Se recrean en cada swap HTMX.
 
 ### Alpine.js
 - Estado global: `sidebarOpen`, `darkMode` (en body `x-data`)
+- Quick add modal: `quickAddModal()` + `quickCategoryDropdown()` en `components/quick_add.html`
 - Tags en transaction_form: componente complejo con `tagIds`, `customTags`
 - Debt tabs: `x-data="{ tab: 'owe' }"` para switchear
+- Transacciones: search toggle con `searchOpen` en mobile
 - Transiciones: sidebar slide, backdrop fade, toast fade
 
 ### Django Admin
@@ -256,6 +263,49 @@ Verbose names en español.
 ### Seed Data
 `python manage.py seed_data` — ubicado en `finances/management/commands/seed_data.py`.
 Idempotente (usa `get_or_create`).
+
+## Patrones Responsive
+
+### Formularios — stacking en mobile
+Todos los formularios usan `flex flex-col gap-4 sm:flex-row` para que los campos se apilen en mobile y se distribuyan en fila en desktop. Los anchos fijos (`w-32`, `w-36`) se aplican con `sm:` prefix.
+
+### Botones de acción — igualar ancho
+Footer de formularios y confirmaciones de delete usan `grid grid-cols-2 gap-3` para que Cancelar y Guardar/Eliminar tengan el mismo ancho. Los botones Cancelar tienen `text-center`.
+
+### Transaction list — search toggle mobile
+En mobile, el search es un ícono que expande un input full-width debajo del toolbar. En desktop, el input siempre es visible. Usa Alpine.js `searchOpen` con `sm:hidden` / `hidden sm:block`.
+
+### Transaction cards mobile
+`transaction_row.html` tiene layout dual: tabla para `sm:` y cards para `sm:hidden`. Las cards mobile muestran: fecha arriba, categoría debajo (misma columna), monto a la derecha, y three-dot menu. No muestran tags.
+
+### Income/Expense lists
+`income_list.html` y `expense_list.html` son templates muertos — no se usan. Las vistas `income_list` y `expense_list` renderizan `transaction_list.html` con `list_type` filtrado. En mobile usan las mismas cards que la lista de transacciones.
+
+### Three-dot menu (acciones en dropdown)
+En mobile, los botones de acción (editar, eliminar, etc.) se agrupan en un menú "⋮" (ellipsis-vertical) que despliega un dropdown con Alpine.js. Patrón:
+
+```html
+<div class="relative" x-data="{ open: false }">
+  <button @click="open = !open" class="touch-target ...">
+    <i data-lucide="ellipsis-vertical" class="lucide-sm"></i>
+  </button>
+  <div x-show="open" @click.outside="open = false" x-transition
+       class="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border bg-white shadow-lg ...">
+    <a href="..." class="flex items-center gap-2 px-4 py-2.5 text-sm ...">Acción</a>
+  </div>
+</div>
+```
+
+Aplicado en: goal_list.html (3 acciones), transaction_row.html (editar/eliminar en mobile y desktop). Extensible a: budget_list, subscription_list, debt_list, split_group_detail.
+
+### Dashboard — 2 columnas en mobile
+KPI cards usan `grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4`. Padding/texto/iconos reducidos en mobile (`p-3 sm:p-5`, `text-lg sm:text-2xl`, `h-7 w-7 sm:h-9 sm:w-9`).
+
+### Hormiguero — compacto en mobile
+`min-h-[180px] sm:min-h-[300px]`. Weather effects y weather badge ocultos en mobile (`hidden sm:block`). Goal name label en `top-2 left-4`. Queen ant z-index `z-10` (debajo de sidebar `z-20`). Container `overflow-visible` para que el tooltip de la "i" sobresalga.
+
+### Bottom Tab Bar (PWA standalone)
+5 tabs: Home, Ingresos, Gastos, Metas, Más. Todos con `px-2`, `text-[10px]`, iconos `lucide` (1.25em). Safe area insets via `padding-bottom: var(--safe-bottom)`.
 
 ## Comandos de Desarrollo
 

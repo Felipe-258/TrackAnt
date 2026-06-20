@@ -27,30 +27,37 @@ class TransactionForm(forms.ModelForm):
                 'hx-swap': 'innerHTML',
             }),
             'amount': forms.NumberInput(attrs={
-                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
+                'class': 'w-full min-w-0 box-border rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5',
                 'step': '0.01',
                 'placeholder': '0.00',
+                'inputmode': 'decimal',
+                'enterkeyhint': 'done',
+                'autocomplete': 'off',
             }),
             'currency': forms.Select(attrs={
-                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 sm:text-sm sm:py-2.5',
             }),
             'category': forms.Select(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
             }),
             'date': forms.DateInput(attrs={
-                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5',
                 'type': 'date',
+                'inputmode': 'none',
             }, format='%Y-%m-%d'),
             'note': forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
-                'rows': 2,
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5',
+                'rows': 3,
                 'placeholder': 'Agrega una nota opcional...',
+                'inputmode': 'text',
+                'enterkeyhint': 'done',
+                'autocapitalize': 'sentences',
             }),
             'receipt': forms.FileInput(attrs={
-                'class': 'w-full text-sm text-earth-500 file:mr-3 file:rounded-lg file:border-0 file:bg-clay-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-clay-700 hover:file:bg-clay-100 dark:file:bg-clay-900/30 dark:file:text-clay-300',
+                'class': 'w-full text-base text-earth-500 file:mr-3 file:rounded-lg file:border-0 file:bg-clay-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-clay-700 hover:file:bg-clay-100 dark:file:bg-clay-900/30 dark:file:text-clay-300 sm:text-sm',
             }),
             'is_recurring': forms.CheckboxInput(attrs={
-                'class': 'h-4 w-4 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
+                'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
             }),
         }
 

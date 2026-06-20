@@ -55,10 +55,10 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">{{ e.currency.symbol }}{{ e.amount|floatformat:2 }}</span>
-            <a href="{% url 'splits:split_expense_edit' e.pk %}" class="rounded-lg p-1 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300" title="Editar">
+            <a href="{% url 'splits:split_expense_edit' e.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300" title="Editar">
               <i data-lucide="pencil" class="lucide-sm"></i>
             </a>
-            <a href="{% url 'splits:split_expense_delete' e.pk %}" class="rounded-lg p-1 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400" title="Eliminar">
+            <a href="{% url 'splits:split_expense_delete' e.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400" title="Eliminar">
               <i data-lucide="trash-2" class="lucide-sm"></i>
             </a>
           </div>

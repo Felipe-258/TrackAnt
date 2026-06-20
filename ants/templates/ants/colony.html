@@ -1,6 +1,6 @@
 {% load static ant_tags %}
 
-<div class="relative overflow-hidden rounded-xl bg-gradient-to-b from-earth-50 via-earth-50 to-earth-100 dark:from-earth-900 dark:via-earth-900 dark:to-earth-950 select-none" style="min-height: 300px;">
+<div class="relative overflow-visible rounded-xl bg-gradient-to-b from-earth-50 via-earth-50 to-earth-100 dark:from-earth-900 dark:via-earth-900 dark:to-earth-950 select-none min-h-[180px] sm:min-h-[300px]">
 
   <!-- ==================== SVG LANDSCAPE ==================== -->
   <svg class="colony-landscape" viewBox="0 0 900 300" preserveAspectRatio="none">
@@ -81,27 +81,27 @@
 
   <!-- ===== WEATHER EFFECTS ===== -->
   {% if weather == 'nublado' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
+  <div class="absolute z-10 hidden sm:block" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-10 h-10 opacity-55" alt="">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-7 h-7 opacity-40 relative" style="left:4px;" alt="">
   </div>
   {% elif weather == 'lluvioso' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
+  <div class="absolute z-10 hidden sm:block" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-11 h-11 opacity-60" alt="">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-7 h-7 opacity-45 relative" style="left:4px;" alt="">
   </div>
-  <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
+  <div class="absolute z-10 hidden sm:flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
     {% for x in '1234' %}<img src="{% static 'icons/colony/raining.svg' %}" class="rain-drop w-3.5 h-3.5 opacity-55" alt="">{% endfor %}
   </div>
   {% elif weather == 'tormenta' %}
-  <div class="absolute z-10" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
+  <div class="absolute z-10 hidden sm:block" style="left:{{ sun_left|add:'-4' }}%; top:{{ sun_top }}%;">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-12 h-12 opacity-70" alt="">
     <img src="{% static 'icons/colony/cloud.svg' %}" class="w-8 h-8 opacity-50 relative" style="left:4px;" alt="">
   </div>
-  <div class="absolute z-10 flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
+  <div class="absolute z-10 hidden sm:flex gap-2" style="left:{{ sun_left|add:'-6' }}%; top:{{ sun_top|add:'16' }}%;">
     {% for x in '1234' %}<img src="{% static 'icons/colony/raining.svg' %}" class="rain-drop w-3.5 h-3.5 opacity-50" alt="">{% endfor %}
   </div>
-  <div class="absolute z-10" style="left:{{ sun_left|add:'4' }}%; top:{{ sun_top|add:'8' }}%; animation:star-twinkle 0.8s ease-in-out infinite;">
+  <div class="absolute z-10 hidden sm:block" style="left:{{ sun_left|add:'4' }}%; top:{{ sun_top|add:'8' }}%; animation:star-twinkle 0.8s ease-in-out infinite;">
     <img src="{% static 'icons/colony/lightning.svg' %}" class="w-4 h-4" alt="">
   </div>
   {% endif %}
@@ -116,11 +116,12 @@
       <p><img src="{% static 'icons/colony/raining.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> lluvioso → gastos &gt; 50% ingresos</p>
       <p><img src="{% static 'icons/colony/lightning.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> tormenta → gastos descontrolados</p>
       <p class="mt-1.5 pt-1.5 border-t border-earth-200 dark:border-earth-700"><img src="{% static 'icons/colony/sun.svg' %}" class="inline-block w-3 h-3" alt=""><img src="{% static 'icons/colony/moon.svg' %}" class="inline-block w-3 h-3" alt=""> ciclo día/noche = hora real</p>
+      <p class="mt-1.5 pt-1.5 border-t border-earth-200 dark:border-earth-700"><img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> hormigas = cantidad de transacciones</p>
     </div>
   </div>
 
   <!-- ==================== QUEEN ANT (inside cave, on throne) ==================== -->
-  <div class="absolute z-20 flex flex-col items-center" style="left:70%; top:76%; transform:translate(-50%,-50%);">
+  <div class="absolute z-10 flex flex-col items-center" style="left:70%; top:76%; transform:translate(-50%,-50%);">
     <div class="queen-wiggle" style="color:{{ goal_color|default:'#C4943A' }}">
       <div class="relative">
         {% if queen_size == 'large' %}
@@ -137,7 +138,7 @@
         {% endif %}
       </div>
     </div>
-    <div class="mt-1 rounded-full bg-earth-900/80 px-2.5 py-0.5 text-[10px] font-medium text-earth-100 backdrop-blur-sm dark:bg-earth-100/80 dark:text-earth-900">
+    <div class="mt-1 hidden rounded-full bg-earth-900/80 px-2.5 py-0.5 text-[10px] font-medium text-earth-100 backdrop-blur-sm dark:bg-earth-100/80 dark:text-earth-900 sm:block">
       {% if active_goals > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin meta{% endif %}
     </div>
   </div>
@@ -192,7 +193,7 @@
       <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs font-medium text-earth-700 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-300">
         {% if worker_ants > 0 %}<img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> {{ worker_ants }} obreras{% else %}Colonia vacía{% endif %}
       </span>
-      <span class="rounded-full bg-earth-200/80 px-2.5 py-1 text-xs text-earth-600 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-400">
+      <span class="hidden sm:inline-flex rounded-full bg-earth-200/80 px-2.5 py-1 text-xs text-earth-600 backdrop-blur-sm dark:bg-earth-800/80 dark:text-earth-400">
         {% weather_icon weather %} {{ weather }}
       </span>
       {% if soldier_ants > 0 %}
@@ -206,7 +207,7 @@
     </span>
   </div>
 
-  <div class="absolute left-4 top-4">
+  <div class="absolute top-2 left-4">
     <div class="rounded-lg bg-white/85 px-3 py-1.5 text-[11px] font-medium text-earth-700 shadow-sm backdrop-blur-sm dark:bg-earth-900/85 dark:text-earth-300">
       {% if active_goals > 0 %}
       {% queen_label queen_size %} {{ goal_name }} — {{ queen_progress }}%

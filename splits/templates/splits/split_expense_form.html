@@ -38,9 +38,9 @@
           {{ form.date }}
         </div>
       </div>
-      <div class="flex items-center justify-end gap-3 pt-3">
-        <a href="{% url 'splits:split_group_detail' group.pk %}" class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
-        <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-clay-600"><i data-lucide="check" class="lucide-sm"></i> Guardar</button>
+      <div class="grid grid-cols-2 gap-3 pt-3">
+        <a href="{% url 'splits:split_group_detail' group.pk %}" class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+        <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-clay-600"><i data-lucide="check" class="lucide-sm"></i> Guardar</button>
       </div>
     </form>
   </div>

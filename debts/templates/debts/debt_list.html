@@ -5,8 +5,8 @@
 
 {% block content %}
 <div class="space-y-6" x-data="{ tab: 'all' }">
-  <div class="flex items-center justify-between">
-    <div class="flex gap-2">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex gap-2 overflow-x-auto">
       <button @click="tab = 'all'"
               class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               :class="tab === 'all' ? 'bg-earth-500 text-white' : 'bg-earth-100 text-earth-600 hover:bg-earth-200 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
@@ -30,7 +30,7 @@
       </button>
     </div>
     <a href="{% url 'debts:debt_add' %}"
-       class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+       class="inline-flex self-start items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
       <i data-lucide="plus" class="lucide-sm"></i>
       Nueva deuda
     </a>
@@ -64,9 +64,24 @@
             <a href="{% url 'debts:debt_detail' d.pk %}" class="inline-flex items-center gap-1.5 rounded-lg border border-clay-200 bg-clay-50 px-3 py-1.5 text-xs font-medium text-clay-700 transition-colors hover:bg-clay-100 dark:border-clay-800 dark:bg-clay-900/30 dark:text-clay-300 dark:hover:bg-clay-900/50">
               <i data-lucide="eye" class="lucide-sm"></i> Ver detalle
             </a>
-            <div class="flex gap-1">
-              <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
-              <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            <div class="hidden sm:flex gap-1">
+              <a href="{% url 'debts:debt_edit' d.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+              <a href="{% url 'debts:debt_delete' d.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            </div>
+            <div class="sm:hidden relative" x-data="{ open: false, yPos: 0 }">
+              <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300">
+                <i data-lucide="ellipsis-vertical" class="lucide-sm"></i>
+              </button>
+              <div x-show="open" @click.outside="open = false" x-transition
+                   :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+                   class="z-50 w-40 overflow-hidden rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900">
+                <a href="{% url 'debts:debt_edit' d.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-earth-700 hover:bg-earth-50 dark:text-earth-300 dark:hover:bg-earth-800">
+                  <i data-lucide="pencil" class="lucide-sm text-earth-400"></i> Editar
+                </a>
+                <a href="{% url 'debts:debt_delete' d.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-clay-600 hover:bg-clay-50 dark:text-clay-400 dark:hover:bg-clay-900/30">
+                  <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -105,9 +120,24 @@
             <a href="{% url 'debts:debt_detail' d.pk %}" class="inline-flex items-center gap-1.5 rounded-lg border border-sage-200 bg-sage-50 px-3 py-1.5 text-xs font-medium text-sage-700 transition-colors hover:bg-sage-100 dark:border-sage-800 dark:bg-sage-900/30 dark:text-sage-300 dark:hover:bg-sage-900/50">
               <i data-lucide="eye" class="lucide-sm"></i> Ver detalle
             </a>
-            <div class="flex gap-1">
-              <a href="{% url 'debts:debt_edit' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
-              <a href="{% url 'debts:debt_delete' d.pk %}" class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            <div class="hidden sm:flex gap-1">
+              <a href="{% url 'debts:debt_edit' d.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"><i data-lucide="pencil" class="lucide-sm"></i></a>
+              <a href="{% url 'debts:debt_delete' d.pk %}" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"><i data-lucide="trash-2" class="lucide-sm"></i></a>
+            </div>
+            <div class="sm:hidden relative" x-data="{ open: false, yPos: 0 }">
+              <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300">
+                <i data-lucide="ellipsis-vertical" class="lucide-sm"></i>
+              </button>
+              <div x-show="open" @click.outside="open = false" x-transition
+                   :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+                   class="z-50 w-40 overflow-hidden rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900">
+                <a href="{% url 'debts:debt_edit' d.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-earth-700 hover:bg-earth-50 dark:text-earth-300 dark:hover:bg-earth-800">
+                  <i data-lucide="pencil" class="lucide-sm text-earth-400"></i> Editar
+                </a>
+                <a href="{% url 'debts:debt_delete' d.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-clay-600 hover:bg-clay-50 dark:text-clay-400 dark:hover:bg-clay-900/30">
+                  <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar
+                </a>
+              </div>
             </div>
           </div>
         </div>

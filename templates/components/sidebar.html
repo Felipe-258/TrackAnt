@@ -1,11 +1,13 @@
 {% load static %}
-<aside class="fixed inset-y-0 z-20 flex w-64 flex-col border-r border-earth-200 bg-white transition-transform duration-300 dark:border-earth-800 dark:bg-earth-950 lg:static lg:translate-x-0"
+<aside class="fixed inset-y-0 z-20 flex w-64 flex-col border-r border-earth-200 bg-white transition-transform duration-300 dark:border-earth-800 dark:bg-earth-950 lg:static lg:translate-x-0 no-select"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-  <div class="flex h-16 items-center gap-3 border-b border-earth-200 px-6 dark:border-earth-800">
-    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-clay-100 dark:bg-clay-900/50"><img src="{% static 'icons/colony/ant.svg' %}" class="h-6 w-6" alt="hormiga"></span>
-    <div>
-      <span class="text-base font-bold text-earth-900 dark:text-earth-100">TrackAnt</span>
-      <p class="text-[10px] leading-tight text-earth-400 dark:text-earth-500">Colonia financiera</p>
+  <div class="border-b border-earth-200 dark:border-earth-800" style="padding-top: var(--safe-top);">
+    <div class="flex h-16 items-center gap-3 px-6">
+      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-clay-100 dark:bg-clay-900/50"><img src="{% static 'icons/colony/ant.svg' %}" class="h-6 w-6" alt="hormiga"></span>
+      <div>
+        <span class="text-base font-bold text-earth-900 dark:text-earth-100">TrackAnt</span>
+        <p class="text-[10px] leading-tight text-earth-400 dark:text-earth-500">Colonia financiera</p>
+      </div>
     </div>
   </div>
 
@@ -15,21 +17,21 @@
     <div class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Principal</div>
 
     <a href="{% url 'finances:dashboard' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:dashboard' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="layout-dashboard" class="lucide text-clay-500 dark:text-clay-400"></i>
       <span>Home</span>
     </a>
 
     <a href="{% url 'finances:income_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:income_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="trending-up" class="lucide text-sage-500 dark:text-sage-400"></i>
       <span>Ingresos</span>
     </a>
 
     <a href="{% url 'finances:expense_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:expense_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="trending-down" class="lucide text-clay-500 dark:text-clay-400"></i>
       <span>Gastos</span>
@@ -38,21 +40,21 @@
     <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Planificación</div>
 
     <a href="{% url 'goals:goal_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
                {% if namespace == 'goals' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="target" class="lucide text-gold-500 dark:text-gold-400"></i>
       <span>Metas</span>
     </a>
 
     <a href="{% url 'debts:debt_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'debts:debt_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="credit-card" class="lucide text-clay-500 dark:text-clay-400"></i>
       <span>Deudas</span>
     </a>
 
     <a href="{% url 'budgets:budget_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'budgets:budget_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="bar-chart-3" class="lucide text-sage-500 dark:text-sage-400"></i>
       <span>Presupuestos</span>
@@ -61,21 +63,21 @@
     <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Extras</div>
 
     <a href="{% url 'subscriptions:subscription_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'subscriptions:subscription_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="repeat" class="lucide text-gold-500 dark:text-gold-400"></i>
       <span>Suscripciones</span>
     </a>
 
     <a href="{% url 'splits:split_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'splits:split_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="users" class="lucide text-clay-500 dark:text-clay-400"></i>
       <span>Splits</span>
     </a>
 
     <a href="{% url 'finances:transaction_list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:transaction_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="list" class="lucide text-earth-500 dark:text-earth-400"></i>
       <span>Transacciones</span>
@@ -93,20 +95,20 @@
       </div>
     </div>
     <a href="{% url 'users:logout' %}"
-       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
+       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
       <i data-lucide="log-out" class="lucide-sm"></i>
       <span>Cerrar sesion</span>
     </a>
     {% endif %}
     {% if debug %}
     <a href="{% url 'playground' %}"
-       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
+       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
       <i data-lucide="gamepad-2" class="lucide-sm"></i>
       <span>Playground</span>
     </a>
     {% endif %}
-    <a href="/admin/" target="_blank"
-       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200">
+    <a href="/admin/" target="_self"
+       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
       <i data-lucide="settings" class="lucide-sm"></i>
       <span>Configuracion</span>
     </a>

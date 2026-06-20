@@ -1,4 +1,4 @@
-<tr class="transition-colors hover:bg-earth-50 dark:hover:bg-earth-800/50">
+<tr class="hidden sm:table-row transition-colors hover:bg-earth-50 dark:hover:bg-earth-800/50">
   <td class="whitespace-nowrap px-4 py-3 text-sm text-earth-500 dark:text-earth-400">{{ transaction.date|date:"d/m/Y" }}</td>
   <td class="px-4 py-3 text-sm">
     <span class="inline-flex items-center gap-1.5 rounded-full bg-earth-100 px-2.5 py-0.5 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
@@ -21,30 +21,59 @@
     {{ transaction.currency.symbol }}{{ transaction.amount|floatformat:2 }}
     </span>
   </td>
-  <td class="whitespace-nowrap px-4 py-3 text-right text-sm">
-    <div class="flex items-center justify-end gap-1">
-      <span class="inline-flex gap-1 text-xs">
-        {% for tag in transaction.tags.all %}
-        <span class="rounded bg-earth-100 px-1.5 py-0.5 text-earth-500 dark:bg-earth-800 dark:text-earth-400">{{ tag.name }}</span>
-        {% endfor %}
-        {% for tag in transaction.custom_tags %}
-        <span class="rounded bg-clay-50 px-1.5 py-0.5 text-clay-500 italic dark:bg-clay-900/30 dark:text-clay-400">{{ tag }}</span>
-        {% endfor %}
-      </span>
+  <td class="whitespace-nowrap px-4 py-3 text-right">
+    <div class="relative inline-block" x-data="{ open: false, yPos: 0 }">
+      <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target rounded-lg p-2 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300">
+        <i data-lucide="ellipsis-vertical" class="lucide"></i>
+      </button>
+      <div x-show="open" @click.outside="open = false" x-transition
+           :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+           class="z-50 w-40 overflow-hidden rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900">
+        <a href="{% url 'finances:transaction_edit' transaction.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-earth-700 hover:bg-earth-50 dark:text-earth-300 dark:hover:bg-earth-800">
+          <i data-lucide="pencil" class="lucide-sm text-earth-400"></i> Editar
+        </a>
+        <a href="{% url 'finances:transaction_delete' transaction.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-clay-600 hover:bg-clay-50 dark:text-clay-400 dark:hover:bg-clay-900/30">
+          <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar
+        </a>
+      </div>
     </div>
   </td>
-  <td class="whitespace-nowrap px-4 py-3 text-right">
-    <div class="flex items-center justify-end gap-1">
-      <a href="{% url 'finances:transaction_edit' transaction.pk %}"
-         class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300"
-         title="Editar">
-        <i data-lucide="pencil" class="lucide-sm"></i>
-      </a>
-      <a href="{% url 'finances:transaction_delete' transaction.pk %}"
-         class="rounded-lg p-1.5 text-earth-400 hover:bg-clay-50 hover:text-clay-600 dark:hover:bg-clay-900/30 dark:hover:text-clay-400"
-         title="Eliminar">
-        <i data-lucide="trash-2" class="lucide-sm"></i>
-      </a>
+</tr>
+
+<tr class="sm:hidden">
+  <td colspan="5" class="px-3 py-2">
+    <div class="rounded-xl border border-earth-200 bg-white p-3 shadow-sm dark:border-earth-800 dark:bg-earth-900 animate-fade-in">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <span class="text-xs text-earth-400 dark:text-earth-500">{{ transaction.date|date:"d/m/Y" }}</span>
+          <div class="mt-0.5 flex items-center gap-1.5">
+            <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2 py-0.5 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
+              <i data-lucide="{{ transaction.category.icon }}" class="lucide-sm"></i> {{ transaction.category.name }}
+            </span>
+          </div>
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          <span class="text-sm font-medium {% if transaction.type == 'INCOME' %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">
+            {% if transaction.type == 'INCOME' %}+{% else %}-{% endif %}
+            {{ transaction.currency.symbol }}{{ transaction.amount|floatformat:2 }}
+          </span>
+          <div class="relative" x-data="{ open: false, yPos: 0 }">
+            <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target flex items-center justify-center rounded-lg p-2 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300">
+              <i data-lucide="ellipsis-vertical" class="lucide"></i>
+            </button>
+            <div x-show="open" @click.outside="open = false" x-transition
+                 :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+                 class="z-50 w-40 overflow-hidden rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900">
+              <a href="{% url 'finances:transaction_edit' transaction.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-earth-700 hover:bg-earth-50 dark:text-earth-300 dark:hover:bg-earth-800">
+                <i data-lucide="pencil" class="lucide-sm text-earth-400"></i> Editar
+              </a>
+              <a href="{% url 'finances:transaction_delete' transaction.pk %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-clay-600 hover:bg-clay-50 dark:text-clay-400 dark:hover:bg-clay-900/30">
+                <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </td>
 </tr>

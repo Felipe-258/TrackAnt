@@ -2,7 +2,7 @@
 <html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{% block title %}TrackAnt{% endblock %}</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,8 +82,15 @@
 
   {% load static %}
   <link rel="stylesheet" href="{% static 'ants/css/colony.css' %}">
+  <script src="{% static 'js/haptics.js' %}" defer></script>
 
   <link rel="icon" type="image/svg+xml" href="{% static 'icons/colony/ant.svg' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/pwa/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#A07858">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrackAnt">
 
   <style>
     body { font-family: 'Inter', system-ui, sans-serif; }
@@ -112,13 +119,91 @@
     .animate-fade-in { animation: fade-in 0.3s ease-out; }
 
     ::selection { background: #D4764A33; }
+
+    /* PWA Native Feel — Global */
+    *, *::before, *::after {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+    html, body { overscroll-behavior: none; }
+
+    /* Safe area variables */
+    :root {
+      --safe-top: env(safe-area-inset-top, 0);
+      --safe-bottom: env(safe-area-inset-bottom, 0);
+      --safe-left: env(safe-area-inset-left, 0);
+      --safe-right: env(safe-area-inset-right, 0);
+    }
+
+    /* Active states para feedback táctil */
+    button:active, a:active, [role="button"]:active,
+    input[type="submit"]:active, input[type="button"]:active,
+    .card:active, .interactive:active,
+    .touch-target:active {
+      transform: scale(0.98);
+      transition: transform 0.05s ease-out;
+    }
+
+    /* Prevenir selección en UI chrome */
+    .no-select { user-select: none; -webkit-user-select: none; }
+
+    /* Touch targets mínimos 44px */
+    .touch-target { min-height: 44px; min-width: 44px; }
+
+    /* Standalone mode adjustments */
+    @media (display-mode: standalone) {
+      .hide-in-standalone { display: none !important; }
+      .standalone-padding-top { padding-top: calc(var(--safe-top) + 1rem); }
+      .standalone-padding-bottom { padding-bottom: calc(var(--safe-bottom) + 1rem); }
+    }
+
+    /* HTMX transitions */
+    .htmx-swapping { opacity: 0; transition: opacity 150ms ease-out; }
+    .htmx-added { animation: fade-in 200ms ease-out; }
+
+    /* Alpine x-cloak */
+    [x-cloak] { display: none !important; }
+
+    /* Skeleton loading */
+    .skeleton { background: linear-gradient(90deg, #e2d1bc 25%, #ceb496 50%, #e2d1bc 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .dark .skeleton { background: linear-gradient(90deg, #543b29 25%, #6e4e38 50%, #543b29 75%); background-size: 200% 100%; }
+
+    /* Normalize date/time inputs across browsers so they match other controls */
+    input[type="date"], input[type="time"], input[type="datetime-local"] {
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+      appearance: none;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      background-color: transparent;
+    }
+    /* Hide inner spin/clear buttons in WebKit */
+    input[type="date"]::-webkit-inner-spin-button,
+    input[type="date"]::-webkit-clear-button {
+      display: none;
+    }
+    /* Slightly dim the calendar icon so it visually matches form controls */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.6;
+      cursor: pointer;
+      filter: none;
+    }
   </style>
 </head>
 <body class="h-full bg-earth-50 text-earth-900 dark:bg-earth-950 dark:text-earth-200"
-      x-data="{ sidebarOpen: false, darkMode: localStorage.getItem('darkMode') === 'true' }"
+      x-data="{ 
+        sidebarOpen: false, 
+        darkMode: localStorage.getItem('darkMode') === 'true',
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+      }"
       x-init="
         $watch('darkMode', val => { localStorage.setItem('darkMode', val); document.documentElement.classList.toggle('dark', val) });
         document.documentElement.classList.toggle('dark', darkMode);
+        updateThemeColor();
       "
       :class="{ 'dark': darkMode }">
 
@@ -126,10 +211,10 @@
     {% include 'components/sidebar.html' %}
 
     <div class="flex flex-1 flex-col overflow-hidden">
-      <header class="z-10 flex h-16 shrink-0 items-center border-b border-earth-200 bg-white/80 backdrop-blur-sm dark:border-earth-800 dark:bg-earth-950/80">
-        <div class="flex w-full items-center justify-between px-4 sm:px-6">
+      <header class="z-10 shrink-0 border-b border-earth-200 bg-white/80 backdrop-blur-sm dark:border-earth-800 dark:bg-earth-950/80" style="padding-top: var(--safe-top);">
+        <div class="flex h-16 w-full items-center justify-between px-4 sm:px-6">
           <div class="flex items-center gap-3">
-            <button @click="sidebarOpen = !sidebarOpen" class="-ml-2 rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 lg:hidden dark:hover:bg-earth-800 dark:hover:text-earth-300">
+            <button @click="sidebarOpen = !sidebarOpen" class="-ml-2 rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 lg:hidden dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target no-select">
               <i data-lucide="menu" class="lucide"></i>
             </button>
             <div>
@@ -138,7 +223,12 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button @click="darkMode = !darkMode" class="rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:hover:bg-earth-800 dark:hover:text-earth-300" title="Modo oscuro">
+            <button @click="$dispatch('open-quick-add')"
+                    class="hidden lg:inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 focus:outline-none focus:ring-2 focus:ring-clay-400 focus:ring-offset-2 dark:focus:ring-offset-earth-950 touch-target no-select">
+              <i data-lucide="plus" class="lucide-sm"></i>
+              Agregar
+            </button>
+            <button @click="darkMode = !darkMode" class="rounded-lg p-2 text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target no-select" title="Modo oscuro">
               <i x-show="!darkMode" data-lucide="moon" class="lucide"></i>
               <i x-show="darkMode" data-lucide="sun" class="lucide"></i>
             </button>
@@ -147,7 +237,7 @@
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" style="padding-bottom: calc(120px + var(--safe-bottom));">
         {% if messages %}
         <div class="mb-6 space-y-2">
           {% for message in messages %}
@@ -181,6 +271,34 @@
     </div>
   </div>
 
+  <!-- Bottom Tab Bar — Solo mobile standalone -->
+  <nav x-show="isStandalone" x-cloak class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-earth-200 dark:border-earth-800 dark:bg-earth-950/95" style="padding-bottom: var(--safe-bottom);">
+    <div class="flex justify-around py-2">
+      <a href="{% url 'finances:dashboard' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.view_name == 'finances:dashboard' %}text-clay-500{% else %}text-earth-400{% endif %}">
+        <i data-lucide="layout-dashboard" class="lucide"></i>
+        <span class="text-[10px]">Home</span>
+      </a>
+      <a href="{% url 'finances:income_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.view_name == 'finances:income_list' %}text-sage-500{% else %}text-earth-400{% endif %}">
+        <i data-lucide="trending-up" class="lucide"></i>
+        <span class="text-[10px]">Ingresos</span>
+      </a>
+      <a href="{% url 'finances:expense_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.view_name == 'finances:expense_list' %}text-clay-500{% else %}text-earth-400{% endif %}">
+        <i data-lucide="trending-down" class="lucide"></i>
+        <span class="text-[10px]">Gastos</span>
+      </a>
+      <a href="{% url 'goals:goal_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.namespace == 'goals' %}text-gold-500{% else %}text-earth-400{% endif %}">
+        <i data-lucide="target" class="lucide"></i>
+        <span class="text-[10px]">Metas</span>
+      </a>
+      <a href="#" @click.prevent="sidebarOpen = true" class="flex flex-col items-center gap-1 px-2 py-2 touch-target text-earth-400">
+        <i data-lucide="menu" class="lucide"></i>
+        <span class="text-[10px]">Más</span>
+      </a>
+    </div>
+  </nav>
+
+  {% include 'components/quick_add.html' %}
+
   <script>
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
     document.addEventListener('htmx:afterSwap', () => lucide.createIcons());
@@ -188,5 +306,31 @@
   </script>
 
   {% block extra_scripts %}{% endblock %}
+
+  <script>
+    function updateThemeColor() {
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (!meta) return;
+      meta.setAttribute('content',
+        document.documentElement.classList.contains('dark')
+          ? '#3A271B' : '#A07858'
+      );
+    }
+    updateThemeColor();
+    new MutationObserver(updateThemeColor)
+      .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+          console.log('SW registered:', reg.scope);
+        })
+        .catch(err => {
+          console.warn('SW registration failed:', err);
+        });
+    }
+  </script>
 </body>
 </html>

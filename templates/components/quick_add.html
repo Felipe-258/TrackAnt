@@ -1,7 +1,162 @@
-{% if request.resolver_match and 'add' not in request.resolver_match.url_name and 'edit' not in request.resolver_match.url_name %}
-<a href="{% url 'finances:transaction_add' %}"
-   class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 focus:outline-none focus:ring-2 focus:ring-clay-400 focus:ring-offset-2 dark:focus:ring-offset-earth-950">
-  <i data-lucide="plus" class="lucide-sm"></i>
-  Agregar
-</a>
-{% endif %}
+{% load static %}
+<div x-data="quickAddModal()" @open-quick-add.window="open = true" x-cloak>
+  <!-- Backdrop -->
+  <div x-show="open" x-transition:enter="transition-opacity duration-200"
+       x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+       x-transition:leave="transition-opacity duration-150"
+       x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+       @click="open = false"
+       class="fixed inset-0 z-50 bg-earth-900/50 dark:bg-earth-950/70"></div>
+
+  <!-- Bottom sheet / Modal -->
+  <div x-show="open" x-cloak
+       x-transition:enter="transition-transform duration-300 ease-out"
+       x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+       x-transition:leave="transition-transform duration-200 ease-in"
+       x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+       @click.outside="open = false"
+       class="fixed bottom-0 inset-x-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white shadow-2xl dark:bg-earth-900
+              lg:static lg:mx-auto lg:mt-32 lg:w-full lg:max-w-md lg:rounded-2xl lg:mb-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-earth-200 px-5 py-4 dark:border-earth-800">
+      <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Agregar rapido</h2>
+      <button @click="open = false" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target">
+        <i data-lucide="x" class="lucide-sm"></i>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form hx-post="{% url 'finances:transaction_quick_add' %}"
+          hx-swap="none"
+          @htmx:before-request="submitting = true"
+          @htmx:after-request="handleResponse($event)"
+          class="space-y-4 p-5">
+
+      <!-- Type toggle -->
+      <div class="flex gap-2">
+        <button type="button" @click="type = 'EXPENSE'; $dispatch('quick-type-change', 'EXPENSE')"
+                class="flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all touch-target"
+                :class="type === 'EXPENSE'
+                  ? 'border-clay-400 bg-clay-50 text-clay-700 dark:border-clay-500 dark:bg-clay-900/30 dark:text-clay-300'
+                  : 'border-earth-200 bg-white text-earth-500 hover:bg-earth-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
+          <i data-lucide="trending-down" class="lucide-sm inline-block align-middle"></i>
+          <span class="align-middle">Gasto</span>
+        </button>
+        <button type="button" @click="type = 'INCOME'; $dispatch('quick-type-change', 'INCOME')"
+                class="flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all touch-target"
+                :class="type === 'INCOME'
+                  ? 'border-sage-400 bg-sage-50 text-sage-700 dark:border-sage-500 dark:bg-sage-900/30 dark:text-sage-300'
+                  : 'border-earth-200 bg-white text-earth-500 hover:bg-earth-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
+          <i data-lucide="trending-up" class="lucide-sm inline-block align-middle"></i>
+          <span class="align-middle">Ingreso</span>
+        </button>
+      </div>
+      <input type="hidden" name="type" :value="type">
+
+      <!-- Amount -->
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
+        <input type="number" name="amount" step="0.01" required placeholder="0.00"
+               x-model="amount" inputmode="decimal" autocomplete="off" enterkeyhint="done"
+               class="w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5">
+      </div>
+
+      <!-- Category -->
+      <div x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="loadCategories($event.detail)">
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoria</label>
+        <div class="relative">
+          <button type="button" @click="toggle()" @click.outside="open = false"
+                  class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+            <template x-if="selectedIcon">
+              <i :data-lucide="selectedIcon" class="lucide-sm"></i>
+            </template>
+            <span x-text="selectedName" class="flex-1 text-left"></span>
+            <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
+          </button>
+          <div x-show="open" x-transition
+               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
+            <template x-for="cat in categories" :key="cat.id">
+              <button type="button" @click="select(cat)"
+                      class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
+                <i :data-lucide="cat.icon" class="lucide-sm"></i>
+                <span x-text="cat.name"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+        <input type="hidden" name="category" id="quick_category" value="" required>
+      </div>
+
+      <!-- Date -->
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha</label>
+        <input type="date" name="date" x-model="date"
+               class="w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 sm:text-sm sm:py-2.5">
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" :disabled="submitting"
+              class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 disabled:opacity-50 disabled:cursor-not-allowed touch-target">
+        <i x-show="!submitting" data-lucide="check" class="lucide-sm"></i>
+        <span x-show="submitting" class="lucide-sm animate-spin">⟳</span>
+        <span x-text="submitting ? 'Guardando...' : 'Guardar'"></span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function quickAddModal() {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    open: false,
+    type: 'EXPENSE',
+    amount: '',
+    date: today,
+    submitting: false,
+    handleResponse(evt) {
+      this.submitting = false;
+      if (evt.detail.successful) {
+        this.open = false;
+        this.amount = '';
+      }
+    }
+  };
+}
+
+function quickCategoryDropdown() {
+  return {
+    open: false,
+    selectedId: '',
+    selectedName: 'Seleccionar categoria',
+    selectedIcon: '',
+    categories: [],
+    loadCategories(type) {
+      type = type || 'EXPENSE';
+      fetch(`/transactions/category-options/?type=${type}`)
+        .then(r => r.text())
+        .then(html => {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const options = temp.querySelectorAll('option');
+          this.categories = Array.from(options).map(opt => ({
+            id: opt.value,
+            name: opt.textContent.trim(),
+            icon: opt.dataset.icon || ''
+          })).filter(c => c.id);
+          this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+        });
+    },
+    select(cat) {
+      this.selectedId = cat.id;
+      this.selectedName = cat.name;
+      this.selectedIcon = cat.icon;
+      this.open = false;
+      document.getElementById('quick_category').value = cat.id;
+      this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    },
+    toggle() { this.open = !this.open; }
+  };
+}
+</script>

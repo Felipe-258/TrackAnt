@@ -30,14 +30,14 @@
                  placeholder="0.00" autofocus>
         </div>
       </div>
-      <div class="flex gap-3">
+      <div class="grid grid-cols-2 gap-3">
         <button type="submit"
-                class="flex-1 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
           <i data-lucide="plus-circle" class="lucide-sm"></i>
           Agregar
         </button>
         <a href="{% url 'goals:goal_list' %}"
-           class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+           class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
       </div>
     </form>
   </div>
