@@ -1,15 +1,16 @@
 import os
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('TRACKANT_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+SECRET_KEY = os.environ.get('TRACKANT_SECRET_KEY') or get_random_secret_key()
 
 DEBUG = os.environ.get('TRACKANT_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('TRACKANT_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 if DEBUG:
-    ALLOWED_HOSTS.extend(['*', '.local', '192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12'])
+    ALLOWED_HOSTS.extend(['*', '.local'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',

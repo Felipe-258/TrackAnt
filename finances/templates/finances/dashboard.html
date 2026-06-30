@@ -3,10 +3,10 @@
 {% block page_subtitle %}Resumen de tu colonia financiera{% endblock %}
 
 {% block content %}
-<script type="application/json" id="balance-data">{{ balance_json|safe }}</script>
-<script type="application/json" id="kpis-data">{{ kpis_json|safe }}</script>
-<script type="application/json" id="category-chart-data">{{ category_by_currency_json|safe }}</script>
-<script type="application/json" id="monthly-chart-data">{{ monthly_by_currency_json|safe }}</script>
+{{ balance_json|json_script:"balance-data" }}
+{{ kpis_json|json_script:"kpis-data" }}
+{{ category_by_currency_json|json_script:"category-chart-data" }}
+{{ monthly_by_currency_json|json_script:"monthly-chart-data" }}
 
 <div class="space-y-6">
   <div x-data="currencySlider()"
@@ -116,6 +116,73 @@
             </button>
           </form>
         </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if budget_alerts %}
+  <div class="rounded-xl border-2 border-clay-300 bg-clay-50 p-4 dark:border-clay-700 dark:bg-clay-950/30">
+    <div class="mb-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="alert-circle" class="lucide text-clay-600 dark:text-clay-400"></i>
+        <h3 class="font-semibold text-clay-900 dark:text-clay-100">Alertas de presupuesto</h3>
+      </div>
+      <a href="{% url 'budgets:budget_list' %}" class="text-sm text-clay-600 hover:text-clay-700 dark:text-clay-400 dark:hover:text-clay-300">
+        Ver todos
+      </a>
+    </div>
+    <div class="grid gap-2">
+      {% for b in budget_alerts %}
+      <div class="flex items-center justify-between rounded-lg border border-clay-200 bg-white p-3 dark:border-clay-800 dark:bg-earth-900">
+        <div class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-clay-100 dark:bg-clay-900/50">
+            <i data-lucide="{{ b.category.icon }}" class="lucide-sm text-clay-600 dark:text-clay-400"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ b.category.name }}</h4>
+            <p class="text-xs text-earth-500 dark:text-earth-400">{{ b.currency.symbol }}{{ b.spent|floatformat:2 }} de {{ b.currency.symbol }}{{ b.limit_amount|floatformat:2 }}</p>
+          </div>
+        </div>
+        <span class="text-sm font-bold {% if b.status == 'danger' %}text-clay-600 dark:text-clay-400{% else %}text-gold-600 dark:text-gold-400{% endif %}">
+          {{ b.pct }}%
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if pending_debts %}
+  <div class="rounded-xl border-2 border-clay-300 bg-clay-50 p-4 dark:border-clay-700 dark:bg-clay-950/30">
+    <div class="mb-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="alert-circle" class="lucide text-clay-600 dark:text-clay-400"></i>
+        <h3 class="font-semibold text-clay-900 dark:text-clay-100">Deudas pendientes</h3>
+      </div>
+      <a href="{% url 'debts:debt_list' %}" class="text-sm text-clay-600 hover:text-clay-700 dark:text-clay-400 dark:hover:text-clay-300">
+        Ver todas
+      </a>
+    </div>
+    <div class="grid gap-2">
+      {% for d in pending_debts %}
+      <div class="flex items-center justify-between rounded-lg border border-clay-200 bg-white p-3 dark:border-clay-800 dark:bg-earth-900">
+        <div class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-clay-100 dark:bg-clay-900/50">
+            <i data-lucide="credit-card" class="lucide-sm text-clay-600 dark:text-clay-400"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ d.person }}</h4>
+            <p class="text-xs text-earth-500 dark:text-earth-400">
+              {{ d.currency.symbol }}{{ d.remaining|floatformat:2 }}
+              {% if d.deadline %} · Vence {{ d.deadline|date:"d/m/Y" }}{% if d.time_until_deadline %} · {{ d.time_until_deadline }}{% endif %}{% endif %}
+            </p>
+          </div>
+        </div>
+        <a href="{% url 'debts:debt_detail' d.pk %}" class="rounded-lg bg-clay-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-clay-600">
+          Pagar
+        </a>
       </div>
       {% endfor %}
     </div>

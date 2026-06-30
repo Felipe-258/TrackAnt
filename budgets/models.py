@@ -3,6 +3,22 @@ from django.db.models import Sum
 from django.utils import timezone
 
 
+class BudgetQuerySet(models.QuerySet):
+    def with_spent(self):
+        return self.annotate(
+            _spent_total=Sum(
+                'category__transaction__amount',
+                filter=models.Q(
+                    category__transaction__colony=models.OuterRef('colony'),
+                    category__transaction__type='EXPENSE',
+                    category__transaction__date__year=models.OuterRef('year'),
+                    category__transaction__date__month=models.OuterRef('month'),
+                    category__transaction__currency=models.OuterRef('currency'),
+                ),
+            )
+        )
+
+
 class Budget(models.Model):
     colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
     category = models.ForeignKey('finances.Category', on_delete=models.CASCADE, verbose_name='Categoría',
@@ -11,6 +27,8 @@ class Budget(models.Model):
     currency = models.ForeignKey('finances.Currency', on_delete=models.PROTECT, verbose_name='Moneda')
     month = models.IntegerField(verbose_name='Mes')
     year = models.IntegerField(verbose_name='Año')
+
+    objects = BudgetQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Presupuesto'
@@ -22,14 +40,15 @@ class Budget(models.Model):
         return f'{self.category.name} — {self.currency.symbol}{self.limit_amount} ({self.month}/{self.year})'
 
     def spent(self):
-        total = self.category.transaction_set.filter(
+        if hasattr(self, '_spent_total') and self._spent_total is not None:
+            return self._spent_total
+        return self.category.transaction_set.filter(
             colony=self.colony,
             type='EXPENSE',
             date__year=self.year,
             date__month=self.month,
             currency=self.currency,
         ).aggregate(s=Sum('amount'))['s'] or 0
-        return total
 
     def remaining(self):
         return max(self.limit_amount - self.spent(), 0)

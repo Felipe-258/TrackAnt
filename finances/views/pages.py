@@ -1,14 +1,20 @@
+from decimal import Decimal
+import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from django.utils import timezone
-from datetime import datetime, date
+from datetime import date
 import json
 from ..models import Transaction, Category, Currency, Tag
 from goals.models import Goal
 from subscriptions.models import SubscriptionPayment
-from ..forms import TransactionForm, CategoryForm
+from debts.models import Debt
+from budgets.models import Budget
+from ..forms import TransactionForm
+
+logger = logging.getLogger(__name__)
 
 
 def _colony_objects(model, colony):
@@ -20,6 +26,22 @@ def _month_filter(qs, year=None, month=None):
     y = year or today.year
     m = month or today.month
     return qs.filter(date__year=y, date__month=m)
+
+
+def _update_goal_progress(goal_id, amount, colony):
+    if not goal_id:
+        return
+    try:
+        goal = Goal.objects.get(pk=goal_id, colony=colony)
+        new_amount = goal.current_amount + Decimal(str(amount))
+        if new_amount >= goal.target_amount:
+            Goal.objects.filter(pk=goal.pk).update(current_amount=F('current_amount') + Decimal(str(amount)), is_achieved=True)
+        else:
+            Goal.objects.filter(pk=goal.pk).update(current_amount=F('current_amount') + Decimal(str(amount)))
+    except Goal.DoesNotExist:
+        logger.warning('Goal %s not found for colony %s', goal_id, colony.id)
+    except ValueError:
+        logger.warning('Invalid amount %s for goal %s', amount, goal_id)
 
 
 def _monthly_summary(colony):
@@ -88,6 +110,22 @@ def dashboard(request):
     ).select_related('subscription__currency', 'subscription__category').order_by('due_date')[:5]
     ctx['pending_subscriptions'] = pending_subs
 
+    budget_alerts = Budget.objects.filter(
+        colony=colony,
+        month=today.month,
+        year=today.year,
+    ).select_related('category', 'currency').with_spent()
+    threshold = colony.budget_alert_threshold
+    budget_alerts = [b for b in budget_alerts if b.pct() >= threshold]
+    ctx['budget_alerts'] = budget_alerts[:5]
+
+    pending_debts = Debt.objects.filter(
+        colony=colony,
+        is_settled=False,
+        debt_type='OWE',
+    ).select_related('currency').order_by('deadline')[:5]
+    ctx['pending_debts'] = pending_debts
+
     category_by_currency = {}
     month_expenses = Transaction.objects.filter(
         colony=colony,
@@ -105,20 +143,20 @@ def dashboard(request):
         category_by_currency[code]['colors'].append(e['category__color'])
 
     monthly_by_currency = {}
-    for m in range(1, today.month + 1):
-        month_data = (
-            Transaction.objects.filter(colony=colony, date__year=today.year, date__month=m)
-            .values('currency__code', 'type')
-            .annotate(total=Sum('amount'))
-        )
-        for row in month_data:
-            code = row['currency__code']
-            if code not in monthly_by_currency:
-                monthly_by_currency[code] = {'incomes': [0.0] * 12, 'expenses': [0.0] * 12}
-            if row['type'] == 'INCOME':
-                monthly_by_currency[code]['incomes'][m - 1] = float(row['total'])
-            else:
-                monthly_by_currency[code]['expenses'][m - 1] = float(row['total'])
+    all_year_data = (
+        Transaction.objects.filter(colony=colony, date__year=today.year)
+        .values('currency__code', 'date__month', 'type')
+        .annotate(total=Sum('amount'))
+    )
+    for row in all_year_data:
+        code = row['currency__code']
+        m = row['date__month']
+        if code not in monthly_by_currency:
+            monthly_by_currency[code] = {'incomes': [0.0] * 12, 'expenses': [0.0] * 12}
+        if row['type'] == 'INCOME':
+            monthly_by_currency[code]['incomes'][m - 1] = float(row['total'])
+        else:
+            monthly_by_currency[code]['expenses'][m - 1] = float(row['total'])
 
     ctx['category_by_currency_json'] = json.dumps(category_by_currency)
     ctx['monthly_by_currency_json'] = json.dumps(monthly_by_currency)
@@ -177,6 +215,9 @@ def transaction_add(request):
             t.colony = colony
             t.save()
             form.save_m2m()
+            goal_id = form.cleaned_data.get('goal')
+            if goal_id:
+                _update_goal_progress(goal_id, t.amount, colony)
             messages.success(request, f'Transaccion registrada: {t}')
             if request.htmx:
                 return render(request, 'components/toast.html', {'message': 'Transaccion guardada'}, status=201)
@@ -203,6 +244,9 @@ def transaction_quick_add(request):
             t = form.save(commit=False)
             t.colony = colony
             t.save()
+            goal_id = form.cleaned_data.get('goal')
+            if goal_id:
+                _update_goal_progress(goal_id, t.amount, colony)
             messages.success(request, f'Transaccion registrada: {t}')
             if request.htmx:
                 return render(request, 'components/toast.html', {'message': 'Transaccion guardada'}, status=201)
@@ -216,9 +260,13 @@ def transaction_edit(request, pk):
     colony = request.colony
     t = get_object_or_404(Transaction, pk=pk, colony=colony)
     if request.method == 'POST':
+        old_goal = t.goal
         form = TransactionForm(request.POST, request.FILES, instance=t, colony=colony)
         if form.is_valid():
-            form.save()
+            t = form.save()
+            new_goal = form.cleaned_data.get('goal')
+            if new_goal and new_goal != old_goal:
+                _update_goal_progress(new_goal, t.amount, colony)
             messages.success(request, 'Transaccion actualizada')
             return redirect('finances:transaction_list')
     else:

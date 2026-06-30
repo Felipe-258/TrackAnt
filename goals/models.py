@@ -1,6 +1,6 @@
-from datetime import date
-
 from django.db import models
+
+from trackant.utils import time_until_deadline as _time_until_deadline
 
 
 class Goal(models.Model):
@@ -33,22 +33,4 @@ class Goal(models.Model):
         return max(remaining, 0)
 
     def time_until_deadline(self):
-        if not self.deadline or self.is_achieved:
-            return None
-        days = (self.deadline - date.today()).days
-        if days < 0:
-            return 'Vencida'
-        if days == 0:
-            return 'Hoy'
-        if days == 1:
-            return 'Mañana'
-        if days <= 7:
-            return f'{days} días'
-        if days <= 30:
-            weeks = days // 7
-            return f'{weeks} {"semana" if weeks == 1 else "semanas"}'
-        if days <= 365:
-            months = days // 30
-            return f'{months} {"mes" if months == 1 else "meses"}'
-        years = days // 365
-        return f'{years} {"año" if years == 1 else "años"}'
+        return _time_until_deadline(self.deadline, self.is_achieved)

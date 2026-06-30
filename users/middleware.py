@@ -36,7 +36,7 @@ class ColonyMiddleware:
         return response
 
     def _create_guest(self, request):
-        colony = Colony.objects.create(
+        colony, _ = Colony.objects.get_or_create(
             name='Colonia invitada',
             is_guest=True,
         )

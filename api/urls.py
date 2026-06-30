@@ -66,15 +66,22 @@ def api_stats_by_category(request):
 def api_stats_monthly(request):
     colony = _get_colony(request)
     today = date.today()
-    data = []
-    for m in range(1, today.month + 1):
-        income = float(Transaction.objects.filter(
-            colony=colony, type='INCOME', date__year=today.year, date__month=m
-        ).aggregate(s=Sum('amount'))['s'] or 0)
-        expense = float(Transaction.objects.filter(
-            colony=colony, type='EXPENSE', date__year=today.year, date__month=m
-        ).aggregate(s=Sum('amount'))['s'] or 0)
-        data.append({'month': m, 'income': income, 'expense': expense})
+    rows = (
+        Transaction.objects.filter(colony=colony, date__year=today.year)
+        .values('date__month', 'type')
+        .annotate(total=Sum('amount'))
+    )
+    month_data = {}
+    for row in rows:
+        m = row['date__month']
+        if m not in month_data:
+            month_data[m] = {'income': 0.0, 'expense': 0.0}
+        if row['type'] == 'INCOME':
+            month_data[m]['income'] = float(row['total'])
+        else:
+            month_data[m]['expense'] = float(row['total'])
+    data = [{'month': m, 'income': month_data.get(m, {}).get('income', 0.0),
+             'expense': month_data.get(m, {}).get('expense', 0.0)} for m in range(1, today.month + 1)]
     return Response(data)
 
 

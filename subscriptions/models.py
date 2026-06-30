@@ -8,14 +8,14 @@ class Subscription(models.Model):
         MONTHLY = 'MONTHLY', 'Mensual'
         YEARLY = 'YEARLY', 'Anual'
 
-    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia')
+    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, verbose_name='Colonia', db_index=True)
     name = models.CharField(max_length=200, verbose_name='Nombre')
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Monto')
     currency = models.ForeignKey('finances.Currency', on_delete=models.PROTECT, verbose_name='Moneda')
     cycle = models.CharField(max_length=10, choices=Cycle.choices, default=Cycle.MONTHLY, verbose_name='Ciclo')
     next_date = models.DateField(verbose_name='Próximo cobro')
     category = models.ForeignKey('finances.Category', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Categoría')
-    is_active = models.BooleanField(default=True, verbose_name='Activa')
+    is_active = models.BooleanField(default=True, verbose_name='Activa', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -47,8 +47,8 @@ class SubscriptionPayment(models.Model):
         related_name='payments',
         verbose_name='Suscripción'
     )
-    due_date = models.DateField(verbose_name='Fecha de cobro')
-    is_paid = models.BooleanField(default=False, verbose_name='Pagado')
+    due_date = models.DateField(verbose_name='Fecha de cobro', db_index=True)
+    is_paid = models.BooleanField(default=False, verbose_name='Pagado', db_index=True)
     paid_date = models.DateField(null=True, blank=True, verbose_name='Fecha de pago')
     transaction = models.ForeignKey(
         'finances.Transaction',

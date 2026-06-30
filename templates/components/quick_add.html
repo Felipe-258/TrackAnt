@@ -21,7 +21,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between border-b border-earth-200 px-5 py-4 dark:border-earth-800">
       <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Agregar rapido</h2>
-      <button @click="open = false" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target">
+      <button @click="open = false" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target" aria-label="Cerrar">
         <i data-lucide="x" class="lucide-sm"></i>
       </button>
     </div>
@@ -34,9 +34,10 @@
           class="space-y-4 p-5">
 
       <!-- Type toggle -->
-      <div class="flex gap-2">
+      <div class="flex gap-2" role="radiogroup" aria-label="Tipo de transacción">
         <button type="button" @click="type = 'EXPENSE'; $dispatch('quick-type-change', 'EXPENSE')"
                 class="flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all touch-target"
+                role="radio" :aria-checked="type === 'EXPENSE'"
                 :class="type === 'EXPENSE'
                   ? 'border-clay-400 bg-clay-50 text-clay-700 dark:border-clay-500 dark:bg-clay-900/30 dark:text-clay-300'
                   : 'border-earth-200 bg-white text-earth-500 hover:bg-earth-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">
@@ -45,6 +46,7 @@
         </button>
         <button type="button" @click="type = 'INCOME'; $dispatch('quick-type-change', 'INCOME')"
                 class="flex-1 rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all touch-target"
+                role="radio" :aria-checked="type === 'INCOME'"
                 :class="type === 'INCOME'
                   ? 'border-sage-400 bg-sage-50 text-sage-700 dark:border-sage-500 dark:bg-sage-900/30 dark:text-sage-300'
                   : 'border-earth-200 bg-white text-earth-500 hover:bg-earth-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-400 dark:hover:bg-earth-700'">

@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from datetime import date
 from ..models import Debt, DebtPayment
 from ..forms import DebtForm, DebtPaymentForm
+from finances.models import Transaction, Category
 
 
 def debt_list(request):
@@ -29,7 +31,7 @@ def debt_add(request):
             messages.success(request, f'Deuda registrada con {d.person}')
             return redirect('debts:debt_list')
     else:
-        form = DebtForm(initial={'date': __import__('datetime').date.today(), 'debt_type': request.GET.get('type', 'OWE')}, colony=colony)
+        form = DebtForm(initial={'date': date.today(), 'debt_type': request.GET.get('type', 'OWE')}, colony=colony)
     return render(request, 'debts/debt_form.html', {'form': form})
 
 
@@ -69,10 +71,26 @@ def debt_detail(request, pk):
             if d.remaining() <= 0:
                 d.is_settled = True
                 d.save()
+            if colony.auto_create_debt_transactions:
+                category, _ = Category.objects.get_or_create(
+                    colony=colony,
+                    name='Pago de deuda',
+                    type='EXPENSE',
+                    defaults={'icon': 'credit-card', 'color': '#D4764A'},
+                )
+                Transaction.objects.create(
+                    colony=colony,
+                    type='EXPENSE',
+                    amount=p.amount,
+                    currency=d.currency,
+                    category=category,
+                    date=p.date,
+                    note=f'Pago de deuda a {d.person}',
+                )
             messages.success(request, f'Pago de ${p.amount} registrado')
             return redirect('debts:debt_detail', pk=pk)
     else:
-        form = DebtPaymentForm(initial={'date': __import__('datetime').date.today()})
+        form = DebtPaymentForm(initial={'date': date.today()})
     return render(request, 'debts/debt_detail.html', {
         'debt': d,
         'payments': payments,

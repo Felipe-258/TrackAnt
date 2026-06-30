@@ -12,8 +12,8 @@ def _img(icon, css_class='inline-block h-4 w-4'):
 
 
 @register.inclusion_tag('ants/colony.html')
-def ant_colony():
-    return get_colony_state()
+def ant_colony(colony):
+    return get_colony_state(colony)
 
 
 @register.simple_tag
