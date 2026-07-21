@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from users.forms import RegistroForm
 from users.models import Colony
+from .settings import settings_view
 
 
 def _assign_colony(request, user):

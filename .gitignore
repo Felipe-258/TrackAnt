@@ -34,3 +34,6 @@ Thumbs.db
 scripts/*.pyc
 staticfiles/
 .playwright-mcp/
+
+# AI
+.mimocode
