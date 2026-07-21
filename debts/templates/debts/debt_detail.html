@@ -69,6 +69,12 @@
       <div>
         {{ form.note }}
       </div>
+      {% if request.colony.auto_create_debt_transactions %}
+      <div class="flex items-center gap-2 rounded-lg bg-sage-50 px-3 py-2 text-sm text-sage-700 dark:bg-sage-900/30 dark:text-sage-300">
+        <i data-lucide="receipt" class="lucide-sm"></i>
+        Se creará automáticamente una transacción de gasto
+      </div>
+      {% endif %}
       <div class="flex justify-end">
         <button type="submit"
                 class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clay-600">

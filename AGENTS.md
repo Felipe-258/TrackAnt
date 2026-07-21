@@ -285,18 +285,21 @@ En mobile, el search es un ícono que expande un input full-width debajo del too
 En mobile, los botones de acción (editar, eliminar, etc.) se agrupan en un menú "⋮" (ellipsis-vertical) que despliega un dropdown con Alpine.js. Patrón:
 
 ```html
-<div class="relative" x-data="{ open: false }">
-  <button @click="open = !open" class="touch-target ...">
+<div class="relative" x-data="{ open: false, yPos: 0 }">
+  <button @click="open = !open; yPos = $el.getBoundingClientRect().bottom + 4" class="touch-target ...">
     <i data-lucide="ellipsis-vertical" class="lucide-sm"></i>
   </button>
   <div x-show="open" @click.outside="open = false" x-transition
-       class="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border bg-white shadow-lg ...">
+       :style="'position:fixed; top:' + yPos + 'px; right:8px'"
+       class="z-50 w-44 overflow-hidden rounded-lg border bg-white shadow-lg ...">
     <a href="..." class="flex items-center gap-2 px-4 py-2.5 text-sm ...">Acción</a>
   </div>
 </div>
 ```
 
-Aplicado en: goal_list.html (3 acciones), transaction_row.html (editar/eliminar en mobile y desktop). Extensible a: budget_list, subscription_list, debt_list, split_group_detail.
+**IMPORTANTE**: Usar `position: fixed` (no `absolute`) con yPos calculado via `getBoundingClientRect()`. `position: absolute` se corta por el `overflow-y-auto` de `<main>`. Desktop usa botones individuales (`hidden sm:flex`), mobile usa dropdown (`sm:hidden`).
+
+Aplicado en: goal_list.html, transaction_row.html (mobile + desktop), budget_list, subscription_list, debt_list.
 
 ### Dashboard — 2 columnas en mobile
 KPI cards usan `grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4`. Padding/texto/iconos reducidos en mobile (`p-3 sm:p-5`, `text-lg sm:text-2xl`, `h-7 w-7 sm:h-9 sm:w-9`).

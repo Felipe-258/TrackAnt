@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from datetime import date
 from ..models import SplitGroup, SplitExpense
 from ..forms import SplitGroupForm, SplitExpenseForm
+from finances.models import Transaction, Category
 
 
 def split_list(request):
@@ -70,10 +72,26 @@ def split_expense_add(request, group_id):
             share_amount = float(e.amount) / num_members if num_members > 0 else 0
             e.shares = {m: share_amount for m in group.members}
             e.save()
+            if colony.auto_create_split_transactions:
+                category, _ = Category.objects.get_or_create(
+                    colony=colony,
+                    name='Gasto compartido',
+                    type='EXPENSE',
+                    defaults={'icon': 'users', 'color': '#D4764A'},
+                )
+                Transaction.objects.create(
+                    colony=colony,
+                    type='EXPENSE',
+                    amount=e.amount,
+                    currency=e.currency,
+                    category=category,
+                    date=e.date,
+                    note=f'Gasto compartido: {e.description}',
+                )
             messages.success(request, f'Gasto agregado: {e.description}')
             return redirect('splits:split_group_detail', pk=group_id)
     else:
-        form = SplitExpenseForm(initial={'date': __import__('datetime').date.today()}, group=group, colony=colony)
+        form = SplitExpenseForm(initial={'date': date.today()}, group=group, colony=colony)
     return render(request, 'splits/split_expense_form.html', {'form': form, 'group': group})
 
 
