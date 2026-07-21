@@ -1,5 +1,6 @@
 {% load static %}
-<aside class="fixed inset-y-0 z-20 flex w-64 flex-col border-r border-earth-200 bg-white transition-transform duration-300 dark:border-earth-800 dark:bg-earth-950 lg:static lg:translate-x-0 no-select"
+<aside class="fixed inset-y-0 z-20 flex w-64 flex-col border-r border-earth-200 bg-white transition-transform duration-300 dark:border-earth-800 dark:bg-earth-950 lg:static lg:translate-x-0 no-select pb-24 lg:pb-0"
+       style="view-transition-name: none;"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
   <div class="border-b border-earth-200 dark:border-earth-800" style="padding-top: var(--safe-top);">
     <div class="flex h-16 items-center gap-3 px-6">
@@ -86,19 +87,48 @@
     {% endwith %}
   </nav>
 
-  <div class="border-t border-earth-200 p-3 dark:border-earth-800">
+  <div class="border-t border-earth-200 p-3 dark:border-earth-800" x-data="{ profileOpen: false }">
     {% if request.user.is_authenticated %}
-    <div class="mb-2 px-3 py-2">
-      <div class="flex items-center gap-2 text-sm text-earth-500 dark:text-earth-400">
-        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sage-100 text-xs font-bold text-sage-700 dark:bg-sage-900/50 dark:text-sage-300">{{ request.user.username|slice:":1"|upper }}</span>
-        <span class="truncate">{{ request.user.username }}</span>
-      </div>
+    <button @click="profileOpen = !profileOpen" class="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sage-100 text-xs font-bold text-sage-700 dark:bg-sage-900/50 dark:text-sage-300">{{ request.user.username|slice:":1"|upper }}</span>
+      <span class="truncate flex-1 text-left">{{ request.user.username }}</span>
+      <i data-lucide="chevron-down" class="lucide-sm transition-transform" :class="profileOpen && 'rotate-180'"></i>
+    </button>
+    <div x-show="profileOpen" x-cloak x-transition class="mt-1 space-y-1">
+      <a href="{% url 'users:settings' %}"
+         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+        <i data-lucide="settings" class="lucide-sm"></i>
+        <span>Configuracion</span>
+      </a>
+      <a href="{% url 'users:logout' %}"
+         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+        <i data-lucide="log-out" class="lucide-sm"></i>
+        <span>Cerrar sesion</span>
+      </a>
     </div>
-    <a href="{% url 'users:logout' %}"
-       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
-      <i data-lucide="log-out" class="lucide-sm"></i>
-      <span>Cerrar sesion</span>
-    </a>
+    {% else %}
+    <button @click="profileOpen = !profileOpen" class="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold-100 text-xs font-bold text-gold-700 dark:bg-gold-900/50 dark:text-gold-300">I</span>
+      <span class="truncate flex-1 text-left">Invitado</span>
+      <i data-lucide="chevron-down" class="lucide-sm transition-transform" :class="profileOpen && 'rotate-180'"></i>
+    </button>
+    <div x-show="profileOpen" x-cloak x-transition class="mt-1 space-y-1">
+      <a href="{% url 'users:settings' %}"
+         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+        <i data-lucide="settings" class="lucide-sm"></i>
+        <span>Configuracion</span>
+      </a>
+      <a href="{% url 'users:registro' %}"
+         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+        <i data-lucide="user-plus" class="lucide-sm"></i>
+        <span>Crear cuenta</span>
+      </a>
+      <a href="{% url 'users:login' %}"
+         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
+        <i data-lucide="log-in" class="lucide-sm"></i>
+        <span>Iniciar sesion</span>
+      </a>
+    </div>
     {% endif %}
     {% if debug %}
     <a href="{% url 'playground' %}"
@@ -107,11 +137,6 @@
       <span>Playground</span>
     </a>
     {% endif %}
-    <a href="/admin/" target="_self"
-       class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-earth-500 hover:bg-earth-100 hover:text-earth-700 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200 touch-target">
-      <i data-lucide="settings" class="lucide-sm"></i>
-      <span>Configuracion</span>
-    </a>
   </div>
 </aside>
 

@@ -1,43 +1,41 @@
-{% extends 'base.html' %}
+{% extends 'users/base_auth.html' %}
 {% block title %}Iniciar sesion — TrackAnt{% endblock %}
-{% block page_title %}Iniciar sesion{% endblock %}
-{% block page_subtitle %}Entra a tu colonia{% endblock %}
+{% block heading %}Iniciar sesion{% endblock %}
+{% block subheading %}Entra a tu colonia{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-md">
-  <div class="rounded-2xl border border-earth-200 bg-white p-8 shadow-sm dark:border-earth-800 dark:bg-earth-900">
-    <form method="post" class="space-y-5">
-      {% csrf_token %}
-      {% if form.errors %}
-      <div class="rounded-lg border border-clay-300 bg-clay-50 px-4 py-3 text-sm text-clay-700 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
-        Usuario o contrasena incorrectos.
-      </div>
-      {% endif %}
+<div class="rounded-2xl border border-earth-200 bg-white p-8 text-left shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <form method="post" class="space-y-5">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="rounded-lg border border-clay-300 bg-clay-50 px-4 py-3 text-sm text-clay-700 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
+      Usuario o contrasena incorrectos.
+    </div>
+    {% endif %}
 
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Usuario</label>
-        <input type="text" name="username" required
-               class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
-               placeholder="Nombre de usuario">
-      </div>
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Usuario</label>
+      <input type="text" name="username" required
+             class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
+             placeholder="Nombre de usuario">
+    </div>
 
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Contrasena</label>
-        <input type="password" name="password" required
-               class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
-               placeholder="Tu contrasena">
-      </div>
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Contrasena</label>
+      <input type="password" name="password" required
+             class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
+             placeholder="Tu contrasena">
+    </div>
 
-      <button type="submit"
-              class="w-full rounded-xl bg-gold-500 px-6 py-3 text-base font-semibold text-white transition-all hover:bg-gold-600">
-        Entrar
-      </button>
-    </form>
+    <button type="submit"
+            class="w-full rounded-xl bg-gold-500 px-6 py-3 text-base font-semibold text-white transition-all hover:bg-gold-600">
+      Entrar
+    </button>
+  </form>
 
-    <p class="mt-6 text-center text-sm text-earth-500 dark:text-earth-400">
-      No tenes cuenta?
-      <a href="{% url 'users:registro' %}" class="font-medium text-gold-600 hover:text-gold-700 dark:text-gold-400">Crear una</a>
-    </p>
-  </div>
+  <p class="mt-6 text-center text-sm text-earth-500 dark:text-earth-400">
+    No tenes cuenta?
+    <a href="{% url 'users:registro' %}" class="font-medium text-gold-600 hover:text-gold-700 dark:text-gold-400">Crear una</a>
+  </p>
 </div>
 {% endblock %}
