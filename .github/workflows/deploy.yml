@@ -64,7 +64,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /mnt/datos/docker/web-apps
+            cd ~/docker/web-apps
             
             echo "Deploying version ${{ needs.build-and-push.outputs.version }}"
             
