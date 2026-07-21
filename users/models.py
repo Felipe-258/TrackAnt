@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class CustomUser(AbstractUser):
@@ -26,6 +27,27 @@ class Colony(models.Model):
         verbose_name='Miembros',
     )
     is_guest = models.BooleanField(default=False, verbose_name='Es invitado')
+    default_currency = models.ForeignKey(
+        'finances.Currency',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='colony_defaults',
+        verbose_name='Moneda por defecto',
+    )
+    auto_create_debt_transactions = models.BooleanField(
+        default=False,
+        verbose_name='Crear gasto al pagar deuda',
+    )
+    auto_create_split_transactions = models.BooleanField(
+        default=False,
+        verbose_name='Crear gasto en splits',
+    )
+    budget_alert_threshold = models.IntegerField(
+        default=80,
+        validators=[MinValueValidator(50), MaxValueValidator(100)],
+        verbose_name='Umbral de alerta de presupuesto (%)',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

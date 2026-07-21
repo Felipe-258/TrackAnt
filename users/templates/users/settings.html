@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Configuración - TrackAnt{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+{% block page_subtitle %}Preferencias de tu colonia{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="rounded-lg bg-clay-50 p-3 text-sm text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-3 mb-5 pb-5 border-b border-earth-200 dark:border-earth-800">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-earth-100 text-lg dark:bg-earth-800"><i data-lucide="home" class="lucide"></i></span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">General</h3>
+          <p class="text-xs text-earth-500 dark:text-earth-400">Configuración básica de la colonia</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre de la colonia</label>
+          {{ form.name }}
+          {% if form.name.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.name.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">
+            <i data-lucide="coins" class="lucide-sm inline-block align-middle text-gold-500"></i>
+            Moneda por defecto
+          </label>
+          {{ form.default_currency }}
+          <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Moneda sugerida al crear transacciones</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-3 mb-5 pb-5 border-b border-earth-200 dark:border-earth-800">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-sage-100 text-lg dark:bg-sage-900/50"><i data-lucide="zap" class="lucide text-sage-600 dark:text-sage-400"></i></span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Automatización</h3>
+          <p class="text-xs text-earth-500 dark:text-earth-400">Crear transacciones automáticamente</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          {{ form.auto_create_debt_transactions }}
+          <div>
+            <label for="{{ form.auto_create_debt_transactions.id_for_label }}" class="text-sm font-medium text-earth-700 dark:text-earth-300 cursor-pointer">
+              Crear gasto al pagar deuda
+            </label>
+            <p class="text-xs text-earth-400 dark:text-earth-500">Al registrar un pago de deuda, se crea automáticamente una transacción de gasto</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          {{ form.auto_create_split_transactions }}
+          <div>
+            <label for="{{ form.auto_create_split_transactions.id_for_label }}" class="text-sm font-medium text-earth-700 dark:text-earth-300 cursor-pointer">
+              Crear gasto en splits
+            </label>
+            <p class="text-xs text-earth-400 dark:text-earth-500">Al crear un gasto compartido, se crea automáticamente una transacción de gasto</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-3 mb-5 pb-5 border-b border-earth-200 dark:border-earth-800">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-clay-100 text-lg dark:bg-clay-900/50"><i data-lucide="bar-chart-3" class="lucide text-clay-600 dark:text-clay-400"></i></span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Presupuestos</h3>
+          <p class="text-xs text-earth-500 dark:text-earth-400">Umbrales de alerta</p>
+        </div>
+      </div>
+
+      <div x-data="{ threshold: {{ form.budget_alert_threshold.value|default:'80' }} }">
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">
+          Umbral de alerta: <span x-text="threshold + '%'" class="font-bold text-clay-600 dark:text-clay-400"></span>
+        </label>
+        <div class="flex items-center gap-4">
+          <input type="range" name="budget_alert_threshold" min="50" max="100" step="5"
+                 x-model="threshold"
+                 class="flex-1 h-2 bg-earth-200 rounded-lg appearance-none cursor-pointer dark:bg-earth-700">
+          <span class="text-sm font-bold text-earth-700 dark:text-earth-300 w-12 text-right" x-text="threshold + '%'"></span>
+        </div>
+        <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Porcentaje a partir del cual se muestra alerta en presupuestos</p>
+        {% if form.budget_alert_threshold.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.budget_alert_threshold.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <a href="{% url 'finances:dashboard' %}"
+         class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
+      <button type="submit"
+              class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-600">
+        <i data-lucide="check" class="lucide-sm"></i>
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
