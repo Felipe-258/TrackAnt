@@ -1,0 +1,189 @@
+========================================
+ SETUP GITHUB DEPLOY - TRACKANT
+========================================
+
+IMPORTANTE: GitHub Actions NO puede deployar a tu TrueNAS porque esta en
+una red local. Tenés 2 opciones:
+
+  Opcion A: Deploy manual con el script deploy.sh (recomendado por ahora)
+  Opcion B: Configurar Tailscale para acceso remoto (ver PASO 9)
+
+
+PASO 1: Configurar GitHub Secrets
+----------------------------------
+Ir a: https://github.com/Felipe-258/TrackAnt/settings/secrets/actions
+
+Crear 3 secrets:
+
+  Nombre: SERVER_HOST
+  Valor: 192.168.1.156
+
+  Nombre: SERVER_USER
+  Valor: felipe
+
+  Nombre: SERVER_SSH_KEY
+  Valor: (ver PASO 2)
+
+
+PASO 2: Generar y configurar SSH key
+--------------------------------------
+Ejecutar estos comandos UNO POR UNO:
+
+  ssh-keygen -t ed25519 -C "github-deploy"
+
+  (Cuando pregunte el archivo, presionar ENTER para aceptar el default)
+
+Si ya generaste la key y la guardaste en otro lugar, moverla:
+
+  mv key.txt ~/.ssh/id_ed25519
+  mv key.txt.pub ~/.ssh/id_ed25519.pub
+  chmod 600 ~/.ssh/id_ed25519
+
+Copiar la public key al TrueNAS:
+
+  ssh-copy-id -i ~/.ssh/id_ed25519.pub felipe@192.168.1.156
+
+Despues copiar la key privada para el secret de GitHub:
+
+  cat ~/.ssh/id_ed25519
+
+Copiar TODO el output (incluyendo las lineas BEGIN y END) y pegarlo
+en el secret SERVER_SSH_KEY de GitHub.
+
+
+PASO 3: Verificar que el server recibe SSH
+--------------------------------------------
+Ejecutar desde tu laptop:
+
+  ssh felipe@192.168.1.156 "echo OK"
+
+Si dice "OK", el SSH funciona.
+
+
+PASO 4: Verificar que Docker está corriendo en TrueNAS
+--------------------------------------------------------
+Ejecutar:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose ps"
+
+
+PASO 5: Probar el deploy manual
+---------------------------------
+Desde la carpeta del proyecto, ejecutar:
+
+  ./deploy.sh
+
+O manualmente:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose pull trackant && sudo docker compose up -d trackant"
+
+
+PASO 6: Verificar que TrackAnt carga
+--------------------------------------
+Abrir en el browser:
+
+  http://192.168.1.156:3200
+
+Si carga, todo funciona.
+
+
+PASO 7: Activar Watchtower (auto-deploy)
+------------------------------------------
+Watchtower revisa cada 5 minutos si hay imagenes nuevas en GHCR
+y automaticamente las deploya.
+
+Ejecutar:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose up -d watchtower"
+
+Verificar que esté corriendo:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose ps watchtower"
+
+Ver logs de Watchtower:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose logs watchtower -f"
+
+
+PASO 8: Activar Cloudflare Tunnel (cuando tengas el dominio)
+--------------------------------------------------------------
+Cuando tengas el dominio configurado en Cloudflare, ejecutar:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose up -d cloudflared"
+
+Verificar:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose ps cloudflared"
+
+Ver logs:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose logs cloudflared -f"
+
+
+PASO 9 (OPCIONAL): Configurar Tailscale para deploy automatico
+----------------------------------------------------------------
+Tailscale te da una IP accesible desde cualquier lugar sin abrir puertos.
+Esto permite que GitHub Actions haga SSH al TrueNAS.
+
+--- Instalar Tailscale en TrueNAS ---
+
+En la terminal del TrueNAS:
+
+  sudo pkg install tailscale
+
+  sudo sysrc tailscaled_enable=YES
+
+  sudo service tailscaled start
+
+  sudo tailscale up
+
+  (Seguir las instrucciones en pantalla para autenticar)
+
+Copiar la IP de Tailscale:
+
+  tailscale ip -4
+
+  (Anotar la IP, algo como 100.x.x.x)
+
+--- Instalar Tailscale en tu laptop ---
+
+  curl -fsSL https://tailscale.com/install.sh | sh
+
+  sudo tailscale up
+
+  (Seguir las instrucciones en pantalla)
+
+--- Configurar GitHub Secrets con Tailscale ---
+
+Ir a: https://github.com/Felipe-258/TrackAnt/settings/secrets/actions
+
+Actualizar el secret SERVER_HOST:
+
+  Nombre: SERVER_HOST
+  Valor: (la IP de Tailscale del TrueNAS, ej: 100.64.0.1)
+
+--- Verificar ---
+
+  ssh felipe@100.64.0.1 "echo OK"
+
+Si funciona, el deploy automatico de GitHub Actions debería funcionar.
+
+
+========================================
+ COMANDOS ÚTILES
+========================================
+
+Deploy manual:
+  ./deploy.sh
+
+Ver logs de TrackAnt:
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose logs trackant -f"
+
+Reiniciar TrackAnt:
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose restart trackant"
+
+Ver todos los contenedores:
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose ps"
+
+Actualizar todo:
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose pull && sudo docker compose up -d"
