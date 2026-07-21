@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sin conexion — TrackAnt</title>
+  <meta name="theme-color" content="#A07858" id="theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrackAnt">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overscroll-behavior: none;
+    }
+    :root {
+      --safe-top: env(safe-area-inset-top, 0);
+      --safe-bottom: env(safe-area-inset-bottom, 0);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      padding-top: calc(var(--safe-top) + 2rem);
+      padding-bottom: calc(var(--safe-bottom) + 2rem);
+      text-align: center;
+      background: #FAF6F1;
+      color: #3A271B;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1F1410;
+        color: #E2D1BC;
+      }
+      .ant-icon { opacity: 0.3; }
+      .btn {
+        background: #8A6348;
+        color: #FAF6F1;
+      }
+      .btn:hover { background: #6E4E38; }
+    }
+    .ant-icon {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 1.5rem;
+      opacity: 0.3;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      max-width: 20rem;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #8A6348;
+      color: #FAF6F1;
+      transition: background 0.15s, transform 0.05s;
+      min-height: 44px;
+      min-width: 44px;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn svg { width: 1em; height: 1em; }
+    .brand {
+      font-size: 0.75rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <svg class="ant-icon" viewBox="0 0 128 128" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M31.1 76.99s-3.75 3.47-4.97 6.95c-1.22 3.47-3.28 11.92-4.13 12.67s-3.66 2.06-4.69 2.53c-1.03.47-3.28.94-3.28 2.53s2.06 1.6 5.63 1.03s4.88-.75 5.54-1.6s4.32-14.17 4.88-15.02c.56-.84 1.6-3.19 4.79-5.63s6.85-5.44 6.85-5.44l-6.01-3.75-4.61 5.73z"/>
+    <path d="M12.56 44.94s-1.08-2.53-4.13-1.74c-2.68.7-4.13 4.74-3.38 6.62s2.86 2.72 2.86 2.72l4.65-7.6z"/>
+    <path d="M15 16.03c-.75.08-1.97 5.02-5.54 4.32-2.64-.52-2.13-4.22 1.22-6.05c3-1.64 4.93-.99 6.76-.33 2.7.97 5.4 3.94 6.71 7.41 1.31 3.47 2.87 7.83 3.52 12.95.66 5.21.28 5.4.28 5.4l-2.53.19s.47-1.31-.47-6.99c-.53-3.21-1.83-7.25-3-10.23-1.32-3.33-4.04-6.99-6.95-6.67z"/>
+    <path d="M36.35 19.51c-.69-.12-2.44 2.3-4.9.88-2.18-1.26-1.15-4.5 2.09-4.82 2.07-.21 4.68 1.28 5.96 2.58 1.97 2.02 3.43 5.35 4.08 8.73.68 3.49.6 6.76-.84 11.5-1.55 5.07-3.38 7.18-3.38 7.18l-1.97-2.02s1.36-1.88 2.82-5.91c1.06-2.94 1.69-6.19.99-10-.66-3.53-2.88-7.79-4.85-8.12z"/>
+    <path d="M15.24 40.95C10.1 43.35 3.44 51.14 4.63 60.1c.94 7.04 6.1 14.36 16.05 16.61 9.95 2.25 16.05-.94 16.05-.94l4.97-.75 4.32 6.01 12.86.09 8.45-3.47s5.89 8.38 7.83 11.33c1.94 2.96 8.38 8.17 8.38 8.17s1.74 1.3 3.53 2.3c1.69.94 9.81 4.88 17.2 5.23 12.92.62 16.81-2.98 17.63-4.01.4-.51.83-2.52 1-3.59.13-.84 1.51-8.79.47-15.02-.84-5.07-3.57-14.08-13.8-23.09s-24.12-11.26-32.85-6.19c-8.23 4.78-11.07 11.73-11.07 11.73s-2.63-6.96-9.76-7.88c-5.82-.75-8.35 2.25-8.35 2.25s.56-12.67-12.2-18.4c-9.33-4.17-17.29-.84-20.1.47z"/>
+    <path d="M52.31 58.78c-2.81.76-3.94 3.85-2.91 5.73 1.03 1.88 2.98 2.65 5.16 2.06 2.82-.75 3.94-3.28 3.28-5.16-.65-1.87-3.09-3.28-5.53-2.63z"/>
+    <path d="M76.52 63.2c1.31 2.63 5.21 2.7 8.82.47 3.94-2.44 4.13-5.91 2.44-7.53-1.74-1.69-5.44-1.31-8.44.75-3.05 2.06-4.13 4.69-2.82 6.31z"/>
+  </svg>
+
+  <h1>Sin conexion</h1>
+  <p>No pudimos conectar con el servidor. Verifica tu conexion a internet y volve a intentarlo.</p>
+
+  <button class="btn" onclick="window.location.reload()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+    Reintentar
+  </button>
+
+  <p class="brand">TrackAnt — Tus finanzas, tu colonia</p>
+
+  <script>
+    var isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark === null) {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta && isDark) {
+      meta.setAttribute('content', '#3A271B');
+    }
+  </script>
+</body>
+</html>
