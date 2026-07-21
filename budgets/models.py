@@ -1,22 +1,22 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Subquery, OuterRef
 from django.utils import timezone
 
 
 class BudgetQuerySet(models.QuerySet):
     def with_spent(self):
-        return self.annotate(
-            _spent_total=Sum(
-                'category__transaction__amount',
-                filter=models.Q(
-                    category__transaction__colony=models.OuterRef('colony'),
-                    category__transaction__type='EXPENSE',
-                    category__transaction__date__year=models.OuterRef('year'),
-                    category__transaction__date__month=models.OuterRef('month'),
-                    category__transaction__currency=models.OuterRef('currency'),
-                ),
-            )
-        )
+        from finances.models import Transaction
+        spent_subquery = Transaction.objects.filter(
+            category=OuterRef('category'),
+            colony=OuterRef('colony'),
+            type='EXPENSE',
+            date__year=OuterRef('year'),
+            date__month=OuterRef('month'),
+            currency=OuterRef('currency'),
+        ).order_by().values('category').annotate(
+            total=Sum('amount')
+        ).values('total')[:1]
+        return self.annotate(_spent_total=Subquery(spent_subquery))
 
 
 class Budget(models.Model):
