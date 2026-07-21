@@ -1,6 +1,7 @@
 from django import forms
 from django.db.models import Q
 from .models import Transaction, Category, Tag
+from goals.models import Goal
 
 
 class TransactionForm(forms.ModelForm):
@@ -17,7 +18,7 @@ class TransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        fields = ['type', 'amount', 'currency', 'category', 'date', 'note', 'receipt', 'is_recurring', 'tag_names', 'new_tags']
+        fields = ['type', 'amount', 'currency', 'category', 'goal', 'date', 'note', 'receipt', 'is_recurring', 'tag_names', 'new_tags']
         widgets = {
             'type': forms.RadioSelect(attrs={
                 'class': 'peer sr-only',
@@ -59,6 +60,9 @@ class TransactionForm(forms.ModelForm):
             'is_recurring': forms.CheckboxInput(attrs={
                 'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
             }),
+            'goal': forms.Select(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+            }),
         }
 
     def __init__(self, *args, colony=None, **kwargs):
@@ -67,6 +71,7 @@ class TransactionForm(forms.ModelForm):
         self.fields['type'].empty_label = None
         self.fields['currency'].empty_label = None
         self.fields['category'].empty_label = None
+        self.fields['goal'].empty_label = 'Sin meta'
         type_val = self.initial.get('type')
         if self.data.get('type'):
             type_val = self.data.get('type')
@@ -78,6 +83,7 @@ class TransactionForm(forms.ModelForm):
         if colony:
             from .models import Currency
             self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
+            self.fields['goal'].queryset = Goal.objects.filter(colony=colony, is_achieved=False).select_related('currency')
 
     def save(self, commit=True):
         instance = super().save(commit=False)

@@ -63,9 +63,9 @@
       </div>
 
       <div id="category-field" x-data="categoryDropdown()"
-           data-initial-category="{{ form.initial.category|default:'' }}"
-           data-initial-category-name="{{ form.initial.category.name|default:'Seleccionar categoría' }}"
-           data-initial-category-icon="{{ form.initial.category.icon|default:'' }}">
+           data-initial-category="{{ initial_category_id }}"
+           data-initial-category-name="{{ initial_category_name }}"
+           data-initial-category-icon="{{ initial_category_icon }}">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría</label>
         <div class="relative">
           <button type="button" @click="toggle()" @click.outside="open = false"
@@ -87,7 +87,7 @@
             </template>
           </div>
         </div>
-        <input type="hidden" name="category" id="id_category" value="{{ form.initial.category|default:'' }}" required>
+        <input type="hidden" name="category" id="id_category" value="{{ initial_category_id }}" required>
         {% if form.category.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.category.errors.0 }}</p>{% endif %}
       </div>
 
@@ -143,6 +143,15 @@
       <div>
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Comprobante</label>
         {{ form.receipt }}
+      </div>
+
+      <div x-show="type === 'INCOME'" x-transition>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">
+          <i data-lucide="target" class="lucide-sm inline-block align-middle text-gold-500"></i>
+          Vincular a meta de ahorro
+        </label>
+        {{ form.goal }}
+        <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Opcional: el monto se sumará al progreso de la meta</p>
       </div>
 
       <div class="flex items-center gap-2">

@@ -95,8 +95,8 @@ def _monthly_summary(colony):
 def dashboard(request):
     colony = request.colony
     ctx = _monthly_summary(colony)
-    ctx['balance_json'] = json.dumps(ctx['balance_by_currency'])
-    ctx['kpis_json'] = json.dumps(ctx['kpis_by_currency'])
+    ctx['balance_json'] = ctx['balance_by_currency']
+    ctx['kpis_json'] = ctx['kpis_by_currency']
     ctx['recent_transactions'] = Transaction.objects.filter(colony=colony).select_related('category', 'currency')[:10]
     ctx['goals_count'] = Goal.objects.filter(colony=colony, is_achieved=False).count()
     ctx['active_goals_list'] = list(Goal.objects.filter(colony=colony, is_achieved=False).only('id', 'name'))
@@ -158,8 +158,8 @@ def dashboard(request):
         else:
             monthly_by_currency[code]['expenses'][m - 1] = float(row['total'])
 
-    ctx['category_by_currency_json'] = json.dumps(category_by_currency)
-    ctx['monthly_by_currency_json'] = json.dumps(monthly_by_currency)
+    ctx['category_by_currency_json'] = category_by_currency
+    ctx['monthly_by_currency_json'] = monthly_by_currency
 
     return render(request, 'finances/dashboard.html', ctx)
 
@@ -271,7 +271,16 @@ def transaction_edit(request, pk):
             return redirect('finances:transaction_list')
     else:
         form = TransactionForm(instance=t, colony=colony)
-    return render(request, 'finances/transaction_form.html', {'form': form, 'transaction': t})
+
+    cat = t.category
+    ctx = {
+        'form': form,
+        'transaction': t,
+        'initial_category_id': cat.pk if cat else '',
+        'initial_category_name': cat.name if cat else 'Seleccionar categoría',
+        'initial_category_icon': cat.icon if cat else '',
+    }
+    return render(request, 'finances/transaction_form.html', ctx)
 
 
 def transaction_delete(request, pk):
