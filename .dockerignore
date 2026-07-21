@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.git
+.github
+.mimocode
+.gstack
+staticfiles/
+*.sqlite3
+.env
+*.log
