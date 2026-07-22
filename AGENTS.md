@@ -347,6 +347,8 @@ python manage.py createsuperuser
 5. **request.resolver_match.namespace**: Usar namespace para active state del sidebar (ej: `namespace == 'goals'`), no view_name exacto.
 6. **Nombres de apps**: `finances`, `goals`, `debts`, `budgets`, `subscriptions`, `splits`, `ants`, `api`.
 7. **Nunca commitear sin que el usuario lo pida explícitamente**.
+8. **Nunca hacer git push a main sin autorización explícita del usuario**. Siempre preguntar antes de pushear.
+9. **Al hacer cambios en main, actualizar también la imagen Docker en GHCR**. Después de commitear y pushear, ejecutar `./build-push-deploy.sh` o al menos buildear y subir la imagen con la versión correspondiente del archivo `VERSION`.
 
 ## Bugs Conocidos y Fixes Recientes
 
