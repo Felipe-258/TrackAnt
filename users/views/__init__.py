@@ -10,6 +10,7 @@ def _assign_colony(request, user):
     existing = user.owned_colonies.filter(is_guest=False).first()
     if existing:
         request.session['colony_id'] = existing.id
+        request.colony = existing
         return
     colony = getattr(request, 'colony', None)
     if colony and colony.is_guest:
@@ -17,6 +18,7 @@ def _assign_colony(request, user):
         colony.is_guest = False
         colony.name = f'Colonia de {user.username}'
         colony.save()
+        request.session['colony_id'] = colony.id
 
 
 def welcome(request):
@@ -66,6 +68,5 @@ def registro(request):
 
 def logout_view(request):
     logout(request)
-    request.session.flush()
     messages.success(request, 'Sesion cerrada')
     return redirect('users:welcome')

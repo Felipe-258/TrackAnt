@@ -7,6 +7,7 @@ WELCOME_EXEMPT = [
     '/login/',
     '/logout/',
     '/registro/',
+    '/settings/',
     '/admin/',
     '/static/',
     '/api/',
@@ -36,8 +37,6 @@ class ColonyMiddleware:
         return response
 
     def _create_guest(self, request):
-        colony = Colony.objects.filter(is_guest=True).first()
-        if not colony:
-            colony = Colony.objects.create(name='Colonia invitada', is_guest=True)
+        colony = Colony.objects.create(name='Colonia invitada', is_guest=True)
         request.session['colony_id'] = colony.id
         return colony
