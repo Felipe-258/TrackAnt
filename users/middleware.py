@@ -30,7 +30,7 @@ class ColonyMiddleware:
 
         path = request.path
         if not any(path.startswith(p) for p in WELCOME_EXEMPT):
-            if not request.session.get('welcome_seen'):
+            if not request.user.is_authenticated and not request.session.get('welcome_seen'):
                 return redirect('users:welcome')
 
         response = self.get_response(request)
