@@ -12,6 +12,9 @@ ALLOWED_HOSTS = os.environ.get('TRACKANT_ALLOWED_HOSTS', 'localhost,127.0.0.1').
 if DEBUG:
     ALLOWED_HOSTS.extend(['*', '.local'])
 
+VERSION_FILE = BASE_DIR / 'VERSION'
+TRACKANT_VERSION = VERSION_FILE.read_text().strip() if VERSION_FILE.exists() else 'dev'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
