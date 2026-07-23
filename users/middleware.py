@@ -44,4 +44,5 @@ class ColonyMiddleware:
             colony.default_currency = default_currency
             colony.save(update_fields=['default_currency'])
         request.session['colony_id'] = colony.id
+        request.session['welcome_seen'] = True
         return colony
