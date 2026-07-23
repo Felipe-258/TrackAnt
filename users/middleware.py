@@ -37,6 +37,11 @@ class ColonyMiddleware:
         return response
 
     def _create_guest(self, request):
+        from finances.models import Currency
         colony = Colony.objects.create(name='Colonia invitada', is_guest=True)
+        default_currency = Currency.objects.filter(colony__isnull=True).first()
+        if default_currency:
+            colony.default_currency = default_currency
+            colony.save(update_fields=['default_currency'])
         request.session['colony_id'] = colony.id
         return colony

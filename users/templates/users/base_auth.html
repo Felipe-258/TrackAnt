@@ -31,6 +31,7 @@
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
   <link rel="icon" type="image/svg+xml" href="{% static 'icons/colony/ant.svg' %}">
   <style>
     body { font-family: 'Inter', system-ui, sans-serif; }
@@ -38,6 +39,8 @@
     .lucide { width: 1.25em; height: 1.25em; }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     .float { animation: float 4s ease-in-out infinite; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .htmx-swapped { animation: fadeIn 0.25s ease-out; }
   </style>
 </head>
 <body class="h-full bg-earth-50 dark:bg-earth-950">

@@ -1,22 +1,23 @@
 {% load static %}
 <div x-data="quickAddModal()" @open-quick-add.window="open = true" x-cloak>
-  <!-- Backdrop -->
+  <!-- Backdrop + Centering wrapper -->
   <div x-show="open" x-transition:enter="transition-opacity duration-200"
        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
        x-transition:leave="transition-opacity duration-150"
        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
        @click="open = false"
-       class="fixed inset-0 z-50 bg-earth-900/50 dark:bg-earth-950/70"></div>
+       class="fixed inset-0 z-50 flex items-end justify-center bg-earth-900/50 dark:bg-earth-950/70
+              lg:items-center">
 
-  <!-- Bottom sheet / Modal -->
-  <div x-show="open" x-cloak
-       x-transition:enter="transition-transform duration-300 ease-out"
-       x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
-       x-transition:leave="transition-transform duration-200 ease-in"
-       x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
-       @click.outside="open = false"
-       class="fixed bottom-0 inset-x-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white shadow-2xl dark:bg-earth-900
-              lg:static lg:mx-auto lg:mt-32 lg:w-full lg:max-w-md lg:rounded-2xl lg:mb-8">
+    <!-- Bottom sheet / Modal -->
+    <div x-show="open" x-cloak
+         x-transition:enter="transition-all duration-300 ease-out"
+         x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition-all duration-200 ease-in"
+         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-8"
+         @click.stop
+         class="w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white shadow-2xl dark:bg-earth-900
+                lg:max-w-md lg:rounded-2xl">
 
     <!-- Header -->
     <div class="flex items-center justify-between border-b border-earth-200 px-5 py-4 dark:border-earth-800">
@@ -32,6 +33,7 @@
           @htmx:before-request="submitting = true"
           @htmx:after-request="handleResponse($event)"
           class="space-y-4 p-5">
+      {% csrf_token %}
 
       <!-- Type toggle -->
       <div class="flex gap-2" role="radiogroup" aria-label="Tipo de transacción">
@@ -59,16 +61,22 @@
       <!-- Amount -->
       <div>
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
-        <input type="number" name="amount" step="0.01" required placeholder="0.00"
-               x-model="amount" inputmode="decimal" autocomplete="off" enterkeyhint="done"
-               class="w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5">
+        <div class="relative">
+          <input type="number" name="amount" step="0.01" required placeholder="0.00"
+                 x-model="amount" inputmode="decimal" autocomplete="off" enterkeyhint="done"
+                 class="w-full rounded-lg border border-earth-300 bg-white px-4 py-3 pr-14 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm sm:py-2.5">
+          {% if request.colony.default_currency %}
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-earth-400 dark:text-earth-500">{{ request.colony.default_currency.symbol }} {{ request.colony.default_currency.code }}</span>
+          {% endif %}
+        </div>
       </div>
 
       <!-- Category -->
       <div x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="loadCategories($event.detail)">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoria</label>
         <div class="relative">
-          <button type="button" @click="toggle()" @click.outside="open = false"
+          <button type="button" @click="toggle(); $nextTick(() => positionDropdown($refs.dropdownBtn))" @click.outside="open = false"
+                  x-ref="dropdownBtn"
                   class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
             <template x-if="selectedIcon">
               <i :data-lucide="selectedIcon" class="lucide-sm"></i>
@@ -76,8 +84,9 @@
             <span x-text="selectedName" class="flex-1 text-left"></span>
             <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
           </button>
-          <div x-show="open" x-transition
-               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
+          <div x-show="open" x-transition x-ref="dropdownList"
+               :style="dropdownStyle"
+               class="fixed z-[60] max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
             <template x-for="cat in categories" :key="cat.id">
               <button type="button" @click="select(cat)"
                       class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
@@ -106,6 +115,7 @@
       </button>
     </form>
   </div>
+  </div>
 </div>
 
 <script>
@@ -120,8 +130,7 @@ function quickAddModal() {
     handleResponse(evt) {
       this.submitting = false;
       if (evt.detail.successful) {
-        this.open = false;
-        this.amount = '';
+        window.location.reload();
       }
     }
   };
@@ -134,6 +143,19 @@ function quickCategoryDropdown() {
     selectedName: 'Seleccionar categoria',
     selectedIcon: '',
     categories: [],
+    dropdownStyle: '',
+    positionDropdown(btn) {
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const listHeight = Math.min(this.categories.length * 40 + 8, 240);
+      const style = `left:${rect.left}px; width:${rect.width}px;`;
+      if (spaceBelow < listHeight + 8) {
+        this.dropdownStyle = `${style} bottom:${window.innerHeight - rect.top}px; max-height:${Math.min(listHeight, spaceBelow)}px;`;
+      } else {
+        this.dropdownStyle = `${style} top:${rect.bottom + 4}px;`;
+      }
+    },
     loadCategories(type) {
       type = type || 'EXPENSE';
       fetch(`/transactions/category-options/?type=${type}`)

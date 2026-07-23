@@ -43,6 +43,8 @@ def login_view(request):
             _assign_colony(request, user)
             messages.success(request, f'Bienvenido, {user.username}')
             return redirect('finances:dashboard')
+        if request.htmx:
+            return render(request, 'users/login_form.html', {'form': form})
     else:
         from django.contrib.auth.forms import AuthenticationForm
         form = AuthenticationForm()
@@ -61,6 +63,8 @@ def registro(request):
             _assign_colony(request, user)
             messages.success(request, f'Colonia creada. Bienvenido, {user.username}')
             return redirect('finances:dashboard')
+        if request.htmx:
+            return render(request, 'users/registro_form.html', {'form': form})
     else:
         form = RegistroForm()
     return render(request, 'users/registro.html', {'form': form})
