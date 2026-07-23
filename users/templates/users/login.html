@@ -5,17 +5,10 @@
 
 {% block content %}
 <div id="login-card" class="rounded-2xl border border-earth-200 bg-white p-8 text-left shadow-sm dark:border-earth-800 dark:bg-earth-900">
-  <form method="post" class="space-y-5" id="login-form" novalidate
-        hx-post="{% url 'users:login' %}"
-        hx-target="#login-card"
-        hx-swap="outerHTML">
+  <form method="post" class="space-y-5" id="login-form" novalidate>
     {% csrf_token %}
     {% if form.errors %}
-    <div class="login-error-banner rounded-lg border border-clay-300 bg-clay-50 px-4 py-3 text-sm text-clay-700 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
-      Usuario o contrasena incorrectos.
-    </div>
-    {% else %}
-    <div class="login-error-banner hidden rounded-lg border border-clay-300 bg-clay-50 px-4 py-3 text-sm text-clay-700 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
+    <div class="rounded-lg border border-clay-300 bg-clay-50 px-4 py-3 text-sm text-clay-700 dark:border-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
       Usuario o contrasena incorrectos.
     </div>
     {% endif %}
@@ -45,25 +38,4 @@
     <a href="{% url 'users:registro' %}" class="font-medium text-gold-600 hover:text-gold-700 dark:text-gold-400">Crear una</a>
   </p>
 </div>
-
-<script>
-(function() {
-  document.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.detail.target.id === 'login-card') {
-      initLoginForm();
-    }
-  });
-
-  function initLoginForm() {
-    var form = document.getElementById('login-form');
-    if (!form || form._loginInit) return;
-    form._loginInit = true;
-
-    var banner = form.querySelector('.login-error-banner');
-    if (banner && !banner.classList.contains('hidden')) return;
-  }
-
-  initLoginForm();
-})();
-</script>
 {% endblock %}
