@@ -13,10 +13,10 @@ echo ""
 rm -f "$SOCK"
 
 # Primera conexión: autentica y crea socket compartido
-echo "[1/3] Conectando al TrueNAS..."
+echo "[1/4] Conectando al TrueNAS..."
 echo "  (Ingresa la contraseña UNA sola vez)"
 echo ""
-if ! ssh -o ConnectTimeout=10 -o ControlMaster=yes -o ControlPath="$SOCK" -o ControlPersist=60 $REMOTE "echo OK" 2>/dev/null; then
+if ! ssh -t -o ConnectTimeout=10 -o ControlMaster=yes -o ControlPath="$SOCK" -o ControlPersist=60 $REMOTE "echo OK" 2>/dev/null; then
     echo "ERROR: No se puede conectar al TrueNAS"
     rm -f "$SOCK"
     echo ""
@@ -26,9 +26,9 @@ fi
 echo "  Conectado OK"
 echo ""
 
-# Ejecutar deploy reusando la misma conexión
-echo "[2/3] Ejecutando deploy..."
-ssh -o ControlPath="$SOCK" $REMOTE "cd $REMOTE_DIR && sudo docker compose pull trackant && sudo docker compose up -d trackant" 2>&1
+# Ejecutar deploy con -t para que sudo pueda pedir contraseña
+echo "[2/4] Ejecutando deploy..."
+ssh -t -o ControlPath="$SOCK" $REMOTE "cd $REMOTE_DIR && sudo docker compose pull trackant && sudo docker compose up -d trackant" 2>&1
 if [ $? -ne 0 ]; then
     echo "ERROR: Fallo el deploy"
     ssh -o ControlPath="$SOCK" -O exit $REMOTE 2>/dev/null
@@ -39,9 +39,9 @@ if [ $? -ne 0 ]; then
 fi
 echo ""
 
-# Verificación reusando la misma conexión
-echo "[3/3] Verificando..."
-ssh -o ControlPath="$SOCK" $REMOTE "cd $REMOTE_DIR && sudo docker compose ps trackant" 2>/dev/null
+# Verificación
+echo "[3/4] Verificando..."
+ssh -t -o ControlPath="$SOCK" $REMOTE "cd $REMOTE_DIR && sudo docker compose ps trackant" 2>&1
 
 # Cerrar socket
 ssh -o ControlPath="$SOCK" -O exit $REMOTE 2>/dev/null
