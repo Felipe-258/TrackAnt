@@ -338,6 +338,57 @@ python manage.py createsuperuser
 ./scripts/run.sh
 ```
 
+## Browser Automation — Obscura vs Chrome DevTools
+
+### Instalación
+Obscura está instalado en `~/.local/bin/obscura`. No requiere Chrome.
+
+### Cuándo usar cada uno
+
+| Tarea | Obscura | Chrome DevTools |
+|-------|---------|-----------------|
+| Scraping / extracción de contenido | ✅ Preferido | ✅ |
+| Llenado de formularios | ✅ Preferido | ✅ |
+| Navegación básica | ✅ Preferido | ✅ |
+| **Screenshots** | ❌ | ✅ Obligatorio |
+| **Performance tracing** | ❌ | ✅ Obligatorio |
+| **Lighthouse audits** | ❌ | ✅ Obligatorio |
+| **Device emulation** | ❌ | ✅ Obligatorio |
+| **File uploads** | ❌ | ✅ Obligatorio |
+| Anti-detección / stealth | ✅ | ❌ |
+
+### Obscura — Comandos útiles
+
+```bash
+# Fetch con evaluación JS
+~/.local/bin/obscura fetch https://example.com --eval "document.title"
+
+# Extract HTML
+~/.local/bin/obscura fetch https://example.com --dump html
+
+# Extraer links
+~/.local/bin/obscura fetch https://example.com --dump links
+
+# Markdown
+~/.local/bin/obscura fetch https://example.com --dump markdown
+
+# Scraping paralelo
+~/.local/bin/obscura scrape url1 url2 url3 --concurrency 10 --eval "document.title"
+
+# Stealth mode (anti-detección)
+~/.local/bin/obscura fetch https://example.com --stealth
+```
+
+### Chrome DevTools — Capacidades únicas
+
+Las herramientas `chrome-devtools_*` siguen siendo necesarias para:
+- `take_screenshot` — QA visual
+- `performance_start_trace` — Análisis de performance
+- `lighthouse_audit` — Accesibilidad, SEO, best practices
+- `emulate` — Testing responsive (viewport, network throttling)
+- `upload_file` — Testing de uploads
+- `take_heapsnapshot` — Debug de memoria
+
 ## Convenciones Importantes
 
 1. **Decimal, nunca float**: Todos los montos son `DecimalField`. Siempre usar `from decimal import Decimal`. `Decimal + float` → `TypeError`.
@@ -349,6 +400,7 @@ python manage.py createsuperuser
 7. **Nunca commitear sin que el usuario lo pida explícitamente**.
 8. **Nunca hacer git push a main sin autorización explícita del usuario**. Siempre preguntar antes de pushear.
 9. **Al hacer cambios en main, actualizar también la imagen Docker en GHCR**. Después de commitear y pushear, ejecutar `./build-push-deploy.sh` o al menos buildear y subir la imagen con la versión correspondiente del archivo `VERSION`.
+10. **Siempre testear en Docker, no en local**. El comportamiento en local (runserver) es distinto al Docker (gunicorn + reverse proxy). Session cookies, middleware timing, y variables de entorno son diferentes. Para testear funcionalidad: buildear imagen Docker, correr el contenedor, y probar en el navegador contra el contenedor.
 
 ## Bugs Conocidos y Fixes Recientes
 
