@@ -67,5 +67,6 @@ def registro(request):
 
 
 def logout_view(request):
+    logout(request)
     messages.success(request, 'Sesion cerrada')
     return redirect('users:welcome')
