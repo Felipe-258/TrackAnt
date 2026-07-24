@@ -28,6 +28,13 @@ class ColonyMiddleware:
         else:
             request.colony = self._create_guest(request)
 
+        if request.user.is_authenticated:
+            user_colony = request.user.owned_colonies.filter(is_guest=False).first()
+            if user_colony and request.colony.id != user_colony.id:
+                request.colony = user_colony
+                request.session['colony_id'] = user_colony.id
+                request.session.modified = True
+
         path = request.path
         if not any(path.startswith(p) for p in WELCOME_EXEMPT):
             if not request.user.is_authenticated and not request.session.get('welcome_seen'):

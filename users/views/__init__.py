@@ -7,18 +7,17 @@ from .settings import settings_view
 
 
 def _assign_colony(request, user):
-    existing = user.owned_colonies.filter(is_guest=False).first()
-    if existing:
-        request.session['colony_id'] = existing.id
-        request.colony = existing
-        return
-    colony = getattr(request, 'colony', None)
-    if colony and colony.is_guest:
-        colony.owner = user
-        colony.is_guest = False
-        colony.name = f'Colonia de {user.username}'
-        colony.save()
+    colony = user.owned_colonies.filter(is_guest=False).first()
+    if not colony:
+        colony = getattr(request, 'colony', None)
+        if colony and colony.is_guest:
+            colony.owner = user
+            colony.is_guest = False
+            colony.name = f'Colonia de {user.username}'
+            colony.save()
+    if colony:
         request.session['colony_id'] = colony.id
+        request.colony = colony
 
 
 def welcome(request):
@@ -39,8 +38,21 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            _assign_colony(request, user)
+            request.session['welcome_seen'] = True
+            request.session.modified = True
+            request.session.save()
+            messages.success(request, f'Bienvenido, {user.username}')
+            return redirect('finances:dashboard')
+    if request.method == 'POST':
+        from django.contrib.auth.forms import AuthenticationForm
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
             request.session['welcome_seen'] = True
             _assign_colony(request, user)
+            request.session.modified = True
             messages.success(request, f'Bienvenido, {user.username}')
             return redirect('finances:dashboard')
     else:
@@ -57,8 +69,10 @@ def registro(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            request.session['welcome_seen'] = True
             _assign_colony(request, user)
+            request.session['welcome_seen'] = True
+            request.session.modified = True
+            request.session.save()
             messages.success(request, f'Colonia creada. Bienvenido, {user.username}')
             return redirect('finances:dashboard')
     else:
