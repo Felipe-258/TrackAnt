@@ -19,21 +19,30 @@ class ColonyMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        colony_id = request.session.get('colony_id')
-        if colony_id:
-            try:
-                request.colony = Colony.objects.get(id=colony_id)
-            except Colony.DoesNotExist:
-                request.colony = self._create_guest(request)
-        else:
-            request.colony = self._create_guest(request)
-
         if request.user.is_authenticated:
             user_colony = request.user.owned_colonies.filter(is_guest=False).first()
-            if user_colony and request.colony.id != user_colony.id:
+            if user_colony:
                 request.colony = user_colony
                 request.session['colony_id'] = user_colony.id
                 request.session.modified = True
+            else:
+                colony_id = request.session.get('colony_id')
+                if colony_id:
+                    try:
+                        request.colony = Colony.objects.get(id=colony_id)
+                    except Colony.DoesNotExist:
+                        request.colony = self._create_guest(request)
+                else:
+                    request.colony = self._create_guest(request)
+        else:
+            colony_id = request.session.get('colony_id')
+            if colony_id:
+                try:
+                    request.colony = Colony.objects.get(id=colony_id)
+                except Colony.DoesNotExist:
+                    request.colony = self._create_guest(request)
+            else:
+                request.colony = self._create_guest(request)
 
         path = request.path
         if not any(path.startswith(p) for p in WELCOME_EXEMPT):
