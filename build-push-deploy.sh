@@ -2,30 +2,40 @@
 # TrackAnt Build + Push + Deploy
 # Ejecutar desde la laptop: ./build-push-deploy.sh
 
-set -e
-
 REMOTE="felipe@192.168.1.156"
 REMOTE_DIR="~/docker/web-apps"
 IMAGE="ghcr.io/felipe-258/trackant"
-VERSION=$(cat VERSION | tr -d '[:space:]')
+CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
 
 echo "=== TrackAnt Build + Push + Deploy ==="
-echo "Version: $VERSION"
+echo "Versión actual: $CURRENT_VERSION"
+echo ""
+read -p "Nueva versión (Enter para mantener $CURRENT_VERSION): " NEW_VERSION
+if [ -z "$NEW_VERSION" ]; then
+    NEW_VERSION=$CURRENT_VERSION
+fi
+echo "$NEW_VERSION" > VERSION
+VERSION=$NEW_VERSION
+echo "  Versión a buildear: $VERSION"
 echo ""
 
 # Login a GHCR
 echo "[1/4] Login a GHCR..."
-if ! cat ~/.git-credentials | grep -q github.com; then
-    echo "ERROR: No hay credenciales de GitHub configuradas"
-    echo "Ejecuta: git config credential.helper store"
-    echo "Y haz un push a GitHub para que guarde las credenciales"
+if [ ! -f ~/.ghcr_token ]; then
+    echo "ERROR: No existe ~/.ghcr_token"
+    echo "Ejecuta: echo 'TU_TOKEN' > ~/.ghcr_token && chmod 600 ~/.ghcr_token"
     read -p "Presiona Enter para cerrar..."
     exit 1
 fi
-TOKEN=$(grep 'github.com' ~/.git-credentials | sed 's|https://||;s|@github.com||' | cut -d: -f2-)
+TOKEN=$(cat ~/.ghcr_token | tr -d '[:space:]')
+if [ "$TOKEN" = "TU_TOKEN_AQUI" ] || [ -z "$TOKEN" ]; then
+    echo "ERROR: ~/.ghcr_token tiene el placeholder. Reemplazá 'TU_TOKEN_AQUI' con tu token real."
+    read -p "Presiona Enter para cerrar..."
+    exit 1
+fi
 echo "$TOKEN" | docker login ghcr.io -u Felipe-258 --password-stdin 2>/dev/null
 if [ $? -ne 0 ]; then
-    echo "ERROR: No se pudo hacer login a GHCR"
+    echo "ERROR: No se pudo hacer login a GHCR. Verificá que el token tenga permisos write:packages."
     read -p "Presiona Enter para cerrar..."
     exit 1
 fi
@@ -67,11 +77,12 @@ sleep 10
 
 echo ""
 echo "Estado del contenedor:"
-ssh $REMOTE "cd $REMOTE_DIR && sudo docker compose ps trackant" 2>/dev/null
+ssh $REMOTE "cd $REMOTE_DIR && sudo docker compose ps trackant" 2>/dev/null || true
 
 echo ""
 echo "=== Deploy completado ==="
 echo "Version: $VERSION"
 echo "TrackAnt: http://192.168.1.156:3200"
 echo ""
+echo "Si ves algún error arriba, copialo antes de continuar."
 read -p "Presiona Enter para cerrar..."

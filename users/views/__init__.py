@@ -44,17 +44,6 @@ def login_view(request):
             request.session.save()
             messages.success(request, f'Bienvenido, {user.username}')
             return redirect('finances:dashboard')
-    if request.method == 'POST':
-        from django.contrib.auth.forms import AuthenticationForm
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            request.session['welcome_seen'] = True
-            _assign_colony(request, user)
-            request.session.modified = True
-            messages.success(request, f'Bienvenido, {user.username}')
-            return redirect('finances:dashboard')
     else:
         from django.contrib.auth.forms import AuthenticationForm
         form = AuthenticationForm()

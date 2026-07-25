@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'splits',
     'ants',
     'api',
+    'backups',
 ]
 
 MIDDLEWARE = [

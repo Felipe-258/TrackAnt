@@ -33,7 +33,7 @@ class RegistroForm(UserCreationForm):
 class ColonySettingsForm(forms.ModelForm):
     class Meta:
         model = Colony
-        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'budget_alert_threshold']
+        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'budget_alert_threshold', 'debt_show_days']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
@@ -52,6 +52,11 @@ class ColonySettingsForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'min': '50',
                 'max': '100',
+            }),
+            'debt_show_days': forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'min': '1',
+                'max': '365',
             }),
         }
 

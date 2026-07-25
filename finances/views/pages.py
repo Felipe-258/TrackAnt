@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Sum, Q, F
 from django.utils import timezone
-from datetime import date
+from datetime import date, timedelta
 import json
 from ..models import Transaction, Category, Currency, Tag
 from goals.models import Goal
@@ -119,10 +119,12 @@ def dashboard(request):
     budget_alerts = [b for b in budget_alerts if b.pct() >= threshold]
     ctx['budget_alerts'] = budget_alerts[:5]
 
+    deadline_threshold = date.today() + timedelta(days=colony.debt_show_days)
     pending_debts = Debt.objects.filter(
         colony=colony,
         is_settled=False,
         debt_type='OWE',
+        deadline__lte=deadline_threshold,
     ).select_related('currency').order_by('deadline')[:5]
     ctx['pending_debts'] = pending_debts
 

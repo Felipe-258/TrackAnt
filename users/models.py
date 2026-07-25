@@ -48,6 +48,11 @@ class Colony(models.Model):
         validators=[MinValueValidator(50), MaxValueValidator(100)],
         verbose_name='Umbral de alerta de presupuesto (%)',
     )
+    debt_show_days = models.IntegerField(
+        default=7,
+        validators=[MinValueValidator(1), MaxValueValidator(365)],
+        verbose_name='Mostrar deudas con deadline en (días)',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

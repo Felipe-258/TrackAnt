@@ -95,6 +95,30 @@
       </div>
     </div>
 
+    <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-3 mb-5 pb-5 border-b border-earth-200 dark:border-earth-800">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-clay-100 text-lg dark:bg-clay-900/50"><i data-lucide="credit-card" class="lucide text-clay-600 dark:text-clay-400"></i></span>
+        <div>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Deudas</h3>
+          <p class="text-xs text-earth-500 dark:text-earth-400">Filtrar qué deudas aparecen en el dashboard</p>
+        </div>
+      </div>
+
+      <div x-data="{ days: {{ form.debt_show_days.value|default:'7' }} }">
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">
+          Mostrar deudas con vencimiento en: <span x-text="days + (days == 1 ? ' día' : ' días')" class="font-bold text-clay-600 dark:text-clay-400"></span>
+        </label>
+        <div class="flex items-center gap-4">
+          <input type="range" name="debt_show_days" min="1" max="365" step="1"
+                 x-model="days"
+                 class="flex-1 h-2 bg-earth-200 rounded-lg appearance-none cursor-pointer dark:bg-earth-700">
+          <span class="text-sm font-bold text-earth-700 dark:text-earth-300 w-16 text-right" x-text="days + (days == 1 ? ' día' : ' días')"></span>
+        </div>
+        <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Solo se muestran en el dashboard las deudas cuyo vencimiento está dentro de este rango</p>
+        {% if form.debt_show_days.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.debt_show_days.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+
     <div class="grid grid-cols-2 gap-3">
       <a href="{% url 'finances:dashboard' %}"
          class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
@@ -105,6 +129,37 @@
       </button>
     </div>
   </form>
+
+  <div class="mt-6 rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="flex items-center gap-3 mb-5 pb-5 border-b border-earth-200 dark:border-earth-800">
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-100 text-lg dark:bg-gold-900/50"><i data-lucide="database" class="lucide text-gold-600 dark:text-gold-400"></i></span>
+      <div>
+        <h3 class="font-semibold text-earth-900 dark:text-earth-100">Respaldo de datos</h3>
+        <p class="text-xs text-earth-500 dark:text-earth-400">Copia de seguridad de tu colonia</p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-earth-600 dark:text-earth-400">Último backup:</span>
+        <span class="font-medium text-earth-900 dark:text-earth-100">{{ last_backup|default:"Nunca" }}</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-earth-600 dark:text-earth-400">Backups guardados:</span>
+        <span class="font-medium text-earth-900 dark:text-earth-100">{{ backup_count }}/30</span>
+      </div>
+
+      <form method="post" action="{% url 'users:backup_download' %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
+          <i data-lucide="download" class="lucide-sm"></i>
+          Descargar backup ahora
+        </button>
+      </form>
+      <p class="text-xs text-earth-400 dark:text-earth-500">Se crea un backup automático al iniciar el servidor (uno por día, 30 días de retención)</p>
+    </div>
+  </div>
 
   <div class="mt-8 text-center">
     <p class="text-xs text-earth-400 dark:text-earth-500">TrackAnt v{{ version }}</p>

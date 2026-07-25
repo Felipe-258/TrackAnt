@@ -187,3 +187,66 @@ Ver todos los contenedores:
 
 Actualizar todo:
   ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose pull && sudo docker compose up -d"
+
+
+========================================
+ BUILD Y PUSH DE IMAGEN DOCKER
+========================================
+
+Cuando haces cambios en el código y necesitas actualizar el servidor,
+seguí estos pasos:
+
+PASO 1: Login a GHCR
+----------------------
+Ejecutar (reemplazar TU_TOKEN por el token de GitHub):
+
+  echo "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" | docker login ghcr.io -u Felipe-258 --password-stdin
+
+Si dice "Login Succeeded", está todo bien.
+
+Para generar un token:
+1. Ir a https://github.com/settings/tokens
+2. Generate new token (classic)
+3. Nombre: docker-push
+4. Permisos: marcar write:packages
+5. Copiar el token
+
+
+PASO 2: Build de la imagen
+----------------------------
+Ejecutar:
+
+  cd /home/felipe/Documents/Github/TrackAnt
+  docker build -t ghcr.io/felipe-258/trackant:latest -t ghcr.io/felipe-258/trackant:0.1.0 .
+
+
+PASO 3: Push a GHCR
+---------------------
+Ejecutar:
+
+  docker push ghcr.io/felipe-258/trackant:latest
+  docker push ghcr.io/felipe-258/trackant:0.1.0
+
+
+PASO 4: Deploy en TrueNAS
+---------------------------
+Ejecutar:
+
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose pull trackant && sudo docker compose up -d trackant"
+
+
+PASO 5: Verificar
+-------------------
+Abrir en el browser:
+
+  http://192.168.1.156:3200
+
+
+RESUMEN RÁPIDO (cuando ya tenés el token):
+-------------------------------------------
+  echo "TU_TOKEN" | docker login ghcr.io -u Felipe-258 --password-stdin && \
+  cd /home/felipe/Documents/Github/TrackAnt && \
+  docker build -t ghcr.io/felipe-258/trackant:latest -t ghcr.io/felipe-258/trackant:0.1.0 . && \
+  docker push ghcr.io/felipe-258/trackant:latest && \
+  docker push ghcr.io/felipe-258/trackant:0.1.0 && \
+  ssh felipe@192.168.1.156 "cd ~/docker/web-apps && sudo docker compose pull trackant && sudo docker compose up -d trackant"

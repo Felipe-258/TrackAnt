@@ -37,3 +37,6 @@ staticfiles/
 
 # AI
 .mimocode
+
+# Credentials
+~/.ghcr_token
