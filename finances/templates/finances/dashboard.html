@@ -10,6 +10,7 @@
 
 <div class="space-y-6">
   <div x-data="currencySlider()"
+       style="touch-action: pan-y"
        @touchstart="handleTouchStart($event)"
        @touchend="handleTouchEnd($event)">
 
@@ -22,14 +23,14 @@
           </span>
         </div>
         <div class="mt-2 flex min-w-0 items-center justify-between sm:mt-3">
-          <button x-show="hasMultiple" x-cloak @click.stop="prev()" class="hidden shrink-0 rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target sm:inline-flex">
+          <button x-show="hasMultiple" x-cloak @click.stop="prev()" class="hidden shrink-0 items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target sm:inline-flex">
             <i data-lucide="chevron-left" class="lucide-sm"></i>
           </button>
           <p class="shrink-0 whitespace-nowrap text-lg font-bold sm:text-2xl"
              :class="currentBalance >= 0 ? 'text-earth-900 dark:text-earth-100' : 'text-clay-600 dark:text-clay-400'">
             <span x-text="currentSymbol"></span> <span x-text="formatNum(currentBalance)"></span>
           </p>
-          <button x-show="hasMultiple" x-cloak @click.stop="next()" class="hidden shrink-0 rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target sm:inline-flex">
+          <button x-show="hasMultiple" x-cloak @click.stop="next()" class="hidden shrink-0 items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target sm:inline-flex">
             <i data-lucide="chevron-right" class="lucide-sm"></i>
           </button>
         </div>
@@ -219,64 +220,112 @@
     </div>
   </div>
 
+  {% if pending_installments %}
+  <div class="rounded-xl border-2 border-clay-300 bg-clay-50 p-4 dark:border-clay-700 dark:bg-clay-950/30">
+    <div class="mb-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shopping-cart" class="lucide text-clay-600 dark:text-clay-400"></i>
+        <h3 class="font-semibold text-clay-900 dark:text-clay-100">Próximas cuotas</h3>
+      </div>
+      <a href="{% url 'installments:list' %}" class="text-sm text-clay-600 hover:text-clay-700 dark:text-clay-400 dark:hover:text-clay-300">Ver todas</a>
+    </div>
+    <div class="grid gap-2">
+      {% for inst in pending_installments %}
+      <div class="flex items-center justify-between rounded-lg border border-clay-200 bg-white p-3 dark:border-clay-800 dark:bg-earth-900">
+        <div>
+          <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ inst.purchase.name }}</h4>
+          <p class="text-xs text-earth-500 dark:text-earth-400">Cuota {{ inst.number }}/{{ inst.purchase.installments_count }} · vence {{ inst.due_date|date:"d/m/Y" }}</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-semibold text-clay-600 dark:text-clay-400">{{ inst.purchase.currency.symbol }}{{ inst.amount|floatformat:2 }}</span>
+          <a href="{% url 'installments:pay' inst.pk %}" class="rounded-lg bg-sage-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sage-600"><i data-lucide="check" class="lucide-sm"></i> Pagar</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if upcoming_recurring %}
+  <details x-data="{ open: localStorage.getItem('recurringPanelOpen') !== 'false' }"
+           :open="open"
+           @toggle="open = $event.target.open; localStorage.setItem('recurringPanelOpen', open)"
+           class="rounded-xl border-2 border-gold-300 bg-gold-50 dark:border-gold-700 dark:bg-gold-950/30">
+    <summary class="flex cursor-pointer items-center justify-between p-4 select-none">
+      <div class="flex items-center gap-2">
+        <i data-lucide="repeat" class="lucide text-gold-600 dark:text-gold-400"></i>
+        <h3 class="font-semibold text-gold-900 dark:text-gold-100">Próximos gastos recurrentes</h3>
+        <span class="ml-1 inline-flex items-center justify-center rounded-full bg-gold-200 px-2 py-0.5 text-xs font-bold text-gold-700 dark:bg-gold-800 dark:text-gold-300">{{ upcoming_recurring|length }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'recurring:list' %}" class="text-sm text-gold-600 hover:text-gold-700 dark:text-gold-400 dark:hover:text-gold-300">Ver todas</a>
+        <i data-lucide="chevron-down" class="lucide-sm text-gold-400 transition-transform open:rotate-180"></i>
+      </div>
+    </summary>
+    <div class="grid gap-2 px-4 pb-4">
+      {% for r in upcoming_recurring %}
+      <div class="flex items-center justify-between rounded-lg border border-gold-200 bg-white p-3 dark:border-gold-800 dark:bg-earth-900">
+        <div>
+          <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ r.name }}</h4>
+          <p class="text-xs text-earth-500 dark:text-earth-400">{{ r.get_cycle_display }} · próximo {{ r.next_date|date:"d/m/Y" }}</p>
+        </div>
+        <span class="font-semibold text-gold-600 dark:text-gold-400">{{ r.currency.symbol }}{{ r.amount|floatformat:2 }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
   <div class="grid gap-6 lg:grid-cols-2">
-    <div x-data="chartCurrencyNav('categoryChart')" class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" id="categoryChart-container">
       <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <i data-lucide="pie-chart" class="lucide text-clay-500"></i>
             <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Gastos por categoría</h2>
           </div>
-          <div x-show="hasMultiple" x-cloak class="flex items-center gap-1">
-            <button @click="prev()" class="rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
+          <div id="categoryChart-nav" class="flex items-center gap-1" style="display:none">
+            <button onclick="window._chartCategory.prev()" class="inline-flex items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
               <i data-lucide="chevron-left" class="lucide-sm"></i>
             </button>
-            <span class="min-w-[2.5rem] text-center text-sm font-medium text-earth-700 dark:text-earth-300" x-text="currentCurrency"></span>
-            <button @click="next()" class="rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
+            <span id="categoryChart-currency" class="min-w-[2.5rem] text-center text-sm font-medium text-earth-700 dark:text-earth-300">—</span>
+            <button onclick="window._chartCategory.next()" class="inline-flex items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
               <i data-lucide="chevron-right" class="lucide-sm"></i>
             </button>
           </div>
         </div>
       </div>
       <div class="flex items-center justify-center p-6">
-        <template x-if="hasData">
-          <div class="h-48 w-48">
-            <canvas id="categoryChart"></canvas>
-          </div>
-        </template>
-        <template x-if="!hasData">
-          <p class="text-sm text-earth-400 dark:text-earth-500">Sin gastos este mes</p>
-        </template>
+        <div id="categoryChart-wrap" class="h-48 w-48">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <p id="categoryChart-empty" class="text-sm text-earth-400 dark:text-earth-500" style="display:none">Sin gastos este mes</p>
       </div>
     </div>
 
-    <div x-data="chartCurrencyNav('monthlyChart')" class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900" id="monthlyChart-container">
       <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <i data-lucide="bar-chart-3" class="lucide text-sage-500"></i>
             <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Ingresos vs Gastos</h2>
           </div>
-          <div x-show="hasMultiple" x-cloak class="flex items-center gap-1">
-            <button @click="prev()" class="rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
+          <div id="monthlyChart-nav" class="flex items-center gap-1" style="display:none">
+            <button onclick="window._chartMonthly.prev()" class="inline-flex items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
               <i data-lucide="chevron-left" class="lucide-sm"></i>
             </button>
-            <span class="min-w-[2.5rem] text-center text-sm font-medium text-earth-700 dark:text-earth-300" x-text="currentCurrency"></span>
-            <button @click="next()" class="rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
+            <span id="monthlyChart-currency" class="min-w-[2.5rem] text-center text-sm font-medium text-earth-700 dark:text-earth-300">—</span>
+            <button onclick="window._chartMonthly.next()" class="inline-flex items-center justify-center rounded-lg border border-earth-200 p-1 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target">
               <i data-lucide="chevron-right" class="lucide-sm"></i>
             </button>
           </div>
         </div>
       </div>
       <div class="flex items-center justify-center p-6">
-        <template x-if="hasData">
-          <div class="h-48 w-full">
-            <canvas id="monthlyChart"></canvas>
-          </div>
-        </template>
-        <template x-if="!hasData">
-          <p class="text-sm text-earth-400 dark:text-earth-500">Sin transacciones este mes</p>
-        </template>
+        <div id="monthlyChart-wrap" class="h-48 w-full">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+        <p id="monthlyChart-empty" class="text-sm text-earth-400 dark:text-earth-500" style="display:none">Sin transacciones este mes</p>
       </div>
     </div>
   </div>
@@ -369,6 +418,13 @@ document.addEventListener('alpine:init', () => {
     init() {
       this.balanceData = JSON.parse(document.getElementById('balance-data').textContent || '[]');
       this.kpisData = JSON.parse(document.getElementById('kpis-data').textContent || '[]');
+      this.$nextTick(() => {
+        this.$el.addEventListener('touchmove', (e) => {
+          if (!this.hasMultiple) return;
+          const diff = this.touchStartX - e.touches[0].clientX;
+          if (Math.abs(diff) > 10) { e.preventDefault(); }
+        }, { passive: false });
+      });
     },
 
     get balanceCodes() { return this.balanceData.map(b => b.code); },
@@ -404,79 +460,102 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
-  Alpine.data('chartCurrencyNav', (chartId) => ({
-    chartId: chartId,
-    allData: {},
-    index: 0,
-    chart: null,
+});
 
-    init() {
-      const sourceId = this.chartId === 'categoryChart' ? 'category-chart-data' : 'monthly-chart-data';
-      this.allData = JSON.parse(document.getElementById(sourceId).textContent || '{}');
-      this.$nextTick(() => this.updateChart());
-    },
-
-    get currencies() { return Object.keys(this.allData); },
-    get hasMultiple() { return this.currencies.length > 1; },
-    get hasData() { return this.currencies.length > 0; },
-    get currentCurrency() { return this.currencies[this.index] || ''; },
-    get currentData() { return this.allData[this.currentCurrency] || {}; },
-
-    prev() { this.index = (this.index - 1 + this.currencies.length) % this.currencies.length; this.updateChart(); },
-    next() { this.index = (this.index + 1) % this.currencies.length; this.updateChart(); },
-
-    updateChart() {
-      if (this.chart) { this.chart.destroy(); this.chart = null; }
-      if (!this.hasData) return;
-
-      const canvas = document.getElementById(this.chartId);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const chartData = this.currentData;
-      const isBar = this.chartId === 'monthlyChart';
-      const self = this;
-
-      requestAnimationFrame(function () {
-        if (isBar) {
-          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-          const now = new Date();
-          const monthLabels = months.slice(0, now.getMonth() + 1);
-          const incomes = (chartData.incomes || []).slice(0, now.getMonth() + 1);
-          const expenses = (chartData.expenses || []).slice(0, now.getMonth() + 1);
-
-          self.chart = new Chart(canvas, {
-            type: 'bar',
-            data: {
-              labels: monthLabels,
-              datasets: [
-                { label: 'Ingresos', data: incomes, backgroundColor: '#6E8F4C', borderRadius: 4 },
-                { label: 'Gastos', data: expenses, backgroundColor: '#D4764A', borderRadius: 4 }
-              ]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: true,
-              scales: { y: { beginAtZero: true, grid: { color: '#E2D1BC33' } } },
-              plugins: { legend: { labels: { usePointStyle: true, padding: 16 } } }
-            }
-          });
-        } else {
-          self.chart = new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-              labels: chartData.labels || [],
-              datasets: [{ data: chartData.values || [], backgroundColor: chartData.colors || [], borderWidth: 0 }]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: true,
-              plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } }
-            }
-          });
-        }
-      });
+class DashboardChart {
+  constructor(chartId, sourceId, type) {
+    this.chartId = chartId;
+    this.type = type;
+    const raw = document.getElementById(sourceId);
+    this.allData = raw ? JSON.parse(raw.textContent || '{}') : {};
+    this.currencies = Object.keys(this.allData);
+    this.index = 0;
+    this.chart = null;
+    this._rafId = null;
+    this._setup();
+  }
+  _setup() {
+    if (this.currencies.length === 0) {
+      const w = document.getElementById(this.chartId + '-wrap');
+      if (w) w.style.display = 'none';
+      const e = document.getElementById(this.chartId + '-empty');
+      if (e) e.style.display = 'block';
+      return;
     }
-  }));
+    const nav = document.getElementById(this.chartId + '-nav');
+    if (nav) nav.style.display = this.currencies.length > 1 ? 'flex' : 'none';
+    this._updateLabel();
+    this._createChart();
+  }
+  prev() {
+    this.index = (this.index - 1 + this.currencies.length) % this.currencies.length;
+    this._scheduleUpdate();
+  }
+  next() {
+    this.index = (this.index + 1) % this.currencies.length;
+    this._scheduleUpdate();
+  }
+  _scheduleUpdate() {
+    if (this._rafId) cancelAnimationFrame(this._rafId);
+    this._rafId = requestAnimationFrame(() => {
+      this._rafId = null;
+      this._updateLabel();
+      this._createChart();
+    });
+  }
+  _updateLabel() {
+    const el = document.getElementById(this.chartId + '-currency');
+    if (el) el.textContent = this.currencies[this.index] || '';
+  }
+  _createChart() {
+    if (this.chart) { this.chart.destroy(); this.chart = null; }
+    const canvas = document.getElementById(this.chartId);
+    if (!canvas) return;
+    if (canvas.offsetParent === null || (canvas.offsetWidth === 0 && canvas.offsetHeight === 0)) {
+      this._rafId = requestAnimationFrame(() => { this._rafId = null; this._createChart(); });
+      return;
+    }
+    const data = this.allData[this.currencies[this.index]];
+    if (!data) return;
+    try {
+      if (this.type === 'bar') {
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const now = new Date();
+        this.chart = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: months.slice(0, now.getMonth() + 1),
+            datasets: [
+              { label: 'Ingresos', data: (data.incomes || []).slice(0, now.getMonth() + 1), backgroundColor: '#6E8F4C', borderRadius: 4 },
+              { label: 'Gastos', data: (data.expenses || []).slice(0, now.getMonth() + 1), backgroundColor: '#D4764A', borderRadius: 4 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: true,
+            scales: { y: { beginAtZero: true, grid: { color: '#E2D1BC33' } } },
+            plugins: { legend: { labels: { usePointStyle: true, padding: 16 } } }
+          }
+        });
+      } else {
+        this.chart = new Chart(canvas, {
+          type: 'doughnut',
+          data: {
+            labels: data.labels || [],
+            datasets: [{ data: data.values || [], backgroundColor: data.colors || [], borderWidth: 0 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } }
+          }
+        });
+      }
+    } catch(e) { console.error('Chart error', this.chartId, e); }
+  }
+}
 
+window.addEventListener('load', function() {
+  window._chartCategory = new DashboardChart('categoryChart', 'category-chart-data', 'doughnut');
+  window._chartMonthly = new DashboardChart('monthlyChart', 'monthly-chart-data', 'bar');
 });
 </script>
 {% endblock %}
