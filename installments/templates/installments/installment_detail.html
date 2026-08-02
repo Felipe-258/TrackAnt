@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block page_title %}{{ purchase.name }}{% endblock %}
+{% block page_subtitle %}{{ purchase.currency.symbol }}{{ purchase.total_amount|floatformat:2 }} en {{ purchase.installments_count }} cuotas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  {% if next_unpaid and not purchase.is_completed and currency_available < next_unpaid.amount %}
+  <div class="flex items-start gap-2 rounded-lg border border-gold-300 bg-gold-50 p-3 text-sm text-gold-800 dark:border-gold-700 dark:bg-gold-950/30 dark:text-gold-200">
+    <i data-lucide="alert-circle" class="lucide-sm mt-0.5 shrink-0"></i>
+    <span>
+      Tenés {{ purchase.currency.symbol }}{{ currency_available|floatformat:2 }} disponibles en {{ purchase.currency.code }} pero la próxima cuota es de {{ purchase.currency.symbol }}{{ next_unpaid.amount|floatformat:2 }}.
+      <a href="{% url 'finances:conversion' %}" class="font-semibold underline">Convertí tu dinero →</a>
+    </span>
+  </div>
+  {% endif %}
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="rounded-xl border border-earth-200 bg-white p-4 dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Pagadas</p>
+      <p class="mt-1 text-2xl font-bold text-sage-600 dark:text-sage-400">{{ purchase.paid_count }}/{{ purchase.installments_count }}</p>
+    </div>
+    <div class="rounded-xl border border-earth-200 bg-white p-4 dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Pagado</p>
+      <p class="mt-1 text-2xl font-bold text-earth-900 dark:text-earth-100">{{ purchase.currency.symbol }}{{ purchase.paid_total|floatformat:2 }}</p>
+    </div>
+    <div class="rounded-xl border border-earth-200 bg-white p-4 dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Restante</p>
+      <p class="mt-1 text-2xl font-bold text-clay-600 dark:text-clay-400">{{ purchase.currency.symbol }}{{ purchase.total_amount|add:"-"|add:purchase.paid_total|floatformat:2 }}</p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    {% if purchase.auto_debit %}<span class="inline-flex items-center gap-1 rounded-full bg-sage-100 px-3 py-1 text-xs font-medium text-sage-700 dark:bg-sage-900/30 dark:text-sage-300"><i data-lucide="zap" class="lucide-sm"></i> Débito automático</span>{% endif %}
+    {% if purchase.is_completed %}<span class="inline-flex items-center gap-1 rounded-full bg-gold-100 px-3 py-1 text-xs font-medium text-gold-700 dark:bg-gold-900/30 dark:text-gold-300"><i data-lucide="check-circle" class="lucide-sm"></i> Completada</span>{% endif %}
+    {% if purchase.note %}<p class="text-sm text-earth-500 dark:text-earth-400">{{ purchase.note }}</p>{% endif %}
+  </div>
+
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Cuotas</h2>
+    </div>
+    <div class="divide-y divide-earth-100 dark:divide-earth-800">
+      {% for inst in installments %}
+      <div class="flex items-center justify-between px-6 py-4 {% if inst.is_paid %}opacity-60{% endif %}">
+        <div class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full {% if inst.is_paid %}bg-sage-100 text-sage-600 dark:bg-sage-900/30 dark:text-sage-400{% else %}bg-earth-100 text-earth-500 dark:bg-earth-800 dark:text-earth-400{% endif %} text-xs font-bold">{{ inst.number }}</span>
+          <div>
+            <p class="text-sm font-medium text-earth-900 dark:text-earth-100">Cuota {{ inst.number }}/{{ purchase.installments_count }}</p>
+            <p class="text-xs text-earth-500 dark:text-earth-400">Vence {{ inst.due_date|date:"d/m/Y" }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-semibold {% if inst.is_paid %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">{{ purchase.currency.symbol }}{{ inst.amount|floatformat:2 }}</span>
+          {% if inst.is_paid %}
+          <span class="text-xs text-sage-600 dark:text-sage-400">Pagada {{ inst.paid_date|date:"d/m/Y" }}</span>
+          <a href="{% url 'installments:unpay' inst.pk %}" class="rounded-lg border border-earth-300 px-2.5 py-1 text-xs font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Revertir</a>
+          {% else %}
+          <a href="{% url 'installments:pay' inst.pk %}" class="rounded-lg bg-sage-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sage-600"><i data-lucide="check" class="lucide-sm"></i> Pagar</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <a href="{% url 'installments:edit' purchase.pk %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800"><i data-lucide="pencil" class="lucide-sm"></i> Editar</a>
+    <form method="post" action="{% url 'installments:delete' purchase.pk %}" class="inline">
+      {% csrf_token %}
+      <button type="submit" class="rounded-lg border border-clay-300 px-4 py-2 text-sm font-medium text-clay-600 hover:bg-clay-50 dark:border-clay-700 dark:text-clay-400 dark:hover:bg-clay-900/20"><i data-lucide="trash-2" class="lucide-sm"></i> Eliminar</button>
+    </form>
+    <a href="{% url 'installments:list' %}" class="rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Volver</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block page_title %}Compras en cuotas{% endblock %}
+{% block page_subtitle %}Tus compras financiadas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Compras activas</p>
+      <p class="mt-1 text-2xl font-bold text-earth-900 dark:text-earth-100">{{ summary.active_count }}</p>
+    </div>
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Cuotas pagadas</p>
+      <p class="mt-1 text-2xl font-bold text-sage-600 dark:text-sage-400">{{ summary.paid_count }}</p>
+    </div>
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Cuotas pendientes</p>
+      <p class="mt-1 text-2xl font-bold text-clay-600 dark:text-clay-400">{{ summary.pending_count }}</p>
+    </div>
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <p class="text-xs font-medium text-earth-500 dark:text-earth-400">Total pendiente</p>
+      {% for code, total in summary.pending_by_currency.items %}
+      <p class="mt-1 text-2xl font-bold text-clay-600 dark:text-clay-400">{{ total|floatformat:2 }}</p>
+      <p class="text-[10px] text-earth-400 dark:text-earth-500">{{ code }}</p>
+      {% empty %}
+      <p class="mt-1 text-2xl font-bold text-sage-600 dark:text-sage-400">$0,00</p>
+      <p class="text-[10px] text-earth-400 dark:text-earth-500">Sin deudas</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-earth-900 dark:text-earth-100">Cuotas activas</h2>
+    <a href="{% url 'installments:add' %}" class="inline-flex items-center gap-1.5 rounded-lg bg-clay-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clay-600">
+      <i data-lucide="plus" class="lucide-sm"></i> Nueva compra
+    </a>
+  </div>
+
+  {% if active_purchases %}
+  <div class="grid gap-4">
+    {% for p in active_purchases %}
+    <div class="rounded-xl border border-earth-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-earth-800 dark:bg-earth-900">
+      <a href="{% url 'installments:detail' p.pk %}" class="flex items-start justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ p.name }}</h3>
+            <span class="shrink-0 rounded-full bg-earth-100 px-2 py-0.5 text-[10px] font-medium text-earth-500 dark:bg-earth-800 dark:text-earth-400">{{ p.installments_count }} cuotas</span>
+          </div>
+          {% if p.next_installment %}
+          <p class="mt-0.5 text-sm text-earth-500 dark:text-earth-400">
+            Cuota {{ p.next_installment.number }}/{{ p.installments_count }} · vence {{ p.next_installment.due_date|date:"d/m/Y" }}
+          </p>
+          {% else %}
+          <p class="mt-0.5 text-sm text-earth-500 dark:text-earth-400">{{ p.paid_installments }}/{{ p.installments_count }} cuotas pagadas</p>
+          {% endif %}
+        </div>
+        <div class="text-right shrink-0">
+          <p class="font-bold text-earth-900 dark:text-earth-100">{{ p.currency.symbol }}{{ p.total_amount|floatformat:2 }}</p>
+          <p class="text-xs text-earth-400 dark:text-earth-500">{{ p.paid_installments }}/{{ p.installments_count }} pagadas</p>
+        </div>
+      </a>
+      <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-earth-200 dark:bg-earth-700">
+        <div class="h-full rounded-full bg-gold-500 transition-all" style="width: {{ p.progress_percent }}%"></div>
+      </div>
+      {% if p.next_installment %}
+      <div class="mt-3 flex items-center justify-between gap-3">
+        <span class="text-xs {% if p.is_overdue %}text-clay-600 dark:text-clay-400{% elif p.due_this_month %}text-gold-600 dark:text-gold-400{% else %}text-earth-400 dark:text-earth-500{% endif %}">
+          {% if p.is_overdue %}Vencida hace {{ p.next_installment.due_date|timesince }}{% elif p.due_this_month %}Vence este mes{% else %}Próxima cuota{% endif %}
+        </span>
+        <a href="{% url 'installments:pay' p.next_installment.pk %}" class="inline-flex items-center gap-1.5 rounded-lg bg-sage-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-sage-600">
+          <i data-lucide="check" class="lucide-sm"></i> Pagar cuota {{ p.next_installment.number }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rounded-xl border border-earth-200 bg-white p-12 text-center dark:border-earth-800 dark:bg-earth-900">
+    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-earth-100 dark:bg-earth-800">
+      <i data-lucide="shopping-cart" class="lucide text-earth-400"></i>
+    </div>
+    <p class="text-sm text-earth-500 dark:text-earth-400">No tenés compras en cuotas activas</p>
+    <a href="{% url 'installments:add' %}" class="mt-2 inline-block text-sm font-medium text-clay-600 hover:text-clay-700 dark:text-clay-400">+ Agregar compra</a>
+  </div>
+  {% endif %}
+
+  {% if completed_purchases %}
+  <details class="rounded-xl border border-earth-200 bg-white dark:border-earth-800 dark:bg-earth-900">
+    <summary class="flex cursor-pointer items-center justify-between px-6 py-4 select-none">
+      <h3 class="text-sm font-semibold text-earth-600 dark:text-earth-400">Completadas ({{ completed_purchases|length }})</h3>
+      <i data-lucide="chevron-down" class="lucide-sm text-earth-400 transition-transform open:rotate-180"></i>
+    </summary>
+    <div class="space-y-2 px-6 pb-4">
+      {% for p in completed_purchases %}
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-earth-500 dark:text-earth-400">{{ p.name }}</span>
+        <span class="text-xs text-earth-400">{{ p.currency.symbol }}{{ p.total_amount|floatformat:2 }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+</div>
+{% endblock %}

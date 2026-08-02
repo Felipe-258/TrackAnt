@@ -91,6 +91,8 @@ urlpatterns = [
     path('', include('debts.api_urls')),
     path('', include('budgets.api_urls')),
     path('', include('subscriptions.api_urls')),
+    path('', include('installments.api_urls')),
+    path('', include('recurring.api_urls')),
     path('', include('splits.api_urls')),
     path('stats/', api_stats, name='api-stats'),
     path('stats/by-category/', api_stats_by_category, name='api-stats-category'),

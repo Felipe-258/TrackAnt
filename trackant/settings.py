@@ -38,8 +38,10 @@ INSTALLED_APPS = [
     'subscriptions',
     'splits',
     'ants',
-    'api',
     'backups',
+    'api',
+    'installments',
+    'recurring',
 ]
 
 MIDDLEWARE = [

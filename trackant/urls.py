@@ -23,6 +23,8 @@ urlpatterns = [
     path('', include('debts.urls')),
     path('', include('budgets.urls')),
     path('', include('subscriptions.urls')),
+    path('', include('installments.urls')),
+    path('', include('recurring.urls')),
     path('', include('splits.urls')),
     path('', include('ants.urls')),
     path('api/v1/', include('api.urls')),
