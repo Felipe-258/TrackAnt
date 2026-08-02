@@ -15,4 +15,5 @@ urlpatterns = [
     path('incomes/', pages.income_list, name='income_list'),
     path('expenses/', pages.expense_list, name='expense_list'),
     path('categories/', pages.category_list, name='category_list'),
+    path('conversion/', pages.conversion, name='conversion'),
 ]

@@ -53,6 +53,15 @@
           </form>
         </div>
       </div>
+      {% if payment.available < payment.subscription.amount %}
+      <div class="mt-1 flex items-start gap-2 rounded-lg border border-gold-200 bg-gold-50 px-3 py-2 text-xs text-gold-800 dark:border-gold-700 dark:bg-gold-950/30 dark:text-gold-200">
+        <i data-lucide="alert-triangle" class="lucide-sm mt-0.5 shrink-0"></i>
+        <span>
+          Tenés {{ payment.subscription.currency.symbol }}{{ payment.available|floatformat:2 }} disponibles en {{ payment.subscription.currency.code }}.
+          <a href="{% url 'finances:conversion' %}" class="font-semibold underline">Convertí tu dinero →</a>
+        </span>
+      </div>
+      {% endif %}
       {% endfor %}
     </div>
   </div>
