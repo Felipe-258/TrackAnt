@@ -40,3 +40,5 @@ staticfiles/
 
 # Credentials
 ~/.ghcr_token
+# Deploy (contiene SECRET_KEY)
+deploy-instructions.txt
