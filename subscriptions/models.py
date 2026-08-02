@@ -15,6 +15,7 @@ class Subscription(models.Model):
     cycle = models.CharField(max_length=10, choices=Cycle.choices, default=Cycle.MONTHLY, verbose_name='Ciclo')
     next_date = models.DateField(verbose_name='Próximo cobro')
     category = models.ForeignKey('finances.Category', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Categoría')
+    auto_debit = models.BooleanField(default=True, verbose_name='Débito automático')
     is_active = models.BooleanField(default=True, verbose_name='Activa', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

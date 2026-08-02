@@ -6,9 +6,57 @@ from finances.models import Transaction
 
 def create_initial_payment(subscription):
     from .models import SubscriptionPayment
-    SubscriptionPayment.objects.get_or_create(
+    today = timezone.now().date()
+
+    payment, _ = SubscriptionPayment.objects.get_or_create(
         subscription=subscription,
         due_date=subscription.next_date,
+        defaults={'is_paid': False}
+    )
+
+    if subscription.auto_debit and subscription.next_date <= today and not payment.is_paid:
+        _process_payment(payment, subscription)
+
+
+def process_due_payment(payment):
+    subscription = payment.subscription
+    if not subscription.auto_debit:
+        return False
+    if payment.is_paid:
+        return False
+    _process_payment(payment, subscription)
+    return True
+
+
+def _process_payment(payment, subscription):
+    if not subscription.colony_id:
+        return
+
+    from trackant.utils import get_expense_category
+    transaction = Transaction.objects.create(
+        colony_id=subscription.colony_id,
+        type='EXPENSE',
+        amount=subscription.amount,
+        currency=subscription.currency,
+        category=get_expense_category(subscription.colony_id, subscription.category),
+        date=payment.due_date,
+        note=f'Suscripción: {subscription.name}',
+        is_recurring=True,
+    )
+
+    payment.is_paid = True
+    payment.paid_date = timezone.now().date()
+    payment.transaction = transaction
+    payment.save(update_fields=['is_paid', 'paid_date', 'transaction'])
+
+    next_date = calculate_next_due_date(payment.due_date, subscription.cycle)
+    subscription.next_date = next_date
+    subscription.save(update_fields=['next_date'])
+
+    from .models import SubscriptionPayment
+    SubscriptionPayment.objects.get_or_create(
+        subscription=subscription,
+        due_date=next_date,
         defaults={'is_paid': False}
     )
 
@@ -25,6 +73,7 @@ def calculate_next_due_date(current_date, cycle):
 
 def mark_as_paid(payment):
     from .models import SubscriptionPayment
+    from trackant.utils import get_expense_category
     subscription = payment.subscription
 
     transaction = Transaction.objects.create(
@@ -32,7 +81,7 @@ def mark_as_paid(payment):
         type='EXPENSE',
         amount=subscription.amount,
         currency=subscription.currency,
-        category=subscription.category,
+        category=get_expense_category(subscription.colony_id, subscription.category),
         date=payment.due_date,
         note=f'Suscripción: {subscription.name}',
         is_recurring=True,

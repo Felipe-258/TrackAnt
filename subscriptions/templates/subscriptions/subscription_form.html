@@ -75,6 +75,11 @@
       </div>
 
       <div class="flex items-center gap-2">
+        {{ form.auto_debit }}
+        <label for="{{ form.auto_debit.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Débito automático (generar gasto al vencer)</label>
+      </div>
+
+      <div class="flex items-center gap-2">
         {{ form.is_active }}
         <label for="{{ form.is_active.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Suscripción activa</label>
       </div>
