@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block page_title %}Conversión de moneda{% endblock %}
+{% block page_subtitle %}Convertí entre monedas con tus cotizaciones{% endblock %}
+
+{% block content %}
+{{ rates_json|json_script:"rates-data" }}
+{{ available_json|json_script:"available-data" }}
+<div class="space-y-6" x-data="converter()">
+  <div class="grid gap-6 lg:grid-cols-2">
+    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+        <i data-lucide="arrows-right-left" class="lucide text-gold-500"></i>
+        <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Convertir</h2>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Tengo</label>
+              <div class="relative">
+                <input type="number" :value="fromValue" @input="editFrom($event)" step="0.01" min="0" placeholder="0,00"
+                       class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+                <div class="absolute inset-y-0 right-1 flex items-center">
+                  <select x-model="fromCode" class="rounded-lg border-0 bg-transparent pr-1 text-xs font-medium text-earth-500 focus:outline-none dark:text-earth-400">
+                    <template x-for="c in currencies" :key="c.code">
+                      <option :value="c.code" x-text="c.code"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Quiero recibir</label>
+              <div class="relative">
+                <input type="number" :value="toValue" @input="editTo($event)" step="0.01" min="0" placeholder="0,00"
+                       class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+                <div class="absolute inset-y-0 right-1 flex items-center">
+                  <select x-model="toCode" class="rounded-lg border-0 bg-transparent pr-1 text-xs font-medium text-earth-500 focus:outline-none dark:text-earth-400">
+                    <template x-for="c in currencies" :key="c.code">
+                      <option :value="c.code" x-text="c.code"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2">
+            <i data-lucide="arrow-down" class="lucide-sm text-earth-400"></i>
+            <p class="text-xs text-earth-400 dark:text-earth-500">
+              1 <span x-text="fromCode"></span> = <span x-text="pairRate"></span> <span x-text="toCode"></span>
+            </p>
+          </div>
+          <div class="rounded-lg border p-4" :class="insufficientFunds ? 'border-clay-300 bg-clay-50 dark:border-clay-700 dark:bg-clay-950/30' : 'border-gold-200 bg-gold-50 dark:border-gold-700 dark:bg-gold-950/30'">
+            <p class="text-base font-semibold" :class="insufficientFunds ? 'text-clay-700 dark:text-clay-300' : 'text-gold-700 dark:text-gold-300'">Resultado</p>
+            <p class="mt-1 text-2xl font-bold" :class="insufficientFunds ? 'text-clay-700 dark:text-clay-300' : 'text-gold-800 dark:text-gold-200'">
+              <template x-if="editing === 'from' ? toValue : fromValue">
+                <span><span x-text="editing === 'from' ? toDisplay : fromDisplay"></span> <span class="text-sm" x-text="editing === 'from' ? toCode : fromCode"></span></span>
+              </template>
+              <span x-show="!(editing === 'from' ? toValue : fromValue)">—</span>
+            </p>
+            <p :style="insufficientFunds ? '' : 'display: none;'" class="mt-1 flex items-center gap-1 text-xs font-medium text-clay-600 dark:text-clay-400">
+              <i data-lucide="alert-triangle" class="lucide-sm"></i>
+              No tenés suficientes <span x-text="fromCode"></span>. Disponible: <span x-text="availableLabel"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'finances/partials/rates_section.html' %}
+  </div>
+
+  {% if quick %}
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Referencia rápida</h2>
+      <p class="text-sm text-earth-500 dark:text-earth-400">Valor de 1 unidad en pesos argentinos</p>
+    </div>
+    <div class="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-4">
+      {% for q in quick %}
+      <button type="button" @click="setQuick('{{ q.code }}')"
+              class="block rounded-xl border border-earth-200 bg-earth-50/50 p-4 text-left transition-all hover:shadow-md hover:border-gold-300 dark:border-earth-800 dark:bg-earth-800/30 dark:hover:border-gold-700">
+        <p class="text-sm font-medium text-earth-900 dark:text-earth-100">{{ q.code }} ({{ q.symbol }})</p>
+        <p class="mt-1 text-lg font-bold text-earth-900 dark:text-earth-100">$ {{ q.to_ars|floatformat:2 }}</p>
+        <p class="text-xs text-earth-400 dark:text-earth-500">{{ q.name }}</p>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function converter() {
+  const currencies = JSON.parse(document.getElementById('rates-data').textContent);
+  const available = JSON.parse(document.getElementById('available-data').textContent || '{}');
+  const requireFunds = {{ require_funds|yesno:"true,false" }};
+  const codes = Object.keys(currencies);
+  return {
+    currencies: codes.map(code => ({ code, symbol: code })),
+    fromCode: '{{ default_from }}',
+    toCode: 'USD',
+    editing: 'from',
+    amount: '',
+    get fromRate() { return currencies[this.fromCode] || 1; },
+    get toRate() { return currencies[this.toCode] || 1; },
+    get pairRate() {
+      const r = this.fromRate / this.toRate;
+      return r.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    },
+    get insufficientFunds() {
+      if (!requireFunds || this.editing !== 'from') return false;
+      const amt = parseFloat(this.amount);
+      if (!amt || isNaN(amt)) return false;
+      const avail = available[this.fromCode];
+      if (avail === undefined) return false;
+      return amt > avail;
+    },
+    get availableLabel() {
+      const avail = available[this.fromCode];
+      if (avail === undefined) return '—';
+      return avail.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    },
+    get fromValue() {
+      if (!this.amount || isNaN(this.amount)) return '';
+      if (this.editing === 'from') return this.amount;
+      const r = this.amount * this.toRate / this.fromRate;
+      return Math.round(r * 100) / 100;
+    },
+    get toValue() {
+      if (!this.amount || isNaN(this.amount)) return '';
+      if (this.editing === 'to') return this.amount;
+      const r = this.amount * this.fromRate / this.toRate;
+      return Math.round(r * 100) / 100;
+    },
+    get fromDisplay() {
+      if (this.fromValue === '') return '';
+      return Number(this.fromValue).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    },
+    get toDisplay() {
+      if (this.toValue === '') return '';
+      return Number(this.toValue).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    },
+    editFrom(e) { this.editing = 'from'; this.amount = e.target.value; },
+    editTo(e) { this.editing = 'to'; this.amount = e.target.value; },
+    setQuick(code) {
+      this.fromCode = code;
+      this.toCode = 'ARS';
+      this.editing = 'from';
+      this.amount = '1';
+    },
+  };
+}
+</script>
+{% endblock %}

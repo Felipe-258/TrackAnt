@@ -136,6 +136,7 @@
       -webkit-touch-callout: none;
       touch-action: manipulation;
     }
+    html { overflow-x: hidden; }
     html, body { overscroll-behavior: none; }
 
     /* Safe area variables */
@@ -149,10 +150,16 @@
     /* Active states para feedback táctil */
     button:active, a:active, [role="button"]:active,
     input[type="submit"]:active, input[type="button"]:active,
-    .card:active, .interactive:active,
-    .touch-target:active {
+    .card:active, .interactive:active {
       transform: scale(0.98);
       transition: transform 0.05s ease-out;
+    }
+    .touch-target:active {
+      transform: scale(0.99);
+      transition: transform 0.05s ease-out;
+    }
+    .touch-target.no-select:active {
+      transform: none;
     }
 
     /* Prevenir selección en UI chrome */
@@ -260,7 +267,7 @@
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" :style="isStandalone ? 'padding-bottom: calc(120px + var(--safe-bottom))' : ''">
+      <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8" :style="isStandalone ? 'padding-bottom: calc(120px + var(--safe-bottom))' : ''">
         {% if messages %}
         <div class="mb-6 space-y-2">
           {% for message in messages %}
@@ -323,9 +330,25 @@
   {% include 'components/quick_add.html' %}
 
   <script>
+    function setDateInputLocale() {
+      document.querySelectorAll('input[type="date"]').forEach(el => {
+        el.setAttribute('lang', 'es-AR');
+      });
+    }
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
-    document.addEventListener('htmx:afterSwap', () => lucide.createIcons());
-    document.addEventListener('htmx:afterSettle', () => lucide.createIcons());
+    document.addEventListener('htmx:configRequest', (e) => {
+      const match = document.cookie.match(/csrftoken=([^;]+)/);
+      if (match) e.detail.headers['X-CSRFToken'] = match[1];
+    });
+    document.addEventListener('htmx:afterSwap', () => {
+      lucide.createIcons();
+      setDateInputLocale();
+    });
+    document.addEventListener('htmx:afterSettle', () => {
+      lucide.createIcons();
+      setDateInputLocale();
+    });
+    setDateInputLocale();
   </script>
 
   {% block extra_scripts %}{% endblock %}

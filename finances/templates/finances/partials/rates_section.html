@@ -1,0 +1,66 @@
+<div id="rates-section">
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <div class="flex items-center gap-2">
+        <i data-lucide="coins" class="lucide text-sage-500"></i>
+        <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Cotizaciones</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        {% if last_updated %}
+        <span class="text-xs text-earth-400 dark:text-earth-500" title="Actualizado {{ last_updated|date:'d/m/Y H:i' }}">
+          <i data-lucide="clock" class="lucide-sm"></i> {{ last_updated|timesince }} atrás
+        </span>
+        {% else %}
+        <span class="text-xs text-earth-400 dark:text-earth-500">Sin actualizar</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="p-6">
+      <form method="post" class="space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_rates">
+        <div class="space-y-2">
+          {% for c in currencies %}
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-earth-100 bg-earth-50/50 px-3 py-2 dark:border-earth-800 dark:bg-earth-800/30">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-earth-100 text-xs font-bold text-earth-600 dark:bg-earth-800 dark:text-earth-300">{{ c.symbol }}</span>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-earth-900 dark:text-earth-100">{{ c.code }}</p>
+                <p class="truncate text-xs text-earth-400 dark:text-earth-500">{{ c.name }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              {% if c.code != 'ARS' %}
+              <input type="number" name="rate_{{ c.code }}" value="{{ c.rate_value }}" step="0.0001" min="0"
+                     class="w-28 rounded-lg border border-earth-300 bg-white px-3 py-1.5 text-right text-sm text-earth-900 focus:border-gold-400 focus:outline-none dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+              <span class="text-xs text-earth-400 dark:text-earth-500">ARS</span>
+              {% else %}
+              <span class="text-sm font-semibold text-earth-500 dark:text-earth-400">1,00</span>
+              <span class="text-xs text-earth-400 dark:text-earth-500">base</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-sage-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sage-600">
+            <i data-lucide="save" class="lucide-sm"></i> Guardar cotizaciones
+          </button>
+          <button type="button"
+                  hx-post="{% url 'finances:conversion' %}"
+                  hx-vals='{"action":"fetch"}'
+                  hx-target="#rates-section"
+                  hx-swap="outerHTML"
+                  hx-indicator="#rates-loading"
+                  class="inline-flex items-center gap-1.5 rounded-lg border border-earth-300 px-4 py-2 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">
+            <i data-lucide="refresh-cw" class="lucide-sm"></i> Actualizar desde API
+          </button>
+          <span id="rates-loading" class="htmx-indicator text-sm text-earth-400"><i data-lucide="loader" class="lucide-sm animate-spin"></i> Actualizando...</span>
+        </div>
+      </form>
+      {% if fetch_status %}
+      <p class="mt-3 text-sm {% if 'Error' in fetch_status %}text-clay-600 dark:text-clay-400{% else %}text-sage-600 dark:text-sage-400{% endif %}">{{ fetch_status }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>

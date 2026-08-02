@@ -124,3 +124,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
 }
+
+# Conversión de moneda
+EXCHANGE_API_URL = os.environ.get('TRACKANT_EXCHANGE_API_URL', 'https://open.er-api.com/v6/latest/USD')
+EXCHANGE_INTERVAL_HOURS = int(os.environ.get('TRACKANT_EXCHANGE_INTERVAL_HOURS', 6))

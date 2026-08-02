@@ -10,6 +10,7 @@ class Currency(models.Model):
     name = models.CharField(max_length=50, verbose_name='Nombre')
     rate_to_base = models.DecimalField(max_digits=10, decimal_places=4, default=1.0,
                                        help_text='Tasa respecto a la moneda base (ARS=1.0)')
+    rates_updated_at = models.DateTimeField(null=True, blank=True, verbose_name='Cotizaciones actualizadas')
 
     class Meta:
         verbose_name = 'Moneda'
@@ -83,4 +84,4 @@ class Transaction(models.Model):
 
     def __str__(self):
         sign = '+' if self.type == 'INCOME' else '-'
-        return f'{sign}${self.amount} — {self.category} ({self.date})'
+        return f'{sign}${self.amount} — {self.category} ({self.date.strftime("%d/%m")})'

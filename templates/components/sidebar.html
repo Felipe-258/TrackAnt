@@ -61,13 +61,34 @@
       <span>Presupuestos</span>
     </a>
 
+    <a href="{% url 'installments:list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
+              {% if namespace == 'installments' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="shopping-cart" class="lucide text-clay-500 dark:text-clay-400"></i>
+      <span>Cuotas</span>
+    </a>
+
     <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Extras</div>
 
     <a href="{% url 'subscriptions:subscription_list' %}"
        class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'subscriptions:subscription_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
-      <i data-lucide="repeat" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <i data-lucide="receipt-text" class="lucide text-gold-500 dark:text-gold-400"></i>
       <span>Suscripciones</span>
+    </a>
+
+    <a href="{% url 'recurring:list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
+              {% if namespace == 'recurring' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="repeat" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Recurrentes</span>
+    </a>
+
+    <a href="{% url 'finances:conversion' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
+              {% if current == 'finances:conversion' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="dollar-sign" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Conversión</span>
     </a>
 
     <a href="{% url 'splits:split_list' %}"

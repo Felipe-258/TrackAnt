@@ -1,4 +1,31 @@
 from datetime import date
+from django.db.models import Q
+
+
+def cap_day(year, month, day):
+    """Ajusta un día al máximo válido para el mes (ej: 31 en febrero → 28/29)."""
+    import calendar
+    last = calendar.monthrange(year, month)[1]
+    return min(day, last)
+
+
+def get_expense_category(colony_id, category=None):
+    """Devuelve una categoría de gasto válida. Si no hay categoría o es inválida, busca una fallback."""
+    from finances.models import Category
+    if category:
+        return category
+    fallback = (
+        Category.objects.filter(colony_id=colony_id, type='EXPENSE')
+        .order_by('id')
+        .first()
+    )
+    if fallback:
+        return fallback
+    return (
+        Category.objects.filter(Q(colony_id=colony_id) | Q(colony__isnull=True), type='EXPENSE')
+        .order_by('id')
+        .first()
+    )
 
 
 def time_until_deadline(deadline, is_done=False):
