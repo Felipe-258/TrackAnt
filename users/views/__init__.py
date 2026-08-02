@@ -14,7 +14,7 @@ def _assign_colony(request, user):
             colony.owner = user
             colony.is_guest = False
             colony.name = f'Colonia de {user.username}'
-            colony.save()
+            colony.save(update_fields=['owner', 'is_guest', 'name'])
     if colony:
         request.session['colony_id'] = colony.id
         request.colony = colony
@@ -41,7 +41,6 @@ def login_view(request):
             _assign_colony(request, user)
             request.session['welcome_seen'] = True
             request.session.modified = True
-            request.session.save()
             messages.success(request, f'Bienvenido, {user.username}')
             return redirect('finances:dashboard')
     else:
@@ -61,7 +60,6 @@ def registro(request):
             _assign_colony(request, user)
             request.session['welcome_seen'] = True
             request.session.modified = True
-            request.session.save()
             messages.success(request, f'Colonia creada. Bienvenido, {user.username}')
             return redirect('finances:dashboard')
     else:

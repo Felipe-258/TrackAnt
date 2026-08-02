@@ -4,7 +4,24 @@ from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('TRACKANT_SECRET_KEY') or get_random_secret_key()
+DATA_DIR = Path.home() / '.trackant'
+DATA_DIR.mkdir(exist_ok=True)
+
+SECRET_KEY_FILE = DATA_DIR / 'secret_key'
+
+
+def _load_secret_key():
+    env_key = os.environ.get('TRACKANT_SECRET_KEY')
+    if env_key:
+        return env_key
+    if SECRET_KEY_FILE.exists():
+        return SECRET_KEY_FILE.read_text().strip()
+    key = get_random_secret_key()
+    SECRET_KEY_FILE.write_text(key)
+    return key
+
+
+SECRET_KEY = _load_secret_key()
 
 DEBUG = os.environ.get('TRACKANT_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
@@ -75,9 +92,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'trackant.wsgi.application'
-
-DATA_DIR = Path.home() / '.trackant'
-DATA_DIR.mkdir(exist_ok=True)
 
 DATABASES = {
     'default': {

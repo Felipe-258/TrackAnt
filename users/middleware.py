@@ -24,25 +24,12 @@ class ColonyMiddleware:
             if user_colony:
                 request.colony = user_colony
                 request.session['colony_id'] = user_colony.id
-                request.session.modified = True
             else:
-                colony_id = request.session.get('colony_id')
-                if colony_id:
-                    try:
-                        request.colony = Colony.objects.get(id=colony_id)
-                    except Colony.DoesNotExist:
-                        request.colony = self._create_guest(request)
-                else:
-                    request.colony = self._create_guest(request)
+                request.colony = self._resolve_colony(request, is_authenticated=True)
         else:
-            colony_id = request.session.get('colony_id')
-            if colony_id:
-                try:
-                    request.colony = Colony.objects.get(id=colony_id)
-                except Colony.DoesNotExist:
-                    request.colony = self._create_guest(request)
-            else:
-                request.colony = self._create_guest(request)
+            request.colony = self._resolve_colony(request, is_authenticated=False)
+
+        request.session.modified = True
 
         path = request.path
         if not any(path.startswith(p) for p in WELCOME_EXEMPT):
@@ -52,13 +39,29 @@ class ColonyMiddleware:
         response = self.get_response(request)
         return response
 
-    def _create_guest(self, request):
+    def _resolve_colony(self, request, is_authenticated):
+        colony_id = request.session.get('colony_id')
+        if colony_id:
+            try:
+                return Colony.objects.get(id=colony_id)
+            except Colony.DoesNotExist:
+                pass
+        return self._create_colony(request, is_authenticated)
+
+    def _create_colony(self, request, is_authenticated):
         from finances.models import Currency
-        colony = Colony.objects.create(name='Colonia invitada', is_guest=True)
+
+        if is_authenticated:
+            name = f'Colonia de {request.user.username}'
+            colony = Colony.objects.create(name=name, is_guest=False, owner=request.user)
+        else:
+            colony = Colony.objects.create(name='Colonia invitada', is_guest=True)
+
         default_currency = Currency.objects.filter(colony__isnull=True).first()
         if default_currency:
             colony.default_currency = default_currency
             colony.save(update_fields=['default_currency'])
+
         request.session['colony_id'] = colony.id
         request.session['welcome_seen'] = True
         return colony
