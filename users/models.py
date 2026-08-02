@@ -43,6 +43,11 @@ class Colony(models.Model):
         default=False,
         verbose_name='Crear gasto en splits',
     )
+    require_funds_for_conversion = models.BooleanField(
+        default=True,
+        verbose_name='Exigir fondos para convertir',
+        help_text='Impide convertir más de lo que tenés disponible en esa moneda',
+    )
     budget_alert_threshold = models.IntegerField(
         default=80,
         validators=[MinValueValidator(50), MaxValueValidator(100)],

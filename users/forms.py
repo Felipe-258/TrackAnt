@@ -33,7 +33,7 @@ class RegistroForm(UserCreationForm):
 class ColonySettingsForm(forms.ModelForm):
     class Meta:
         model = Colony
-        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'budget_alert_threshold', 'debt_show_days']
+        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'require_funds_for_conversion', 'budget_alert_threshold', 'debt_show_days']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
@@ -46,6 +46,9 @@ class ColonySettingsForm(forms.ModelForm):
                 'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
             }),
             'auto_create_split_transactions': forms.CheckboxInput(attrs={
+                'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
+            }),
+            'require_funds_for_conversion': forms.CheckboxInput(attrs={
                 'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
             }),
             'budget_alert_threshold': forms.NumberInput(attrs={

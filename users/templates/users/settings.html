@@ -68,6 +68,16 @@
             <p class="text-xs text-earth-400 dark:text-earth-500">Al crear un gasto compartido, se crea automáticamente una transacción de gasto</p>
           </div>
         </div>
+
+        <div class="flex items-start gap-3">
+          {{ form.require_funds_for_conversion }}
+          <div>
+            <label for="{{ form.require_funds_for_conversion.id_for_label }}" class="text-sm font-medium text-earth-700 dark:text-earth-300 cursor-pointer">
+              Exigir fondos para convertir
+            </label>
+            <p class="text-xs text-earth-400 dark:text-earth-500">Impide convertir más de lo que tenés disponible en esa moneda</p>
+          </div>
+        </div>
       </div>
     </div>
 

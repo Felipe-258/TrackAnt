@@ -5,6 +5,7 @@ from datetime import timedelta
 from ..models import Subscription, SubscriptionPayment
 from ..forms import SubscriptionForm
 from ..services import mark_as_paid, mark_as_unpaid
+from finances.exchange import available_balances
 
 
 def subscription_list(request):
@@ -28,7 +29,10 @@ def subscription_list(request):
         is_paid=True,
     ).select_related('subscription__currency', 'subscription__category').order_by('-paid_date')[:10]
 
+    balances = available_balances(colony)
+
     for payment in pending_payments:
+        payment.available = balances.get(payment.subscription.currency.code, 0)
         delta = (payment.due_date - today).days
         if delta < 0:
             payment.status = 'overdue'
@@ -49,6 +53,7 @@ def subscription_list(request):
         'total_monthly': total_monthly,
         'pending_payments': pending_payments,
         'recent_paid': recent_paid,
+        'balances': balances,
     })
 
 
@@ -102,6 +107,11 @@ def subscription_toggle_paid(request, pk):
             mark_as_unpaid(payment)
             messages.warning(request, f'Pago de {payment.subscription.name} marcado como no pagado')
         else:
+            if request.colony.require_funds_for_conversion:
+                avail = available_balances(request.colony).get(payment.subscription.currency.code, 0)
+                if payment.subscription.amount > avail:
+                    messages.error(request, f'No tenés suficientes {payment.subscription.currency.code} (disponible: {avail:,.2f}). Convertí tu dinero en la página de Conversión.')
+                    return redirect('subscriptions:subscription_list')
             mark_as_paid(payment)
             messages.success(request, f'{payment.subscription.name} marcada como pagada')
 

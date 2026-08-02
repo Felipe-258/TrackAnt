@@ -67,6 +67,12 @@ def debt_detail(request, pk):
         if form.is_valid():
             p = form.save(commit=False)
             p.debt = d
+            if colony.require_funds_for_conversion:
+                from finances.exchange import available_balances
+                avail = available_balances(colony).get(d.currency.code, 0)
+                if p.amount > avail:
+                    messages.error(request, f'No tenés suficientes {d.currency.code} (disponible: {avail:,.2f}). Convertí tu dinero en la página de Conversión.')
+                    return redirect('debts:debt_detail', pk=pk)
             p.save()
             if d.remaining() <= 0:
                 d.is_settled = True
@@ -91,8 +97,16 @@ def debt_detail(request, pk):
             return redirect('debts:debt_detail', pk=pk)
     else:
         form = DebtPaymentForm(initial={'date': date.today()})
+    form.fields['amount'].widget.attrs['x-on:input'] = 'amount = $event.target.value'
+
+    from finances.exchange import available_balances
+    import json
+    balances = available_balances(colony)
+    debt_available = balances.get(d.currency.code, 0)
     return render(request, 'debts/debt_detail.html', {
         'debt': d,
         'payments': payments,
         'form': form,
+        'debt_available': debt_available,
+        'debt_available_json': json.dumps(debt_available),
     })
