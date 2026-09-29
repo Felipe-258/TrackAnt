@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trackant-v1';
+const CACHE_NAME = 'trackant-v2';
 
 const STATIC_ASSETS = [
   '/offline/',
@@ -61,6 +61,10 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return;
 
   if (url.pathname.startsWith('/admin/')) return;
+
+  // Endpoints auth-dependentes: no cachear (respuesta varía por usuario/colonia)
+  if (url.pathname.startsWith('/transactions/category-options/')
+      || url.pathname.startsWith('/categories/')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(

@@ -72,10 +72,10 @@
       </div>
 
       <!-- Category -->
-      <div x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="loadCategories($event.detail)">
+      <div x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="type = $event.detail; loadCategories($event.detail)">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoria</label>
-        <div class="relative">
-          <button type="button" @click="toggle(); $nextTick(() => positionDropdown($refs.dropdownBtn))" @click.outside="open = false"
+        <div class="relative" @click.outside="open = false">
+          <button type="button" @click="toggle(); $nextTick(() => positionDropdown($refs.dropdownBtn))"
                   x-ref="dropdownBtn"
                   class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
             <template x-if="selectedIcon">
@@ -87,12 +87,57 @@
           <div x-show="open" x-transition x-ref="dropdownList"
                :style="dropdownStyle"
                class="fixed z-[60] max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
-            <template x-for="cat in categories" :key="cat.id">
-              <button type="button" @click="select(cat)"
-                      class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
-                <i :data-lucide="cat.icon" class="lucide-sm"></i>
-                <span x-text="cat.name"></span>
-              </button>
+            <template x-if="!creating">
+              <div>
+                <template x-for="cat in categories" :key="cat.id">
+                  <button type="button" @click="select(cat)"
+                          class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
+                    <i :data-lucide="cat.icon" class="lucide-sm"></i>
+                    <span x-text="cat.name"></span>
+                  </button>
+                </template>
+                <button x-show="canCreate" type="button" @click="creating = true; $nextTick(() => positionDropdown($refs.dropdownBtn))"
+                        class="flex w-full items-center gap-2 border-t border-earth-200 px-4 py-2 text-sm font-medium text-clay-600 hover:bg-earth-50 dark:border-earth-700 dark:text-clay-400 dark:hover:bg-earth-800">
+                  <i data-lucide="plus" class="lucide-sm"></i>
+                  Nueva categoría
+                </button>
+              </div>
+            </template>
+            <template x-if="creating">
+              <div class="space-y-1.5 p-2">
+                <p class="text-sm font-semibold text-earth-800 dark:text-earth-200">Nueva categoría</p>
+                <input type="text" x-model="newName" maxlength="100" placeholder="Nombre de la categoría"
+                       class="w-full rounded-lg border border-earth-300 bg-white px-3 py-1.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500">
+                <div>
+                  <p class="mb-0.5 text-xs font-medium text-earth-500 dark:text-earth-400">Ícono</p>
+                  <div class="grid max-h-16 grid-cols-8 gap-1 overflow-y-auto rounded-lg border border-earth-200 bg-white p-1 dark:border-earth-700 dark:bg-earth-800">
+                    <template x-for="ic in icons" :key="ic">
+                      <button type="button" @click="newIcon = ic"
+                              :class="newIcon === ic ? 'border-clay-400 bg-clay-50 text-clay-700 dark:bg-clay-900/40 dark:text-clay-300' : 'border-transparent text-gray-500 hover:bg-earth-50 dark:text-gray-400 dark:hover:bg-earth-700'"
+                              class="flex items-center justify-center rounded-lg border p-1">
+                        <i :data-lucide="ic" class="lucide-sm"></i>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+                <div>
+                  <p class="mb-0.5 text-xs font-medium text-earth-500 dark:text-earth-400">Color</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <template x-for="col in colors" :key="col">
+                      <button type="button" @click="newColor = col"
+                              :class="newColor === col ? 'ring-2 ring-offset-2 ring-clay-400 dark:ring-offset-earth-900' : ''"
+                              class="h-6 w-6 rounded-full border border-earth-200"
+                              :style="'background-color: ' + col"></button>
+                    </template>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button" @click="creating = false; $nextTick(() => positionDropdown($refs.dropdownBtn))"
+                          class="flex-1 rounded-lg border border-earth-300 px-3 py-1.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+                  <button type="button" @click="submitNew()" :disabled="!newName.trim()"
+                          class="flex-1 rounded-lg bg-clay-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-clay-600 disabled:opacity-50 touch-target">Crear</button>
+                </div>
+              </div>
             </template>
           </div>
         </div>
@@ -137,18 +182,38 @@ function quickAddModal() {
 }
 
 function quickCategoryDropdown() {
+  const ICONS = ['wallet','banknote','credit-card','coins','shopping-cart','shopping-bag','pizza','coffee','utensils','salad','bus','car','train','home','building','lightbulb','heart-pulse','graduation-cap','film','music','gamepad-2','shirt','laptop','smartphone','paw-print','plane','dumbbell','gift','briefcase','trending-up','piggy-bank','scale','receipt-text','stethoscope','wrench','sparkles','star','package','wifi','heart','calculator','cloud'];
+  const COLORS = ['#6E4E38','#A07858','#C4943A','#D4A857','#8BA864','#6E8F4C','#D4764A','#C16645','#7A3F23','#8A6348','#485D35','#5A753F'];
   return {
     open: false,
+    creating: false,
+    canCreate: true,
+    type: 'EXPENSE',
+    newName: '',
+    newIcon: 'package',
+    newColor: '#A07858',
+    icons: ICONS,
+    colors: COLORS,
     selectedId: '',
     selectedName: 'Seleccionar categoria',
     selectedIcon: '',
     categories: [],
     dropdownStyle: '',
+    init() {
+      this.$watch('creating', (val) => {
+        if (val) {
+          this.$nextTick(() => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          });
+        }
+      });
+    },
     positionDropdown(btn) {
       if (!btn) return;
       const rect = btn.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      const listHeight = Math.min(this.categories.length * 40 + 8, 240);
+      const list = this.$refs.dropdownList;
+      const listHeight = list ? list.scrollHeight : 240;
       const style = `left:${rect.left}px; width:${rect.width}px;`;
       if (spaceBelow < listHeight + 8) {
         this.dropdownStyle = `${style} bottom:${window.innerHeight - rect.top}px; max-height:${Math.min(listHeight, spaceBelow)}px;`;
@@ -163,12 +228,50 @@ function quickCategoryDropdown() {
         .then(html => {
           const temp = document.createElement('div');
           temp.innerHTML = html;
+          this.canCreate = temp.querySelector('select')?.dataset.canCreate === 'true';
           const options = temp.querySelectorAll('option');
           this.categories = Array.from(options).map(opt => ({
             id: opt.value,
             name: opt.textContent.trim(),
             icon: opt.dataset.icon || ''
           })).filter(c => c.id);
+          this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+        });
+    },
+    submitNew() {
+      const name = this.newName.trim();
+      if (!name) return;
+      const body = new URLSearchParams();
+      body.append('name', name);
+      body.append('type', this.type || 'EXPENSE');
+      body.append('icon', this.newIcon);
+      body.append('color', this.newColor);
+      const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+      fetch('/categories/add/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf, 'HX-Request': 'true' },
+        body
+      })
+        .then(r => r.text())
+        .then(html => {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const options = temp.querySelectorAll('option');
+          this.categories = Array.from(options).map(opt => ({
+            id: opt.value,
+            name: opt.textContent.trim(),
+            icon: opt.dataset.icon || ''
+          })).filter(c => c.id);
+          const created = this.categories.find(c => c.name.toLowerCase() === name.toLowerCase());
+          if (created) {
+            this.selectedId = created.id;
+            this.selectedName = created.name;
+            this.selectedIcon = created.icon;
+            document.getElementById('quick_category').value = created.id;
+          }
+          this.creating = false;
+          this.open = false;
+          this.newName = '';
           this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
         });
     },

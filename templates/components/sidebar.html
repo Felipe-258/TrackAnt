@@ -12,16 +12,32 @@
     </div>
   </div>
 
-  <nav class="flex-1 space-y-1 overflow-y-auto p-3">
+  <nav class="flex-1 space-y-1 overflow-y-auto p-3" x-data="sidebarSections()">
     {% with current=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
 
-    <div class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Principal</div>
+    <div>
+      <button type="button" @click="toggle('principal')"
+              class="group mb-2 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-earth-400 transition-colors hover:text-earth-600 dark:text-earth-500 dark:hover:text-earth-300">
+        <span>Principal</span>
+        <span class="inline-flex transition-transform duration-300" :class="sections.principal ? 'rotate-0' : '-rotate-90'"><i data-lucide="chevron-down" class="lucide-sm"></i></span>
+      </button>
+      <div x-cloak class="grid transition-all duration-300 ease-in-out"
+           :class="sections.principal ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-40'">
+        <div class="min-h-0 overflow-hidden">
+          <div class="space-y-1 pb-1">
 
     <a href="{% url 'finances:dashboard' %}"
        class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:dashboard' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="layout-dashboard" class="lucide text-clay-500 dark:text-clay-400"></i>
       <span>Home</span>
+    </a>
+
+    <a href="{% url 'finances:analytics' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
+              {% if current == 'finances:analytics' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="chart-bar" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Análisis</span>
     </a>
 
     <a href="{% url 'finances:income_list' %}"
@@ -38,13 +54,27 @@
       <span>Gastos</span>
     </a>
 
-    <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Planificación</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <a href="{% url 'goals:goal_list' %}"
+    <div>
+      <button type="button" @click="toggle('planificacion')"
+              class="group mb-2 mt-4 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-earth-400 transition-colors hover:text-earth-600 dark:text-earth-500 dark:hover:text-earth-300">
+        <span>Planificación</span>
+        <span class="inline-flex transition-transform duration-300" :class="sections.planificacion ? 'rotate-0' : '-rotate-90'"><i data-lucide="chevron-down" class="lucide-sm"></i></span>
+      </button>
+      <div x-cloak class="grid transition-all duration-300 ease-in-out"
+           :class="sections.planificacion ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-40'">
+        <div class="min-h-0 overflow-hidden">
+          <div class="space-y-1 pb-1">
+
+    <a href="{% url 'reserves:list' %}"
        class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
-               {% if namespace == 'goals' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
-      <i data-lucide="target" class="lucide text-gold-500 dark:text-gold-400"></i>
-      <span>Metas</span>
+               {% if namespace == 'reserves' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="piggy-bank" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Reservas</span>
     </a>
 
     <a href="{% url 'debts:debt_list' %}"
@@ -68,20 +98,27 @@
       <span>Cuotas</span>
     </a>
 
-    <div class="mt-4 mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-earth-400 dark:text-earth-500">Extras</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <button type="button" @click="toggle('extras')"
+              class="group mb-2 mt-4 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-earth-400 transition-colors hover:text-earth-600 dark:text-earth-500 dark:hover:text-earth-300">
+        <span>Extras</span>
+        <span class="inline-flex transition-transform duration-300" :class="sections.extras ? 'rotate-0' : '-rotate-90'"><i data-lucide="chevron-down" class="lucide-sm"></i></span>
+      </button>
+      <div x-cloak class="grid transition-all duration-300 ease-in-out"
+           :class="sections.extras ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-40'">
+        <div class="min-h-0 overflow-hidden">
+          <div class="space-y-1 pb-1">
 
     <a href="{% url 'subscriptions:subscription_list' %}"
        class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'subscriptions:subscription_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="receipt-text" class="lucide text-gold-500 dark:text-gold-400"></i>
       <span>Suscripciones</span>
-    </a>
-
-    <a href="{% url 'recurring:list' %}"
-       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
-              {% if namespace == 'recurring' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
-      <i data-lucide="repeat" class="lucide text-gold-500 dark:text-gold-400"></i>
-      <span>Recurrentes</span>
     </a>
 
     <a href="{% url 'finances:conversion' %}"
@@ -98,12 +135,24 @@
       <span>Splits</span>
     </a>
 
+    <a href="{% url 'finances:category_list' %}"
+       class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
+              {% if current == 'finances:category_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
+      <i data-lucide="folder-tree" class="lucide text-gold-500 dark:text-gold-400"></i>
+      <span>Categorías</span>
+    </a>
+
     <a href="{% url 'finances:transaction_list' %}"
        class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all touch-target
               {% if current == 'finances:transaction_list' %}bg-earth-100 text-earth-900 dark:bg-earth-800 dark:text-earth-100{% else %}text-earth-600 hover:bg-earth-100 hover:text-earth-900 dark:text-earth-400 dark:hover:bg-earth-800 dark:hover:text-earth-200{% endif %}">
       <i data-lucide="list" class="lucide text-earth-500 dark:text-earth-400"></i>
       <span>Transacciones</span>
     </a>
+
+          </div>
+        </div>
+      </div>
+    </div>
 
     {% endwith %}
   </nav>

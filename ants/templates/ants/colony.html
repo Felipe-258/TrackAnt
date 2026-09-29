@@ -139,7 +139,7 @@
       </div>
     </div>
     <div class="mt-1 hidden rounded-full bg-earth-900/80 px-2.5 py-0.5 text-[10px] font-medium text-earth-100 backdrop-blur-sm dark:bg-earth-100/80 dark:text-earth-900 sm:block">
-      {% if active_goals > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin meta{% endif %}
+      {% if active_reserves > 0 %}{{ goal_name }} · {{ queen_progress }}%{% else %}Sin reserva{% endif %}
     </div>
   </div>
 
@@ -209,10 +209,10 @@
 
   <div class="absolute top-2 left-4">
     <div class="rounded-lg bg-white/85 px-3 py-1.5 text-[11px] font-medium text-earth-700 shadow-sm backdrop-blur-sm dark:bg-earth-900/85 dark:text-earth-300">
-      {% if active_goals > 0 %}
+      {% if active_reserves > 0 %}
       {% queen_label queen_size %} {{ goal_name }} — {{ queen_progress }}%
       {% else %}
-      <img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> Creá una meta de ahorro para que la reina crezca
+      <img src="{% static 'icons/colony/ant.svg' %}" class="inline-block w-3.5 h-3.5" alt=""> Creá una reserva con objetivo para que la reina crezca
       {% endif %}
     </div>
   </div>

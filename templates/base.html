@@ -136,6 +136,12 @@
       -webkit-touch-callout: none;
       touch-action: manipulation;
     }
+    /* Prevenir auto-zoom del browser al enfocar inputs en dispositivos táctiles */
+    @media (pointer: coarse) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
     html { overflow-x: hidden; }
     html, body { overscroll-behavior: none; }
 
@@ -304,22 +310,15 @@
   <!-- Bottom Tab Bar — Solo mobile standalone -->
   <nav x-show="isStandalone" x-cloak class="bottom-tab-bar lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-earth-200 dark:border-earth-800 dark:bg-earth-950/95" style="padding-bottom: var(--safe-bottom);">
     <div class="flex justify-around py-2">
-      <a href="{% url 'finances:dashboard' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.view_name == 'finances:dashboard' %}text-clay-500{% else %}text-earth-400{% endif %}">
-        <i data-lucide="layout-dashboard" class="lucide"></i>
-        <span class="text-[10px]">Home</span>
+      {% for tab in tab_config %}
+      {% if tab.visible %}
+      <a href="{% url tab.url %}"
+         class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if tab.active_view and tab.active_view == request.resolver_match.view_name or tab.active_ns and tab.active_ns == request.resolver_match.namespace or tab.active_contains and tab.active_contains in request.resolver_match.url_name %}text-clay-500{% else %}text-earth-400{% endif %}">
+        <i data-lucide="{{ tab.icon }}" class="lucide"></i>
+        <span class="text-[10px]">{{ tab.label }}</span>
       </a>
-      <a href="{% url 'finances:income_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if 'income' in request.resolver_match.url_name %}text-sage-500{% else %}text-earth-400{% endif %}">
-        <i data-lucide="trending-up" class="lucide"></i>
-        <span class="text-[10px]">Ingresos</span>
-      </a>
-      <a href="{% url 'finances:expense_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if 'expense' in request.resolver_match.url_name %}text-clay-500{% else %}text-earth-400{% endif %}">
-        <i data-lucide="trending-down" class="lucide"></i>
-        <span class="text-[10px]">Gastos</span>
-      </a>
-      <a href="{% url 'goals:goal_list' %}" class="flex flex-col items-center gap-1 px-2 py-2 touch-target {% if request.resolver_match.namespace == 'goals' %}text-gold-500{% else %}text-earth-400{% endif %}">
-        <i data-lucide="target" class="lucide"></i>
-        <span class="text-[10px]">Metas</span>
-      </a>
+      {% endif %}
+      {% endfor %}
       <a href="#" @click.prevent="sidebarOpen = true" class="flex flex-col items-center gap-1 px-2 py-2 touch-target text-earth-400">
         <i data-lucide="menu" class="lucide"></i>
         <span class="text-[10px]">Más</span>
@@ -336,6 +335,7 @@
       });
     }
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+
     document.addEventListener('htmx:configRequest', (e) => {
       const match = document.cookie.match(/csrftoken=([^;]+)/);
       if (match) e.detail.headers['X-CSRFToken'] = match[1];
@@ -349,6 +349,19 @@
       setDateInputLocale();
     });
     setDateInputLocale();
+
+    function sidebarSections() {
+      const KEY = 'trackant-sidebar-sections';
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+      return {
+        sections: { principal: true, planificacion: true, extras: true, ...saved },
+        toggle(name) {
+          this.sections[name] = !this.sections[name];
+          try { localStorage.setItem(KEY, JSON.stringify(this.sections)); } catch (e) {}
+        },
+      };
+    }
   </script>
 
   {% block extra_scripts %}{% endblock %}
