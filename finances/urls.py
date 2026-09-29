@@ -5,15 +5,18 @@ app_name = 'finances'
 
 urlpatterns = [
     path('', pages.dashboard, name='dashboard'),
+    path('analisis/', pages.analytics, name='analytics'),
     path('transactions/', pages.transaction_list, name='transaction_list'),
     path('transactions/add/', pages.transaction_add, name='transaction_add'),
     path('transactions/quick-add/', pages.transaction_quick_add, name='transaction_quick_add'),
     path('transactions/<int:pk>/edit/', pages.transaction_edit, name='transaction_edit'),
     path('transactions/<int:pk>/delete/', pages.transaction_delete, name='transaction_delete'),
     path('transactions/category-options/', pages.transaction_category_options, name='transaction_category_options'),
-    path('tags/search/', pages.tag_search, name='tag_search'),
     path('incomes/', pages.income_list, name='income_list'),
     path('expenses/', pages.expense_list, name='expense_list'),
     path('categories/', pages.category_list, name='category_list'),
+    path('categories/add/', pages.category_add, name='category_add'),
+    path('categories/<int:pk>/edit/', pages.category_edit, name='category_edit'),
+    path('categories/<int:pk>/delete/', pages.category_delete, name='category_delete'),
     path('conversion/', pages.conversion, name='conversion'),
 ]

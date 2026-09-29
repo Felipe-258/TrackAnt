@@ -12,8 +12,9 @@ EXCHANGE_INTERVAL_HOURS = getattr(settings, 'EXCHANGE_INTERVAL_HOURS', 6)
 
 
 def available_balances(colony):
-    """Devuelve {currency_code: balance_disponible} (ingresos - gastos) por moneda."""
+    """Devuelve {currency_code: balance_disponible} (ingresos - gastos - reservas) por moneda."""
     from .models import Transaction
+    from goals.models import Reserve
     rows = (
         Transaction.objects.filter(colony=colony)
         .values('currency__code')
@@ -22,10 +23,18 @@ def available_balances(colony):
             expense=Sum('amount', filter=Q(type='EXPENSE')),
         )
     )
-    return {
+    balance = {
         r['currency__code']: float((r['income'] or 0) - (r['expense'] or 0))
         for r in rows
     }
+    reserve_rows = (
+        Reserve.objects.filter(colony=colony)
+        .values('currency__code')
+        .annotate(total=Sum('current_amount'))
+    )
+    for row in reserve_rows:
+        balance[row['currency__code']] = balance.get(row['currency__code'], 0.0) - float(row['total'] or 0)
+    return balance
 
 
 def rates_stale():

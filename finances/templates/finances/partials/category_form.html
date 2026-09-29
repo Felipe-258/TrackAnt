@@ -1,0 +1,64 @@
+<div class="rounded-xl border border-earth-200 bg-earth-50/70 p-5 dark:border-earth-700 dark:bg-earth-900/70">
+  <h3 class="mb-3 text-sm font-semibold text-earth-800 dark:text-earth-200">{{ title }}</h3>
+  <form method="post"
+        hx-post="{% if form_pk %}{% url form_url form_pk %}{% else %}{% url form_url %}{% endif %}"
+        hx-target="#category-container"
+        hx-swap="outerHTML"
+        class="space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="from" value="page">
+
+    {% if form.non_field_errors %}
+    <div class="rounded-lg bg-clay-50 p-3 text-sm text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre</label>
+      {{ form.name }}
+      {% if form.name.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Tipo</label>
+      {{ form.type }}
+    </div>
+
+    <div x-data="{ icon: '{{ form.icon.value|default:'package' }}', color: '{{ form.color.value|default:'#A07858' }}' }">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Ícono</label>
+        <input type="hidden" name="icon" :value="icon">
+        <div class="grid max-h-28 grid-cols-8 gap-1 overflow-y-auto rounded-lg border border-earth-200 bg-white p-1.5 dark:border-earth-700 dark:bg-earth-800">
+          {% for ic in icon_list %}
+          <button type="button" @click="icon = '{{ ic }}'"
+                  :class="icon === '{{ ic }}' ? 'border-clay-400 bg-clay-50 text-clay-700 dark:bg-clay-900/40 dark:text-clay-300' : 'border-transparent text-gray-500 hover:bg-earth-50 dark:text-gray-400 dark:hover:bg-earth-700'"
+                  class="flex items-center justify-center rounded-lg border p-1">
+            <i data-lucide="{{ ic }}" class="lucide-sm"></i>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="mt-2.5">
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Color</label>
+        <input type="hidden" name="color" :value="color">
+        <div class="flex flex-wrap gap-1.5">
+          {% for col in color_list %}
+          <button type="button" @click="color = '{{ col }}'"
+                  :class="color === '{{ col }}' ? 'ring-2 ring-offset-2 ring-clay-400 dark:ring-offset-earth-900' : ''"
+                  class="h-7 w-7 rounded-full border border-earth-200"
+                  style="background-color: {{ col }}"></button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-2 pt-1">
+      <button type="button"
+              @click="document.getElementById('category-form-slot').classList.add('hidden'); document.getElementById('category-form-slot').innerHTML = ''"
+              class="flex-1 rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+      <button type="submit"
+              class="flex-1 rounded-lg bg-clay-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 touch-target">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

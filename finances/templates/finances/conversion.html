@@ -6,39 +6,44 @@
 {{ rates_json|json_script:"rates-data" }}
 {{ available_json|json_script:"available-data" }}
 <div class="space-y-6" x-data="converter()">
-  <div class="grid gap-6 lg:grid-cols-2">
-    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="min-w-0 rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
       <div class="flex items-center gap-2 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
         <i data-lucide="arrows-right-left" class="lucide text-gold-500"></i>
         <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Convertir</h2>
       </div>
       <div class="p-6">
-        <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="convert">
+          <input type="hidden" name="amount" :value="fromValue || ''">
+          <input type="hidden" name="from" :value="fromCode">
+          <input type="hidden" name="to" :value="toCode">
+          <div class="grid grid-cols-2 gap-4 min-w-0">
+            <div class="min-w-0">
               <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Tengo</label>
               <div class="relative">
-                <input type="number" :value="fromValue" @input="editFrom($event)" step="0.01" min="0" placeholder="0,00"
-                       class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+                <input type="number" :value="fromValue" @input="editFrom($event)" step="0.01" min="0" placeholder="0,00" inputmode="decimal"
+                       class="w-full min-w-0 rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
                 <div class="absolute inset-y-0 right-1 flex items-center">
                   <select x-model="fromCode" class="rounded-lg border-0 bg-transparent pr-1 text-xs font-medium text-earth-500 focus:outline-none dark:text-earth-400">
-                    <template x-for="c in currencies" :key="c.code">
-                      <option :value="c.code" x-text="c.code"></option>
-                    </template>
+                    {% for c in currencies %}
+                    <option value="{{ c.code }}">{{ c.code }}</option>
+                    {% endfor %}
                   </select>
                 </div>
               </div>
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Quiero recibir</label>
               <div class="relative">
-                <input type="number" :value="toValue" @input="editTo($event)" step="0.01" min="0" placeholder="0,00"
-                       class="w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+                <input type="number" :value="toValue" @input="editTo($event)" step="0.01" min="0" placeholder="0,00" inputmode="decimal"
+                       class="w-full min-w-0 rounded-lg border border-earth-300 bg-white px-4 py-2.5 pr-14 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
                 <div class="absolute inset-y-0 right-1 flex items-center">
                   <select x-model="toCode" class="rounded-lg border-0 bg-transparent pr-1 text-xs font-medium text-earth-500 focus:outline-none dark:text-earth-400">
-                    <template x-for="c in currencies" :key="c.code">
-                      <option :value="c.code" x-text="c.code"></option>
-                    </template>
+                    {% for c in currencies %}
+                    <option value="{{ c.code }}">{{ c.code }}</option>
+                    {% endfor %}
                   </select>
                 </div>
               </div>
@@ -63,7 +68,12 @@
               No tenés suficientes <span x-text="fromCode"></span>. Disponible: <span x-text="availableLabel"></span>
             </p>
           </div>
-        </div>
+          <button type="submit"
+                  :disabled="!hasValue || insufficientFunds"
+                  class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600 disabled:cursor-not-allowed disabled:opacity-50">
+            <i data-lucide="arrows-right-left" class="lucide-sm"></i> Convertir
+          </button>
+        </form>
       </div>
     </div>
 
@@ -71,7 +81,7 @@
   </div>
 
   {% if quick %}
-  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="min-w-0 rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
       <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Referencia rápida</h2>
       <p class="text-sm text-earth-500 dark:text-earth-400">Valor de 1 unidad en pesos argentinos</p>
@@ -79,10 +89,10 @@
     <div class="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-4">
       {% for q in quick %}
       <button type="button" @click="setQuick('{{ q.code }}')"
-              class="block rounded-xl border border-earth-200 bg-earth-50/50 p-4 text-left transition-all hover:shadow-md hover:border-gold-300 dark:border-earth-800 dark:bg-earth-800/30 dark:hover:border-gold-700">
+              class="block min-w-0 rounded-xl border border-earth-200 bg-earth-50/50 p-4 text-left transition-all hover:shadow-md hover:border-gold-300 dark:border-earth-800 dark:bg-earth-800/30 dark:hover:border-gold-700">
         <p class="text-sm font-medium text-earth-900 dark:text-earth-100">{{ q.code }} ({{ q.symbol }})</p>
         <p class="mt-1 text-lg font-bold text-earth-900 dark:text-earth-100">$ {{ q.to_ars|floatformat:2 }}</p>
-        <p class="text-xs text-earth-400 dark:text-earth-500">{{ q.name }}</p>
+        <p class="truncate text-xs text-earth-400 dark:text-earth-500">{{ q.name }}</p>
       </button>
       {% endfor %}
     </div>
@@ -101,7 +111,7 @@ function converter() {
   return {
     currencies: codes.map(code => ({ code, symbol: code })),
     fromCode: '{{ default_from }}',
-    toCode: 'USD',
+    toCode: '{{ to_code }}',
     editing: 'from',
     amount: '',
     get fromRate() { return currencies[this.fromCode] || 1; },
@@ -117,6 +127,10 @@ function converter() {
       const avail = available[this.fromCode];
       if (avail === undefined) return false;
       return amt > avail;
+    },
+    get hasValue() {
+      const v = this.fromValue;
+      return !!v && !isNaN(v) && parseFloat(v) > 0;
     },
     get availableLabel() {
       const avail = available[this.fromCode];

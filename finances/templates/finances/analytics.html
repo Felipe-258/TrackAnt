@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block title %}Análisis - TrackAnt{% endblock %}
+{% block page_title %}Análisis{% endblock %}
+{% block page_subtitle %}Tus gastos hormiga por categoría{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex min-w-0 items-center gap-1">
+      <a href="?mes={{ prev_link }}&currency={{ selected_currency }}"
+         class="inline-flex shrink-0 items-center justify-center rounded-lg border border-earth-200 p-2 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target" aria-label="Mes anterior">
+        <i data-lucide="chevron-left" class="lucide"></i>
+      </a>
+      <span class="truncate text-center text-sm font-semibold text-earth-900 sm:min-w-[8rem] sm:text-base dark:text-earth-100">{{ month_label }}</span>
+      <a href="?mes={{ next_link }}&currency={{ selected_currency }}"
+         class="inline-flex shrink-0 items-center justify-center rounded-lg border border-earth-200 p-2 text-earth-400 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-500 dark:hover:bg-earth-800 touch-target" aria-label="Mes siguiente">
+        <i data-lucide="chevron-right" class="lucide"></i>
+      </a>
+    </div>
+
+    {% if currencies %}
+    <form method="get" class="flex shrink-0 items-center gap-2">
+      <input type="hidden" name="mes" value="{{ year }}-{{ month|stringformat:'02d' }}">
+      <label class="hidden text-sm text-earth-500 sm:inline dark:text-earth-400">Moneda</label>
+      <select name="currency" onchange="this.form.submit()"
+              class="rounded-lg border border-earth-300 bg-white px-2 py-1.5 text-xs text-earth-900 focus:border-clay-400 focus:outline-none sm:px-3 sm:py-2 sm:text-sm dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+        {% for c in currencies %}
+        <option value="{{ c.code }}" {% if c.code == selected_currency %}selected{% endif %}>{{ c.symbol }} {{ c.code }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <div class="rounded-xl border border-earth-200 bg-white p-3 shadow-sm sm:p-5 dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 text-xs text-earth-500 sm:text-sm dark:text-earth-400"><i data-lucide="trending-up" class="lucide-sm text-sage-500"></i> Ingresos</div>
+      <p class="mt-2 text-lg font-bold text-sage-600 sm:text-2xl dark:text-sage-400">{{ symbol }}{{ kpis.income|floatformat:2 }}</p>
+      {% if kpis.income_delta is not None %}
+      <p class="mt-1 text-xs {% if kpis.income_delta >= 0 %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">
+        {% if kpis.income_delta >= 0 %}▲{% else %}▼{% endif %} {{ kpis.income_delta|floatformat:1 }}% vs mes ant.
+      </p>
+      {% else %}<p class="mt-1 text-xs text-earth-400 dark:text-earth-500">— sin mes anterior</p>{% endif %}
+    </div>
+
+    <div class="rounded-xl border border-earth-200 bg-white p-3 shadow-sm sm:p-5 dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 text-xs text-earth-500 sm:text-sm dark:text-earth-400"><i data-lucide="trending-down" class="lucide-sm text-clay-500"></i> Gastos</div>
+      <p class="mt-2 text-lg font-bold text-clay-600 sm:text-2xl dark:text-clay-400">{{ symbol }}{{ kpis.expenses|floatformat:2 }}</p>
+      {% if kpis.expenses_delta is not None %}
+      <p class="mt-1 text-xs {% if kpis.expenses_delta <= 0 %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">
+        {% if kpis.expenses_delta >= 0 %}▲{% else %}▼{% endif %} {{ kpis.expenses_delta|floatformat:1 }}% vs mes ant.
+      </p>
+      {% else %}<p class="mt-1 text-xs text-earth-400 dark:text-earth-500">— sin mes anterior</p>{% endif %}
+    </div>
+
+    <div class="rounded-xl border border-earth-200 bg-white p-3 shadow-sm sm:p-5 dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 text-xs text-earth-500 sm:text-sm dark:text-earth-400"><i data-lucide="wallet" class="lucide-sm text-gold-500"></i> Balance</div>
+      <p class="mt-2 text-lg font-bold sm:text-2xl {% if kpis.balance >= 0 %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">{{ symbol }}{{ kpis.balance|floatformat:2 }}</p>
+      {% if kpis.balance_delta is not None %}
+      <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">{{ kpis.balance_delta|floatformat:1 }}% vs mes ant.</p>
+      {% else %}<p class="mt-1 text-xs text-earth-400 dark:text-earth-500">— sin mes anterior</p>{% endif %}
+    </div>
+
+    <div class="rounded-xl border-2 border-gold-300 bg-gold-50 p-3 sm:p-5 dark:border-gold-700 dark:bg-gold-950/30">
+      <div class="flex items-center gap-2 text-xs font-medium text-gold-800 sm:text-sm dark:text-gold-300"><i data-lucide="calendar-clock" class="lucide-sm"></i> Proyección fin de mes</div>
+      <p class="mt-2 text-lg font-bold text-gold-700 sm:text-2xl dark:text-gold-300">{{ symbol }}{{ projection|floatformat:2 }}</p>
+      <p class="mt-1 text-xs text-gold-700/80 dark:text-gold-400/80">Según el ritmo de gasto actual</p>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-earth-200 bg-white p-5 shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="flex items-center gap-2 text-sm text-earth-500 dark:text-earth-400"><i data-lucide="receipt" class="lucide-sm text-clay-500"></i> Presupuestos del mes</div>
+    {% if budgets %}
+    <div class="mt-3 space-y-2">
+      {% for b in budgets %}
+      <div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="flex items-center gap-1 text-earth-700 dark:text-earth-300"><i data-lucide="{{ b.icon }}" class="lucide-sm"></i> {{ b.name }}</span>
+          <span class="font-medium {% if b.status == 'danger' %}text-clay-600 dark:text-clay-400{% elif b.status == 'warning' %}text-gold-600 dark:text-gold-400{% else %}text-earth-500 dark:text-earth-400{% endif %}">{{ b.pct }}%</span>
+        </div>
+        <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-earth-100 dark:bg-earth-800">
+          <div class="h-full rounded-full {% if b.status == 'danger' %}bg-clay-500{% elif b.status == 'warning' %}bg-gold-500{% else %}bg-sage-500{% endif %}" style="width: {{ b.pct }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="mt-3 text-sm text-earth-400 dark:text-earth-500">Sin presupuestos para este mes</p>
+    {% endif %}
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+        <i data-lucide="pie-chart" class="lucide text-clay-500"></i>
+        <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Gastos por categoría</h2>
+      </div>
+      {% if by_category %}
+      <div class="flex items-center gap-4 p-4 sm:gap-6 sm:p-6">
+        <div class="h-36 w-36 shrink-0 sm:h-56 sm:w-56"><canvas id="analyticsCategoryChart"></canvas></div>
+        <ul class="min-w-0 flex-1 space-y-1.5">
+          {% for c in by_category %}
+          <li class="flex items-center gap-2 text-xs sm:text-sm">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: {{ c.color }}"></span>
+            <span class="min-w-0 flex-1 truncate text-earth-700 dark:text-earth-300">{{ c.name }}</span>
+            <span class="whitespace-nowrap font-medium text-clay-600 dark:text-clay-400">{{ symbol }}{{ c.total|floatformat:2 }}</span>
+            <span class="w-9 shrink-0 text-right text-earth-400 dark:text-earth-500">{{ c.pct|floatformat:0 }}%</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% else %}
+      <p class="p-6 text-sm text-earth-400 dark:text-earth-500">Sin gastos este mes</p>
+      {% endif %}
+    </div>
+
+    <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+      <div class="flex items-center gap-2 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+        <i data-lucide="bar-chart-3" class="lucide text-sage-500"></i>
+        <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Ingresos vs Gastos (12 meses)</h2>
+      </div>
+      <div class="p-6"><canvas id="analyticsTrendChart" class="h-48 w-full"></canvas></div>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <div class="flex items-center gap-2 border-b border-earth-200 px-6 py-4 dark:border-earth-800">
+      <i data-lucide="list" class="lucide text-earth-500"></i>
+      <h2 class="text-base font-semibold text-earth-900 dark:text-earth-100">Detalle por categoría</h2>
+    </div>
+    {% if by_category %}
+    <div class="overflow-x-auto">
+      <table class="w-full" x-data="{ expanded: null }">
+        <thead>
+          <tr class="border-b border-earth-100 text-left text-[10px] font-semibold uppercase tracking-wider text-earth-500 dark:border-earth-800 dark:text-earth-400">
+            <th class="px-4 py-3">Categoría</th>
+            <th class="px-4 py-3 text-right">Total</th>
+            <th class="px-4 py-3 text-right">% del gasto</th>
+            <th class="px-4 py-3 text-right">vs mes anterior</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-earth-100 dark:divide-earth-800">
+          {% for c in by_category %}
+          <tr class="cursor-pointer hover:bg-earth-50 dark:hover:bg-earth-800/50"
+              @click="expanded = expanded === {{ forloop.counter }} ? null : {{ forloop.counter }}">
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2.5 py-0.5 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
+                <i data-lucide="chevron-right" class="lucide-sm transition-transform" :class="expanded === {{ forloop.counter }} && 'rotate-90'"></i>
+                <i data-lucide="{{ c.icon }}" class="lucide-sm"></i> {{ c.name }}
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-clay-600 dark:text-clay-400">{{ symbol }}{{ c.total|floatformat:2 }}</td>
+            <td class="px-4 py-3 text-right text-sm text-earth-600 dark:text-earth-400">{{ c.pct|floatformat:1 }}%</td>
+            <td class="whitespace-nowrap px-4 py-3 text-right text-sm {% if c.delta is None %}text-earth-400{% elif c.delta <= 0 %}text-sage-600 dark:text-sage-400{% else %}text-clay-600 dark:text-clay-400{% endif %}">
+              {% if c.delta is None %}—{% else %}{% if c.delta >= 0 %}▲{% else %}▼{% endif %} {{ c.delta|floatformat:1 }}%{% endif %}
+            </td>
+          </tr>
+          <tr x-show="expanded === {{ forloop.counter }}" x-cloak class="bg-earth-50/60 dark:bg-earth-800/30">
+            <td colspan="4" class="px-4 pb-3 pt-0">
+              {% if c.transactions %}
+              <div class="space-y-1">
+                {% for tx in c.transactions %}
+                <div class="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-1.5 text-xs dark:bg-earth-900">
+                  <span class="whitespace-nowrap text-earth-500 dark:text-earth-400">{{ tx.date|date:"d/m/Y" }}</span>
+                  <span class="min-w-0 flex-1 truncate text-earth-700 dark:text-earth-300">{{ tx.note|default:"—" }}</span>
+                  <span class="whitespace-nowrap font-medium text-clay-600 dark:text-clay-400">{{ symbol }}{{ tx.amount|floatformat:2 }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="py-1 text-xs text-earth-400 dark:text-earth-500">Sin movimientos</p>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="px-6 py-10 text-center text-sm text-earth-400 dark:text-earth-500">Sin gastos registrados en este mes</p>
+    {% endif %}
+  </div>
+
+  <div class="rounded-xl border-2 border-clay-300 bg-clay-50 shadow-sm dark:border-clay-700 dark:bg-clay-950/30">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-clay-200 px-6 py-4 dark:border-clay-800">
+      <div class="flex items-center gap-2">
+        <i data-lucide="bug" class="lucide text-clay-600 dark:text-clay-400"></i>
+        <h2 class="text-base font-semibold text-clay-900 dark:text-clay-100">Gastos hormiga</h2>
+      </div>
+      <p class="text-xs text-clay-700 dark:text-clay-300">
+        Umbral efectivo: <span class="font-bold">{{ symbol }}{{ ant.threshold|floatformat:2 }}</span>
+        (tope {{ symbol }}{{ ant.threshold_absolute|floatformat:2 }})
+      </p>
+    </div>
+
+    {% if ant.categories %}
+    <div class="grid gap-3 p-6 sm:grid-cols-3">
+      <div class="rounded-lg border border-clay-200 bg-white p-4 dark:border-clay-800 dark:bg-earth-900">
+        <p class="text-xs text-earth-500 dark:text-earth-400">Total hormiga</p>
+        <p class="mt-1 text-xl font-bold text-clay-700 dark:text-clay-300">{{ symbol }}{{ ant.ant_total|floatformat:2 }}</p>
+      </div>
+      <div class="rounded-lg border border-clay-200 bg-white p-4 dark:border-clay-800 dark:bg-earth-900">
+        <p class="text-xs text-earth-500 dark:text-earth-400">% de tus gastos</p>
+        <p class="mt-1 text-xl font-bold text-clay-700 dark:text-clay-300">{{ ant.ant_pct_expenses|floatformat:1 }}%</p>
+      </div>
+      <div class="rounded-lg border border-clay-200 bg-white p-4 dark:border-clay-800 dark:bg-earth-900">
+        <p class="text-xs text-earth-500 dark:text-earth-400">% de tus ingresos</p>
+        <p class="mt-1 text-xl font-bold text-clay-700 dark:text-clay-300">{{ ant.ant_pct_income|floatformat:1 }}%</p>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto px-6 pb-6">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-clay-200 text-left text-[10px] font-semibold uppercase tracking-wider text-clay-600 dark:border-clay-800 dark:text-clay-400">
+            <th class="px-2 py-2">Categoría</th>
+            <th class="px-2 py-2 text-right">Tx chicas</th>
+            <th class="px-2 py-2 text-right">Total hormiga</th>
+            <th class="px-2 py-2 text-right">% gasto</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-clay-100 dark:divide-clay-900/50">
+          {% for c in ant.categories %}
+          <tr>
+            <td class="px-2 py-2">
+              <span class="inline-flex items-center gap-1 text-sm text-earth-700 dark:text-earth-300"><i data-lucide="{{ c.icon }}" class="lucide-sm"></i> {{ c.name }}</span>
+            </td>
+            <td class="px-2 py-2 text-right text-sm text-earth-600 dark:text-earth-400">{{ c.small_count }} de {{ c.count }}</td>
+            <td class="whitespace-nowrap px-2 py-2 text-right text-sm font-medium text-clay-600 dark:text-clay-400">{{ symbol }}{{ c.small_total|floatformat:2 }}</td>
+            <td class="px-2 py-2 text-right text-sm text-earth-600 dark:text-earth-400">{{ c.pct_expenses|floatformat:1 }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="px-6 py-8 text-center text-sm text-clay-700 dark:text-clay-300">Sin gastos hormiga detectados este mes 🎉</p>
+    {% endif %}
+  </div>
+</div>
+
+{{ by_category_json|json_script:"analytics-category-data" }}
+{{ trend_json|json_script:"analytics-trend-data" }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+window.addEventListener('load', function () {
+  const catData = JSON.parse(document.getElementById('analytics-category-data').textContent || '[]');
+  const trendData = JSON.parse(document.getElementById('analytics-trend-data').textContent || '[]');
+
+  const catCanvas = document.getElementById('analyticsCategoryChart');
+  if (catCanvas && catData.length) {
+    new Chart(catCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: catData.map(c => c.name),
+        datasets: [{ data: catData.map(c => c.total), backgroundColor: catData.map(c => c.color), borderWidth: 0 }]
+      },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '62%', plugins: { legend: { display: false } } }
+    });
+  }
+
+  const trendCanvas = document.getElementById('analyticsTrendChart');
+  if (trendCanvas && trendData.length) {
+    new Chart(trendCanvas, {
+      type: 'bar',
+      data: {
+        labels: trendData.map(t => t.label),
+        datasets: [
+          { label: 'Ingresos', data: trendData.map(t => t.income), backgroundColor: '#6E8F4C', borderRadius: 4 },
+          { label: 'Gastos', data: trendData.map(t => t.expenses), backgroundColor: '#D4764A', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        scales: { y: { beginAtZero: true, grid: { color: '#E2D1BC33' } } },
+        plugins: { legend: { labels: { usePointStyle: true, padding: 16 } } }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

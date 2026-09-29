@@ -1,5 +1,5 @@
 <div id="rates-section">
-  <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+  <div class="min-w-0 rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <div class="flex items-center justify-between border-b border-earth-200 px-6 py-4 dark:border-earth-800">
       <div class="flex items-center gap-2">
         <i data-lucide="coins" class="lucide text-sage-500"></i>
@@ -31,7 +31,7 @@
             </div>
             <div class="flex items-center gap-1 shrink-0">
               {% if c.code != 'ARS' %}
-              <input type="number" name="rate_{{ c.code }}" value="{{ c.rate_value }}" step="0.0001" min="0"
+              <input type="number" name="rate_{{ c.code }}" value="{{ c.rate_value }}" step="0.0001" min="0" inputmode="decimal"
                      class="w-28 rounded-lg border border-earth-300 bg-white px-3 py-1.5 text-right text-sm text-earth-900 focus:border-gold-400 focus:outline-none dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
               <span class="text-xs text-earth-400 dark:text-earth-500">ARS</span>
               {% else %}
@@ -42,7 +42,7 @@
           </div>
           {% endfor %}
         </div>
-        <div class="flex items-center gap-3 pt-2">
+        <div class="flex flex-wrap items-center gap-3 pt-2">
           <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-sage-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sage-600">
             <i data-lucide="save" class="lucide-sm"></i> Guardar cotizaciones
           </button>

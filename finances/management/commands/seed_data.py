@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
-from finances.models import Currency, Category, Tag
+from finances.models import Currency, Category
 
 
 class Command(BaseCommand):
-    help = 'Seed initial data: currencies, categories, and tags'
+    help = 'Seed initial data: currencies and categories'
 
     def add_arguments(self, parser):
         parser.add_argument('--colony-id', type=int, default=None,
@@ -13,7 +13,6 @@ class Command(BaseCommand):
         colony_id = options['colony_id']
         self._currencies(colony_id)
         self._categories(colony_id)
-        self._tags(colony_id)
         self.stdout.write(self.style.SUCCESS('✅ Datos iniciales creados'))
 
     def _currencies(self, colony_id):
@@ -69,18 +68,3 @@ class Command(BaseCommand):
                 defaults={'icon': icon, 'color': color}
             )
         self.stdout.write(f'  Categorías: {len(income_categories) + len(expense_categories)} creadas')
-
-    def _tags(self, colony_id):
-        tags = [
-            ('urgente', '#D4764A'),
-            ('recurrente', '#6E8F4C'),
-            ('importante', '#C4943A'),
-            ('compartido', '#8BA864'),
-            ('trabajo', '#7A3F23'),
-            ('personal', '#A07858'),
-            ('viaje', '#C4943A'),
-            ('hogar', '#6E4E38'),
-        ]
-        for name, color in tags:
-            Tag.objects.get_or_create(name=name, colony_id=colony_id, defaults={'color': color})
-        self.stdout.write(f'  Tags: {len(tags)} creados')

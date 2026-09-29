@@ -1,0 +1,31 @@
+<div class="rounded-xl border border-clay-300 bg-clay-50 p-5 dark:border-clay-800 dark:bg-clay-900/20">
+  <div class="flex items-start gap-3">
+    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style="background-color: {{ category.color }}20;">
+      <i data-lucide="{{ category.icon }}" class="lucide" style="color: {{ category.color }}"></i>
+    </span>
+    <div class="flex-1">
+      <h3 class="text-sm font-semibold text-earth-800 dark:text-earth-200">Eliminar "{{ category.name }}"?</h3>
+      <p class="mt-1 text-xs text-earth-500 dark:text-earth-400">Esta acción no se puede deshacer. Solo las categorías sin transacciones asociadas se pueden eliminar.</p>
+      {% if error %}<p class="mt-2 text-sm font-medium text-clay-700 dark:text-clay-300">{{ error }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="mt-4 flex gap-2">
+    <button type="button"
+            @click="document.getElementById('category-form-slot').classList.add('hidden'); document.getElementById('category-form-slot').innerHTML = ''"
+            class="flex-1 rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+    {% if not error %}
+    <form method="post" action="{% url 'finances:category_delete' category.pk %}"
+          hx-post="{% url 'finances:category_delete' category.pk %}"
+          hx-target="#category-container"
+          hx-swap="outerHTML"
+          class="flex-1">
+      {% csrf_token %}
+      <input type="hidden" name="from" value="page">
+      <button type="submit"
+              class="w-full rounded-lg bg-clay-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 touch-target">
+        Eliminar
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>

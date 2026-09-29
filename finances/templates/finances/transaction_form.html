@@ -8,9 +8,7 @@
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <form method="post" enctype="multipart/form-data" class="space-y-5" id="transactionForm"
           x-data="transactionForm()"
-          data-initial-type="{{ form.initial.type|default:'EXPENSE' }}"
-          data-tag-ids="{{ tag_ids|default:'[]' }}"
-          data-custom-tags="{{ custom_tags|default:'[]' }}">
+          data-initial-type="{{ form.initial.type|default:'EXPENSE' }}">
 
       {% csrf_token %}
 
@@ -67,8 +65,8 @@
            data-initial-category-name="{{ initial_category_name }}"
            data-initial-category-icon="{{ initial_category_icon }}">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría</label>
-        <div class="relative">
-          <button type="button" @click="toggle()" @click.outside="open = false"
+        <div class="relative" @click.outside="open = false">
+          <button type="button" @click="toggle()"
                   class="flex w-full items-center gap-2 rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
             <template x-if="selectedIcon">
               <i :data-lucide="selectedIcon" class="lucide-sm"></i>
@@ -77,58 +75,64 @@
             <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
           </button>
           <div x-show="open" x-transition
-               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
-            <template x-for="cat in categories" :key="cat.id">
-              <button type="button" @click="select(cat)"
-                      class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
-                <i :data-lucide="cat.icon" class="lucide-sm"></i>
-                <span x-text="cat.name"></span>
-              </button>
+               class="absolute z-10 mt-1 max-h-80 w-full overflow-auto rounded-lg border border-earth-200 bg-white py-1 shadow-lg dark:border-earth-700 dark:bg-earth-900">
+            <template x-if="!creating">
+              <div>
+                <template x-for="cat in categories" :key="cat.id">
+                  <button type="button" @click="select(cat)"
+                          class="flex w-full items-center gap-2 px-4 py-2 text-sm text-earth-900 hover:bg-earth-50 dark:text-earth-200 dark:hover:bg-earth-800">
+                    <i :data-lucide="cat.icon" class="lucide-sm"></i>
+                    <span x-text="cat.name"></span>
+                  </button>
+                </template>
+                <button x-show="canCreate" type="button" @click="creating = true"
+                        class="flex w-full items-center gap-2 border-t border-earth-200 px-4 py-2 text-sm font-medium text-clay-600 hover:bg-earth-50 dark:border-earth-700 dark:text-clay-400 dark:hover:bg-earth-800">
+                  <i data-lucide="plus" class="lucide-sm"></i>
+                  Nueva categoría
+                </button>
+              </div>
+            </template>
+            <template x-if="creating">
+              <div class="space-y-1.5 p-2">
+                <p class="text-sm font-semibold text-earth-800 dark:text-earth-200">Nueva categoría</p>
+                <input type="text" x-model="newName" maxlength="100" placeholder="Nombre de la categoría"
+                       class="w-full rounded-lg border border-earth-300 bg-white px-3 py-1.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500">
+                <div>
+                  <p class="mb-0.5 text-xs font-medium text-earth-500 dark:text-earth-400">Ícono</p>
+                  <div class="grid max-h-16 grid-cols-8 gap-1 overflow-y-auto rounded-lg border border-earth-200 bg-white p-1 dark:border-earth-700 dark:bg-earth-800">
+                    <template x-for="ic in icons" :key="ic">
+                      <button type="button" @click="newIcon = ic"
+                              :class="newIcon === ic ? 'border-clay-400 bg-clay-50 text-clay-700 dark:bg-clay-900/40 dark:text-clay-300' : 'border-transparent text-gray-500 hover:bg-earth-50 dark:text-gray-400 dark:hover:bg-earth-700'"
+                              class="flex items-center justify-center rounded-lg border p-1">
+                        <i :data-lucide="ic" class="lucide-sm"></i>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+                <div>
+                  <p class="mb-0.5 text-xs font-medium text-earth-500 dark:text-earth-400">Color</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <template x-for="col in colors" :key="col">
+                      <button type="button" @click="newColor = col"
+                              :class="newColor === col ? 'ring-2 ring-offset-2 ring-clay-400 dark:ring-offset-earth-900' : ''"
+                              class="h-6 w-6 rounded-full border border-earth-200"
+                              :style="'background-color: ' + col"></button>
+                    </template>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button" @click="creating = false"
+                          class="flex-1 rounded-lg border border-earth-300 px-3 py-1.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+                  <button type="button" @click="submitNew()" :disabled="!newName.trim()"
+                          class="flex-1 rounded-lg bg-clay-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-clay-600 disabled:opacity-50 touch-target">Crear</button>
+                </div>
+              </div>
             </template>
           </div>
         </div>
         <input type="hidden" name="category" id="id_category" value="{{ initial_category_id }}" required>
         {% if form.category.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.category.errors.0 }}</p>{% endif %}
       </div>
-
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Etiquetas</label>
-        <div class="flex flex-wrap gap-1.5 mb-2">
-          <template x-for="id in tagIds" :key="'tid-' + id">
-              <span class="inline-flex items-center gap-1 rounded-full bg-earth-100 px-2.5 py-1 text-xs font-medium text-earth-700 dark:bg-earth-800 dark:text-earth-300">
-                <span x-text="'Tag #' + id"></span>
-                <button type="button" @click="removeTagId(id)" class="touch-target flex items-center justify-center rounded p-1 text-earth-400 hover:text-clay-500 active:scale-95">&times;</button>
-            </span>
-          </template>
-          <template x-for="(tag, i) in customTags" :key="'ct-' + i">
-              <span class="inline-flex items-center gap-1 rounded-full bg-clay-50 px-2.5 py-1 text-xs font-medium text-clay-700 dark:bg-clay-900/30 dark:text-clay-300">
-                <span x-text="tag"></span>
-                <button type="button" @click="removeTag(i)" class="touch-target flex items-center justify-center rounded p-1 text-clay-400 hover:text-clay-600 active:scale-95">&times;</button>
-            </span>
-          </template>
-        </div>
-
-        <div class="relative flex gap-2">
-          <input type="text" x-model="tagInput"
-                 class="flex-1 rounded-lg border border-earth-300 bg-earth-50 px-3 py-2 text-base text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500 sm:text-sm"
-                 placeholder="Buscar o crear etiqueta..."
-                 hx-get="/tags/search/"
-                 hx-trigger="keyup changed delay:300ms"
-                 hx-target="#tag-suggestions"
-                 hx-swap="innerHTML"
-                 autocomplete="off"
-                 inputmode="text"
-                 enterkeyhint="done"
-                 autocapitalize="none"
-                 @keydown.enter.prevent="addTag()">
-          <button type="button" @click="addTag()" class="touch-target flex items-center justify-center rounded-lg border border-earth-300 px-4 py-2 text-sm text-earth-600 hover:bg-earth-100 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">+</button>
-        </div>
-        <div id="tag-suggestions" class="mt-1 rounded-lg border border-earth-200 bg-white shadow-lg dark:border-earth-700 dark:bg-earth-900"
-             x-show="tagInput.length > 0" @click.outside="tagInput = ''; $el.innerHTML = ''"></div>
-      </div>
-
-      {{ form.tag_names }}
-      {{ form.new_tags }}
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Fecha</label>
@@ -147,20 +151,15 @@
 
       <div x-show="type === 'INCOME'" x-transition>
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">
-          <i data-lucide="target" class="lucide-sm inline-block align-middle text-gold-500"></i>
-          Vincular a meta de ahorro
+          <i data-lucide="piggy-bank" class="lucide-sm inline-block align-middle text-gold-500"></i>
+          Vincular a reserva con objetivo
         </label>
-        {{ form.goal }}
-        <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Opcional: el monto se sumará al progreso de la meta</p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        {{ form.is_recurring }}
-        <label for="{{ form.is_recurring.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Es una transacción recurrente</label>
+        {{ form.reserve }}
+        <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">Opcional: el monto se sumará al saldo de la reserva</p>
       </div>
 
       <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
-        <a href="{% url 'finances:transaction_list' %}"
+        <a href="{% url return_url|default:'finances:transaction_list' %}"
            class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
         <button type="submit"
                 class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600"
@@ -180,23 +179,6 @@ function transactionForm() {
   const el = document.getElementById('transactionForm');
   return {
     type: el?.dataset.initialType || 'EXPENSE',
-    tagIds: JSON.parse(el?.dataset.tagIds || '[]'),
-    customTags: JSON.parse(el?.dataset.customTags || '[]'),
-    tagInput: '',
-    addTag() {
-      const val = this.tagInput.trim();
-      if (!val) return;
-      if (this.customTags.includes(val)) return;
-      this.customTags.push(val);
-      this.tagInput = '';
-    },
-    removeTag(i) { this.customTags.splice(i, 1) },
-    removeTagId(id) { this.tagIds = this.tagIds.filter(t => t !== id) },
-    selectTag(id) {
-      if (!this.tagIds.includes(id)) this.tagIds.push(id);
-      this.tagInput = '';
-      document.getElementById('tag-suggestions').innerHTML = '';
-    },
     init() {
       document.querySelectorAll('input[name="type"]').forEach(radio => {
         radio.addEventListener('change', () => {
@@ -211,17 +193,34 @@ function transactionForm() {
   };
 }
 
+const CATEGORY_ICONS = ['wallet','banknote','credit-card','coins','shopping-cart','shopping-bag','pizza','coffee','utensils','salad','bus','car','train','home','building','lightbulb','heart-pulse','graduation-cap','film','music','gamepad-2','shirt','laptop','smartphone','paw-print','plane','dumbbell','gift','briefcase','trending-up','piggy-bank','scale','receipt-text','stethoscope','wrench','sparkles','star','package','wifi','heart','calculator','cloud'];
+const CATEGORY_COLORS = ['#6E4E38','#A07858','#C4943A','#D4A857','#8BA864','#6E8F4C','#D4764A','#C16645','#7A3F23','#8A6348','#485D35','#5A753F'];
+
 function categoryDropdown() {
   const el = document.getElementById('category-field');
   return {
     open: false,
+    creating: false,
+    canCreate: true,
+    newName: '',
+    newIcon: 'package',
+    newColor: '#A07858',
+    icons: CATEGORY_ICONS,
+    colors: CATEGORY_COLORS,
     selectedId: el?.dataset.initialCategory || '',
+    init() {
+      this.$watch('creating', (val) => {
+        if (val) {
+          this.$nextTick(() => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          });
+        }
+      });
+      this.loadCategories();
+    },
     selectedName: el?.dataset.initialCategoryName || 'Seleccionar categoría',
     selectedIcon: el?.dataset.initialCategoryIcon || '',
     categories: [],
-    init() {
-      this.loadCategories();
-    },
     loadCategories() {
       const type = document.querySelector('input[name="type"]:checked')?.value || 'EXPENSE';
       fetch(`/transactions/category-options/?type=${type}`)
@@ -229,6 +228,7 @@ function categoryDropdown() {
         .then(html => {
           const temp = document.createElement('div');
           temp.innerHTML = html;
+          this.canCreate = temp.querySelector('select')?.dataset.canCreate === 'true';
           const options = temp.querySelectorAll('option');
           this.categories = Array.from(options).map(opt => ({
             id: opt.value,
@@ -246,6 +246,46 @@ function categoryDropdown() {
               lucide.createIcons();
             }
           });
+        });
+    },
+    currentType() {
+      return document.querySelector('input[name="type"]:checked')?.value || 'EXPENSE';
+    },
+    submitNew() {
+      const name = this.newName.trim();
+      if (!name) return;
+      const body = new URLSearchParams();
+      body.append('name', name);
+      body.append('type', this.currentType());
+      body.append('icon', this.newIcon);
+      body.append('color', this.newColor);
+      const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+      fetch('/categories/add/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf, 'HX-Request': 'true' },
+        body
+      })
+        .then(r => r.text())
+        .then(html => {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const options = temp.querySelectorAll('option');
+          this.categories = Array.from(options).map(opt => ({
+            id: opt.value,
+            name: opt.textContent.trim(),
+            icon: opt.dataset.icon || ''
+          })).filter(c => c.id);
+          const created = this.categories.find(c => c.name.toLowerCase() === name.toLowerCase());
+          if (created) {
+            this.selectedId = created.id;
+            this.selectedName = created.name;
+            this.selectedIcon = created.icon;
+            document.getElementById('id_category').value = created.id;
+          }
+          this.creating = false;
+          this.open = false;
+          this.newName = '';
+          this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
         });
     },
     select(cat) {
@@ -267,21 +307,7 @@ function categoryDropdown() {
   };
 }
 
-document.getElementById('transactionForm')?.addEventListener('submit', function() {
-  const data = Alpine.$data(document.querySelector('[x-data="transactionForm()"]'));
-  document.getElementById('id_tag_names').value = data.tagIds.join(',');
-  document.getElementById('id_new_tags').value = data.customTags.join(',');
-});
-
 document.addEventListener('htmx:afterSwap', function(evt) {
-  if (evt.detail.target && evt.detail.target.id === 'tag-suggestions') {
-    document.querySelectorAll('.tag-option').forEach(function(el) {
-      el.addEventListener('click', function() {
-        const data = Alpine.$data(document.querySelector('[x-data="transactionForm()"]'));
-        data.selectTag(parseInt(this.dataset.tagId));
-      });
-    });
-  }
   if (evt.detail.target && evt.detail.target.id === 'category-field') {
     const catData = Alpine.$data(document.querySelector('#category-field'));
     if (catData) catData.loadCategories();

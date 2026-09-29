@@ -77,16 +77,16 @@
         </p>
       </a>
 
-      <a href="{% url 'goals:goal_list' %}" class="block rounded-xl border border-earth-200 bg-white p-3 shadow-sm transition-all hover:shadow-md cursor-pointer dark:border-earth-800 dark:bg-earth-900 sm:p-5">
+      <a href="{% url 'reserves:list' %}" class="block rounded-xl border border-earth-200 bg-white p-3 shadow-sm transition-all hover:shadow-md cursor-pointer dark:border-earth-800 dark:bg-earth-900 sm:p-5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-earth-500 dark:text-earth-400 sm:text-sm">Metas activas</span>
+          <span class="text-xs font-medium text-earth-500 dark:text-earth-400 sm:text-sm">Reservas</span>
           <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gold-100 text-gold-600 dark:bg-gold-900/50 dark:text-gold-300 sm:h-9 sm:w-9">
-            <i data-lucide="target" class="lucide"></i>
+            <i data-lucide="piggy-bank" class="lucide"></i>
           </span>
         </div>
-        <p class="mt-2 text-lg font-bold text-earth-900 dark:text-earth-100 sm:mt-3 sm:text-2xl">{{ goals_count }}</p>
+        <p class="mt-2 text-lg font-bold text-earth-900 dark:text-earth-100 sm:mt-3 sm:text-2xl">{{ reserves_count }}</p>
         <p class="mt-1 text-xs text-earth-400 dark:text-earth-500">
-          {% if goals_count > 0 %}Metas en progreso{% else %}Creá tu primera meta{% endif %}
+          {% if reserves_count > 0 %}Reservas en progreso{% else %}Creá tu primera reserva{% endif %}
         </p>
       </a>
     </div>
@@ -246,30 +246,30 @@
   </div>
   {% endif %}
 
-  {% if upcoming_recurring %}
-  <details x-data="{ open: localStorage.getItem('recurringPanelOpen') !== 'false' }"
+  {% if upcoming_subscriptions %}
+  <details x-data="{ open: localStorage.getItem('subscriptionsPanelOpen') !== 'false' }"
            :open="open"
-           @toggle="open = $event.target.open; localStorage.setItem('recurringPanelOpen', open)"
+           @toggle="open = $event.target.open; localStorage.setItem('subscriptionsPanelOpen', open)"
            class="rounded-xl border-2 border-gold-300 bg-gold-50 dark:border-gold-700 dark:bg-gold-950/30">
     <summary class="flex cursor-pointer items-center justify-between p-4 select-none">
       <div class="flex items-center gap-2">
         <i data-lucide="repeat" class="lucide text-gold-600 dark:text-gold-400"></i>
-        <h3 class="font-semibold text-gold-900 dark:text-gold-100">Próximos gastos recurrentes</h3>
-        <span class="ml-1 inline-flex items-center justify-center rounded-full bg-gold-200 px-2 py-0.5 text-xs font-bold text-gold-700 dark:bg-gold-800 dark:text-gold-300">{{ upcoming_recurring|length }}</span>
+        <h3 class="font-semibold text-gold-900 dark:text-gold-100">Próximas suscripciones</h3>
+        <span class="ml-1 inline-flex items-center justify-center rounded-full bg-gold-200 px-2 py-0.5 text-xs font-bold text-gold-700 dark:bg-gold-800 dark:text-gold-300">{{ upcoming_subscriptions|length }}</span>
       </div>
       <div class="flex items-center gap-2">
-        <a href="{% url 'recurring:list' %}" class="text-sm text-gold-600 hover:text-gold-700 dark:text-gold-400 dark:hover:text-gold-300">Ver todas</a>
+        <a href="{% url 'subscriptions:subscription_list' %}" class="text-sm text-gold-600 hover:text-gold-700 dark:text-gold-400 dark:hover:text-gold-300">Ver todas</a>
         <i data-lucide="chevron-down" class="lucide-sm text-gold-400 transition-transform open:rotate-180"></i>
       </div>
     </summary>
     <div class="grid gap-2 px-4 pb-4">
-      {% for r in upcoming_recurring %}
+      {% for s in upcoming_subscriptions %}
       <div class="flex items-center justify-between rounded-lg border border-gold-200 bg-white p-3 dark:border-gold-800 dark:bg-earth-900">
         <div>
-          <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ r.name }}</h4>
-          <p class="text-xs text-earth-500 dark:text-earth-400">{{ r.get_cycle_display }} · próximo {{ r.next_date|date:"d/m/Y" }}</p>
+          <h4 class="text-sm font-semibold text-earth-900 dark:text-earth-100">{{ s.name }}</h4>
+          <p class="text-xs text-earth-500 dark:text-earth-400">{{ s.get_cycle_display }} · próximo {{ s.next_date|date:"d/m/Y" }}</p>
         </div>
-        <span class="font-semibold text-gold-600 dark:text-gold-400">{{ r.currency.symbol }}{{ r.amount|floatformat:2 }}</span>
+        <span class="font-semibold text-gold-600 dark:text-gold-400">{{ s.currency.symbol }}{{ s.amount|floatformat:2 }}</span>
       </div>
       {% endfor %}
     </div>
