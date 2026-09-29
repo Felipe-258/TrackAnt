@@ -63,8 +63,8 @@ python manage.py runserver
 
 ```
 TrackAnt/
-├── finances/       # Core: transacciones, categorías, monedas, tags
-├── goals/          # Metas de ahorro
+├── finances/       # Core: transacciones, categorías, monedas
+├── goals/          # Reservas e Inversiones
 ├── debts/          # Deudas y préstamos
 ├── budgets/        # Presupuestos mensuales
 ├── subscriptions/  # Suscripciones recurrentes
@@ -84,7 +84,7 @@ Todas las APIs están en `/api/v1/` sin autenticación (local-first).
 | Endpoint | Descripción |
 |---|---|
 | `GET/POST /api/v1/transactions/` | CRUD transacciones |
-| `GET/POST /api/v1/goals/` | CRUD metas |
+| `GET/POST /api/v1/reserves/` | CRUD reservas |
 | `GET/POST /api/v1/debts/` | CRUD deudas |
 | `GET/POST /api/v1/budgets/` | CRUD presupuestos |
 | `GET/POST /api/v1/subscriptions/` | CRUD suscripciones |

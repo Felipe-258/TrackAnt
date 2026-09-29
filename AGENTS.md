@@ -36,8 +36,8 @@ TrackAnt/
 ├── templates/         # base.html, components/, partials/
 ├── static/            # manifest.json, sw.js, js/haptics.js
 ├── users/             # CustomUser, Colony, auth, settings
-├── finances/          # Core: Transaction, Category, Tag, Currency, Dashboard
-├── goals/             # Metas de ahorro (Goal)
+├── finances/          # Core: Transaction, Category, Currency, Dashboard
+├── goals/             # Reservas e Inversiones (Reserve, namespace reserves)
 ├── debts/             # Deudas y préstamos (Debt, DebtPayment)
 ├── budgets/           # Presupuestos mensuales (Budget)
 ├── subscriptions/     # Suscripciones (Subscription, SubscriptionPayment, services)
@@ -57,29 +57,30 @@ TrackAnt/
 - **Colony**: owner, members (M2M), is_guest, default_currency, config fields
 - **Auth dual**: anónimo → colonia invitada (`is_guest=True`); registrado → colonia propia
 - **Filtros datos privados**: `filter(colony=request.colony)`
-- **Filtros datos globales**: `filter(Q(colony=colony) | Q(colony__isnull=True))` (Currency, Category, Tag)
+- **Filtros datos globales**: `filter(Q(colony=colony) | Q(colony__isnull=True))` (Currency, Category)
 - **Ref completa**: `docs/colony-system.md`
 
 ## Apps y Sus Propósitos
 
 ### `users` — Auth y Colony
 Modelos: `CustomUser` (AbstractUser), `Colony`
-- Colony config: `auto_create_debt_transactions`, `auto_create_split_transactions`, `budget_alert_threshold` (50-100), `debt_show_days` (1-365)
+- Colony config: `auto_create_debt_transactions`, `auto_create_split_transactions`, `budget_alert_threshold` (50-100), `debt_show_days` (1-365), `tab_bar_config` (JSON barra inferior PWA), `ant_expense_max_amount`/`ant_expense_income_pct`/`ant_expense_min_count` (detector gastos hormiga)
 - ColonyMiddleware inyecta `request.colony`
 - URLs: `/welcome/`, `/login/`, `/registro/`, `/logout/`, `/settings/`, `/settings/backup/`
 
 ### `finances` — App Core
-Modelos: `Currency`, `Category`, `Tag`, `Transaction`
+Modelos: `Currency`, `Category`, `Transaction`
 - **Dashboard** (`/`): KPIs por moneda, gráficos torta/barras, últimas 10 transacciones, widget colonia
+- **Análisis** (`/analisis/`): selector mes/moneda, KPIs con Δ vs mes anterior, gastos por categoría + deltas, tendencia 12 meses, presupuestos, proyección fin de mes, detector de gastos hormiga (`_ant_expenses`: umbral híbrido = min(`ant_expense_max_amount`, `ant_expense_income_pct`% del ingreso), flag por categoría con `ant_expense_min_count`+ tx bajo umbral)
 - **Transacciones** (`/transactions/`): CRUD HTMX, búsqueda, filtro por mes
 - **Ingresos/Gastos**: Listados con `list_type` filtrado
-- **Tags dual**: M2M `Tag` + `custom_tags` JSONField
-- **Transaction.goal**: FK opcional → auto-actualiza `current_amount` con F() expressions
+- **Categorías** (`/categories/`): CRUD HTMX (solo usuarios registrados, colony-scoped), icon picker Lucide + color presets. Creación inline desde form de transacción y quick add (dropdown → "Nueva categoría")
+- **Transaction.reserve**: FK opcional → auto-actualiza `current_amount` con F() expressions (solo INCOME, solo reservas con objetivo)
 - **Transaction.receipt**: ImageField para subir comprobantes
-- `seed_data [--colony-id]`: crea 6 monedas, 21 categorías, 8 tags
+- `seed_data [--colony-id]`: crea 6 monedas, 21 categorías
 
-### `goals` — Metas de Ahorro
-Modelo: `Goal` — CRUD con barras de progreso. Auto-marca `is_achieved` cuando `current_amount >= target_amount`.
+### `goals` — Reservas e Inversiones (label app `goals`, modelo `Reserve`)
+Modelo: `Reserve` — app label interno `goals` (historial de migraciones), namespace URLs `reserves`. Dinero apartado que **no cuenta como disponible** (se resta en `available_balances`, `_monthly_summary`, `ants.utils`, `api_stats`). `target_amount` opcional (null = sin objetivo, solo saldo). Con objetivo: barra de progreso, auto-marca `is_achieved`. Movimientos internos: `deposit`/`withdraw` (F() + Decimal, sin crear Transaction). `Transaction.reserve` FK vincula transacción INCOME → suma saldo.
 
 ### `debts` — Deudas
 Modelos: `Debt`, `DebtPayment` — Tipos: OWE/OWED. Auto-settled cuando `remaining <= 0`. Si `colony.auto_create_debt_transactions`, al pagar crea Transaction EXPENSE.
@@ -108,22 +109,20 @@ Router central + 3 stats endpoints.
 ## Modelos — Relaciones Clave
 
 ```
-users.Colony ──┬── Transaction, Goal, Debt, Budget
+users.Colony ──┬── Transaction, Reserve, Debt, Budget
               ├── Subscription, SplitGroup, SplitExpense
-              └── Currency, Category, Tag
+              └── Currency, Category
 
 users.CustomUser ──┬── Colony.owner (PROTECT)
                    └── Colony.members (M2M)
 
-Currency ──┬── Transaction, Goal, Debt, Budget, SplitExpense
+Currency ──┬── Transaction, Reserve, Debt, Budget, SplitExpense
 
 Category ──┬── Transaction, Budget (solo EXPENSE)
            └── Subscription (SET_NULL)
 
-Tag ←──M2M──→ Transaction
-
 Transaction ──┬── SubscriptionPayment.transaction (SET_NULL)
-              └── Goal (FK, SET_NULL) — auto-actualiza progreso
+              └── Reserve (FK, SET_NULL) — auto-actualiza progreso
 
 Subscription ──< SubscriptionPayment (CASCADE)
 
@@ -140,9 +139,8 @@ Router en `/api/v1/` con `PageNumberPagination` (page_size=25). Sin auth. Filtro
 |---|---|---|
 | `currencies/` | finances | ModelViewSet |
 | `categories/` | finances | ModelViewSet |
-| `tags/` | finances | ModelViewSet |
 | `transactions/` | finances | ModelViewSet |
-| `goals/` | goals | ModelViewSet |
+| `reserves/` | goals | ModelViewSet |
 | `debts/` | debts | ModelViewSet |
 | `debt-payments/` | debts | ModelViewSet |
 | `budgets/` | budgets | ModelViewSet |
@@ -158,12 +156,13 @@ Router en `/api/v1/` con `PageNumberPagination` (page_size=25). Sin auth. Filtro
 
 ```
 /                          → finances:dashboard
+/analisis/                 → finances:analytics
 /transactions/             → finances:transaction_list (+ add, edit, delete)
 /transactions/quick-add/   → finances:transaction_quick_add (POST HTMX)
 /incomes/                  → finances:income_list
 /expenses/                 → finances:expense_list
 /categories/               → finances:category_list
-/goals/                    → goals:goal_list (+ add, edit, delete, add-progress)
+/reservas/               → reserves:list (+ add, edit, delete, deposit, withdraw)
 /debts/                    → debts:debt_list (+ add, edit, delete, detail)
 /budgets/                  → budgets:budget_list (+ add, edit, delete)
 /subscriptions/            → subscriptions:subscription_list (+ add, edit, delete)
@@ -187,13 +186,13 @@ Router en `/api/v1/` con `PageNumberPagination` (page_size=25). Sin auth. Filtro
 | `earth` | Fondos, bordes, texto neutro, chrome UI |
 | `clay` | Gastos, montos negativos, delete |
 | `sage` | Ingresos, montos positivos, éxito |
-| `gold` | Metas, progreso, suscripciones, acentos |
+| `gold` | Reservas, progreso, suscripciones, acentos |
 
 **Modo Oscuro**: class-based, toggle Alpine.js, persistido en localStorage.
 
 **Layout**: Sidebar fijo `w-64`, header sticky con backdrop blur, footer fijo. Quick Add modal via `$dispatch('open-quick-add')`.
 
-**PWA**: Bottom tab bar (Home, Ingresos, Gastos, Metas, Más). View Transitions API para transiciones entre páginas. Service worker en `static/sw.js`.
+**PWA**: Bottom tab bar (Home, Ingresos, Gastos, Reservas, Más). View Transitions API para transiciones entre páginas. Service worker en `static/sw.js`.
 
 **Iconos**: Lucide CDN `<i data-lucide="name" class="lucide">`. Sizes: `.lucide` (1.25em), `.lucide-sm` (1em), `.lucide-lg` (1.5em). Se recrean en cada swap HTMX.
 
@@ -231,7 +230,7 @@ def perform_create(self, serializer):
 
 ### HTMX
 - CRUD interactions HTMX-driven. `request.htmx` check para partial vs full redirect
-- Tags: autocomplete debounce 300ms. Transacciones: search debounce 500ms
+- Transacciones: search debounce 500ms
 
 ### Alpine.js
 - Estado global: `sidebarOpen`, `darkMode` (body `x-data`)
@@ -248,7 +247,7 @@ Todos los modelos registrados. Verbose names en español.
 
 1. **Decimal, nunca float**: `DecimalField` → siempre `Decimal()`. `Decimal + float` → `TypeError`.
 2. **F() expressions**: Updates atómicos: `Model.objects.filter(pk=pk).update(campo=F('campo') + valor)`
-3. **select_related('currency')**: Siempre en templates que acceden a `goal.currency.symbol`
+3. **select_related('currency')**: Siempre en templates que acceden a `reserve.currency.symbol`
 4. **request.colony, NO request.user**: Para filtrar datos en todas las vistas
 5. **request.resolver_match.namespace**: Para active state del sidebar
 6. **Mensajes Django**: En `base.html`, estilos por tag (success=sage, error=clay, warning=gold, info=earth)

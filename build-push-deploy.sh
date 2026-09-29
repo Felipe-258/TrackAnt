@@ -7,8 +7,30 @@ REMOTE_DIR="~/docker/web-apps"
 IMAGE="ghcr.io/felipe-258/trackant"
 CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
 
+ensure_docker() {
+    if docker info >/dev/null 2>&1; then
+        echo "  Docker daemon OK"
+        return 0
+    fi
+    echo "  Docker daemon no está corriendo. Intentando arrancarlo..."
+    sudo systemctl start docker 2>/dev/null || sudo service docker start 2>/dev/null || {
+        sudo dockerd >/dev/null 2>&1 &
+    }
+    sleep 3
+    if docker info >/dev/null 2>&1; then
+        echo "  Docker daemon arrancado"
+        return 0
+    fi
+    echo "ERROR: No se pudo iniciar el Docker daemon. Arrancalo manualmente con: sudo systemctl start docker"
+    read -p "Presiona Enter para cerrar..."
+    exit 1
+}
+
 echo "=== TrackAnt Build + Push + Deploy ==="
 echo "Versión actual: $CURRENT_VERSION"
+echo ""
+echo "[0/4] Verificando Docker daemon..."
+ensure_docker
 echo ""
 read -p "Nueva versión (Enter para mantener $CURRENT_VERSION): " NEW_VERSION
 if [ -z "$NEW_VERSION" ]; then
