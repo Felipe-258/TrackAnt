@@ -33,7 +33,7 @@ class RegistroForm(UserCreationForm):
 class ColonySettingsForm(forms.ModelForm):
     class Meta:
         model = Colony
-        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'require_funds_for_conversion', 'budget_alert_threshold', 'debt_show_days']
+        fields = ['name', 'default_currency', 'auto_create_debt_transactions', 'auto_create_split_transactions', 'require_funds_for_conversion', 'budget_alert_threshold', 'debt_show_days', 'ant_expense_max_amount', 'ant_expense_income_pct', 'ant_expense_min_count']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500',
@@ -55,11 +55,31 @@ class ColonySettingsForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'min': '50',
                 'max': '100',
+                'inputmode': 'numeric',
             }),
             'debt_show_days': forms.NumberInput(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
                 'min': '1',
                 'max': '365',
+                'inputmode': 'numeric',
+            }),
+            'ant_expense_max_amount': forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'min': '0',
+                'step': '100',
+                'inputmode': 'decimal',
+            }),
+            'ant_expense_income_pct': forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'min': '0.1',
+                'max': '100',
+                'step': '0.1',
+                'inputmode': 'decimal',
+            }),
+            'ant_expense_min_count': forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
+                'min': '1',
+                'inputmode': 'numeric',
             }),
         }
 
