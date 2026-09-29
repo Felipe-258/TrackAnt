@@ -3,7 +3,9 @@
 {% block page_subtitle %}Gastos compartidos{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-6" x-data="debtModal({{ group.pk }})"
+     @open-debt-modal.window="openPay($event.detail)"
+     @open-pref-modal.window="openPref($event.detail)">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex items-center gap-3">
       <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-earth-100 text-lg dark:bg-earth-800"><i data-lucide="users" class="lucide"></i></span>
@@ -24,18 +26,88 @@
     </div>
   </div>
 
+  <div class="rounded-xl border-2 border-sage-300 bg-sage-50 dark:border-sage-700 dark:bg-sage-950/30">
+    <div class="flex items-center justify-between border-b border-sage-200 px-6 py-4 dark:border-sage-800">
+      <h3 class="flex items-center gap-2 text-base font-semibold text-sage-900 dark:text-sage-100">
+        <i data-lucide="hand-coins" class="lucide text-sage-600 dark:text-sage-400"></i> Deudas pendientes
+      </h3>
+      <button type="button" @click="$dispatch('open-pref-modal', {})"
+              class="inline-flex items-center gap-1 rounded-lg border border-sage-300 px-3 py-1.5 text-xs font-medium text-sage-700 hover:bg-sage-100 dark:border-sage-700 dark:text-sage-300 dark:hover:bg-sage-900/40">
+        <i data-lucide="heart-handshake" class="lucide-sm"></i> Preferencias
+      </button>
+    </div>
+    {% if debts %}
+    <div class="divide-y divide-sage-100 dark:divide-sage-800/60">
+      {% for d in debts %}
+      <div class="flex items-center justify-between px-6 py-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-earth-800 dark:text-earth-200">{{ d.payer }}</span>
+          <span class="text-xs text-sage-500">le debe</span>
+          <span class="text-sm font-bold text-clay-600 dark:text-clay-400">{{ d.currency_symbol }}{{ d.amount|floatformat:2 }}</span>
+          <span class="text-xs text-sage-500">a</span>
+          <span class="text-sm font-medium text-earth-800 dark:text-earth-200">{{ d.payee }}</span>
+          {% if d.preferred %}
+          <span class="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700 dark:bg-sage-900/50 dark:text-sage-300">preferido</span>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-earth-400 dark:text-earth-500">{{ d.currency_code }}</span>
+          <button type="button"
+                  @click="$dispatch('open-debt-modal', { payer: '{{ d.payer|escapejs }}', payee: '{{ d.payee|escapejs }}', amount: '{{ d.amount|stringformat:".2f" }}', symbol: '{{ d.currency_symbol }}', currency: '{{ d.currency_code }}' })"
+                  class="touch-target rounded-lg p-1.5 text-sage-600 hover:bg-sage-100 dark:text-sage-400 dark:hover:bg-sage-900/40" title="Marcar pagado">
+            <i data-lucide="check" class="lucide-sm"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex items-center gap-3 px-6 py-8">
+      <i data-lucide="party-popper" class="lucide text-sage-500"></i>
+      <p class="text-sm font-medium text-sage-700 dark:text-sage-300">Todos al día 🎉 No hay deudas pendientes</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if preferences %}
+  <details class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <summary class="cursor-pointer px-6 py-3 text-sm font-medium text-earth-500 dark:text-earth-400">Preferencias de pago</summary>
+    <div class="border-t border-earth-200 px-6 py-3 dark:border-earth-800">
+      {% for payer, payee in preferences.items %}
+      <div class="flex items-center justify-between py-1.5 text-sm">
+        <span class="text-earth-700 dark:text-earth-300">{{ payer }} prefiere pagarle a <strong>{{ payee }}</strong></span>
+        <form method="post" action="{% url 'splits:split_preference_remove' group.pk %}" class="inline">
+          {% csrf_token %}
+          <input type="hidden" name="payer" value="{{ payer }}">
+          <button type="submit" class="touch-target rounded-lg p-1 text-earth-400 hover:text-clay-600" title="Eliminar preferencia">
+            <i data-lucide="x" class="lucide-sm"></i>
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
   <div class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
     <div class="border-b border-earth-200 px-6 py-4 dark:border-earth-800">
       <h3 class="text-base font-semibold text-earth-900 dark:text-earth-100">Balances</h3>
     </div>
     <div class="divide-y divide-earth-100 dark:divide-earth-800">
-      {% for person, bal in balance.items %}
-      <div class="flex items-center justify-between px-6 py-3">
+      {% for code, entries in balances.items %}
+      <div class="px-6 pt-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-earth-400 dark:text-earth-500">{{ code }}</p>
+      </div>
+      {% for person, bal in entries.items %}
+      <div class="flex items-center justify-between px-6 py-2.5">
         <span class="text-sm font-medium text-earth-700 dark:text-earth-300">{{ person }}</span>
         <span class="text-sm font-bold {% if bal > 0 %}text-sage-600 dark:text-sage-400{% elif bal < 0 %}text-clay-600 dark:text-clay-400{% else %}text-earth-400{% endif %}">
           {% if bal > 0 %}+{% endif %}{{ bal|floatformat:2 }}
         </span>
       </div>
+      {% endfor %}
+      {% empty %}
+      <div class="px-6 py-4 text-center text-sm text-earth-400">Sin balances</div>
       {% endfor %}
     </div>
   </div>
@@ -76,11 +148,142 @@
     {% endif %}
   </div>
 
+  {% if payments %}
+  <details class="rounded-xl border border-earth-200 bg-white shadow-sm dark:border-earth-800 dark:bg-earth-900">
+    <summary class="cursor-pointer px-6 py-3 text-sm font-medium text-earth-500 dark:text-earth-400">{{ payments|length }} pagos</summary>
+    <div class="border-t border-earth-200 px-6 py-3 dark:border-earth-800">
+      {% for p in payments %}
+      <div class="flex items-center justify-between py-1.5 text-sm">
+        <div class="flex items-center gap-2">
+          <i data-lucide="arrow-down-right" class="lucide-sm text-sage-500"></i>
+          <span class="text-earth-700 dark:text-earth-300">{{ p.payer }} → {{ p.payee }}</span>
+          <span class="text-xs text-earth-400">{{ p.date|date:"d/m/Y" }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-earth-700 dark:text-earth-300">{{ p.currency.symbol }}{{ p.amount|floatformat:2 }}</span>
+          <form method="post" action="{% url 'splits:split_payment_delete' p.pk %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="touch-target rounded-lg p-1 text-earth-400 hover:text-clay-600" title="Eliminar pago">
+              <i data-lucide="x" class="lucide-sm"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
   <div class="flex justify-center">
     <a href="{% url 'splits:split_group_delete' group.pk %}"
        class="rounded-lg border border-clay-300 px-4 py-2 text-sm font-medium text-clay-600 hover:bg-clay-50 dark:border-clay-800 dark:text-clay-400 dark:hover:bg-clay-900/30">
       <i data-lucide="trash-2" class="lucide-sm"></i> Eliminar grupo
     </a>
   </div>
+
+  <!-- Modal: marcar deuda pagada -->
+  <div x-show="payOpen" x-cloak class="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style="view-transition-name: none;">
+    <div class="fixed inset-0 bg-earth-900/60 backdrop-blur-sm" @click="payOpen = false"></div>
+    <div class="relative z-10 w-full max-w-md rounded-t-2xl bg-white p-6 shadow-xl dark:bg-earth-900 sm:rounded-2xl" style="padding-bottom: calc(1.5rem + var(--safe-bottom));">
+      <h3 class="text-lg font-semibold text-earth-900 dark:text-earth-100">Registrar pago</h3>
+      <p class="mt-1 text-xs text-earth-500 dark:text-earth-400">Confirmá que <span x-text="payPayer" class="font-medium"></span> le pagó a <span x-text="payPayee" class="font-medium"></span></p>
+      <form method="post" :action="payAction" class="mt-4 space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="payer" :value="payPayer">
+        <input type="hidden" name="payee" :value="payPayee">
+        <input type="hidden" name="currency" :value="payCurrency">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-earth-400" x-text="paySymbol"></span>
+            <input type="number" name="amount" step="0.01" min="0.01" required x-model="payAmount" inputmode="decimal"
+                   class="w-full rounded-lg border border-earth-300 bg-white px-8 py-2.5 text-sm text-earth-900 focus:border-sage-400 focus:outline-none focus:ring-2 focus:ring-sage-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200"
+                   placeholder="0.00">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" @click="payOpen = false" class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+          <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sage-600">
+            <i data-lucide="check" class="lucide-sm"></i> Confirmar pago
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: preferencia de pago -->
+  <div x-show="prefOpen" x-cloak class="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style="view-transition-name: none;">
+    <div class="fixed inset-0 bg-earth-900/60 backdrop-blur-sm" @click="prefOpen = false"></div>
+    <div class="relative z-10 w-full max-w-md rounded-t-2xl bg-white p-6 shadow-xl dark:bg-earth-900 sm:rounded-2xl" style="padding-bottom: calc(1.5rem + var(--safe-bottom));">
+      <h3 class="text-lg font-semibold text-earth-900 dark:text-earth-100">Preferencia de pago</h3>
+      <p class="mt-1 text-xs text-earth-500 dark:text-earth-400">"X prefiere pagarle a Y en lo posible" (se usa cuando hay deuda)</p>
+      <form method="post" action="{% url 'splits:split_preference_add' group.pk %}" class="mt-4 space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Quién paga</label>
+            <select name="payer" required class="w-full rounded-lg border border-earth-300 bg-white px-3 py-2.5 text-sm text-earth-900 focus:border-sage-400 focus:outline-none focus:ring-2 focus:ring-sage-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+              <option value="">Seleccionar...</option>
+              {% for m in group.members %}
+              <option value="{{ m }}" {% if prefPayer == m %}selected{% endif %}>{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Preferido (a quien le paga)</label>
+            <select name="payee" required class="w-full rounded-lg border border-earth-300 bg-white px-3 py-2.5 text-sm text-earth-900 focus:border-sage-400 focus:outline-none focus:ring-2 focus:ring-sage-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200">
+              <option value="">Seleccionar...</option>
+              {% for m in group.members %}
+              <option value="{{ m }}" {% if prefPayee == m %}selected{% endif %}>{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" @click="prefOpen = false" class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+          <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sage-600">
+            <i data-lucide="save" class="lucide-sm"></i> Guardar preferencia
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function debtModal(groupId) {
+  return {
+    groupId: groupId,
+    payOpen: false,
+    payPayer: '',
+    payPayee: '',
+    payAmount: '',
+    paySymbol: '',
+    payCurrency: '',
+    prefOpen: false,
+    prefPayer: '',
+    prefPayee: '',
+    get payAction() {
+      return this.groupId ? '/splits/groups/' + this.groupId + '/pay/' : '#';
+    },
+    openPay(detail) {
+      this.payPayer = detail.payer || '';
+      this.payPayee = detail.payee || '';
+      this.payAmount = detail.amount || '';
+      this.paySymbol = detail.symbol || '';
+      this.payCurrency = detail.currency || '';
+      this.payOpen = true;
+      this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    },
+    openPref(detail) {
+      this.prefPayer = detail.payer || '';
+      this.prefPayee = detail.payee || '';
+      this.prefOpen = true;
+      this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    },
+  };
+}
+</script>
 {% endblock %}

@@ -12,4 +12,8 @@ urlpatterns = [
     path('splits/expenses/add/<int:group_id>/', pages.split_expense_add, name='split_expense_add'),
     path('splits/expenses/<int:pk>/edit/', pages.split_expense_edit, name='split_expense_edit'),
     path('splits/expenses/<int:pk>/delete/', pages.split_expense_delete, name='split_expense_delete'),
+    path('splits/groups/<int:pk>/pay/', pages.split_payment_add, name='split_payment_add'),
+    path('splits/payments/<int:pk>/delete/', pages.split_payment_delete, name='split_payment_delete'),
+    path('splits/groups/<int:pk>/preference/', pages.split_preference_add, name='split_preference_add'),
+    path('splits/groups/<int:pk>/preference/remove/', pages.split_preference_remove, name='split_preference_remove'),
 ]
