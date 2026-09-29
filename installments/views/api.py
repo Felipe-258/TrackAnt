@@ -48,7 +48,6 @@ class InstallmentViewSet(viewsets.ReadOnlyModelViewSet):
             category=get_expense_category(request.colony.id, installment.purchase.category),
             date=timezone.now().date(),
             note=f'Cuota {installment.number}/{installment.purchase.installments_count} - {installment.purchase.name}',
-            is_recurring=True,
         )
         installment.is_paid = True
         installment.paid_date = timezone.now().date()
