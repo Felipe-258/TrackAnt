@@ -1,24 +1,13 @@
 from django import forms
 from django.db.models import Q
-from .models import Transaction, Category, Tag
-from goals.models import Goal
+from .models import Transaction, Category
+from goals.models import Reserve
 
 
 class TransactionForm(forms.ModelForm):
-    tag_names = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput(),
-        label='Etiquetas',
-    )
-    new_tags = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput(),
-        label='Nuevas etiquetas',
-    )
-
     class Meta:
         model = Transaction
-        fields = ['type', 'amount', 'currency', 'category', 'goal', 'date', 'note', 'receipt', 'is_recurring', 'tag_names', 'new_tags']
+        fields = ['type', 'amount', 'currency', 'category', 'reserve', 'date', 'note', 'receipt']
         widgets = {
             'type': forms.RadioSelect(attrs={
                 'class': 'peer sr-only',
@@ -57,10 +46,7 @@ class TransactionForm(forms.ModelForm):
             'receipt': forms.FileInput(attrs={
                 'class': 'w-full text-base text-earth-500 file:mr-3 file:rounded-lg file:border-0 file:bg-clay-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-clay-700 hover:file:bg-clay-100 dark:file:bg-clay-900/30 dark:file:text-clay-300 sm:text-sm',
             }),
-            'is_recurring': forms.CheckboxInput(attrs={
-                'class': 'h-5 w-5 rounded border-earth-300 text-clay-600 focus:ring-clay-500 dark:border-earth-600 dark:bg-earth-800',
-            }),
-            'goal': forms.Select(attrs={
+            'reserve': forms.Select(attrs={
                 'class': 'w-full rounded-lg border border-earth-300 bg-white px-4 py-2.5 text-sm text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200',
             }),
         }
@@ -71,7 +57,7 @@ class TransactionForm(forms.ModelForm):
         self.fields['type'].empty_label = None
         self.fields['currency'].empty_label = None
         self.fields['category'].empty_label = None
-        self.fields['goal'].empty_label = 'Sin meta'
+        self.fields['reserve'].empty_label = 'Sin reserva'
         type_val = self.initial.get('type')
         if self.data.get('type'):
             type_val = self.data.get('type')
@@ -83,32 +69,10 @@ class TransactionForm(forms.ModelForm):
         if colony:
             from .models import Currency
             self.fields['currency'].queryset = Currency.objects.filter(colony_filter)
-            self.fields['goal'].queryset = Goal.objects.filter(colony=colony, is_achieved=False).select_related('currency')
+            self.fields['reserve'].queryset = Reserve.objects.filter(colony=colony, is_achieved=False, target_amount__isnull=False).select_related('currency')
 
     def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance.save()
-
-        tag_ids = self.cleaned_data.get('tag_names', '')
-        new_tags_raw = self.cleaned_data.get('new_tags', '')
-
-        if tag_ids:
-            ids = [int(i) for i in tag_ids.split(',') if i.isdigit()]
-            tag_filter = Q(colony=self.colony) | Q(colony__isnull=True) if self.colony else Q(colony__isnull=True)
-            instance.tags.set(Tag.objects.filter(tag_filter, id__in=ids))
-
-        if new_tags_raw:
-            existing = [t.strip() for t in new_tags_raw.split(',') if t.strip()]
-            current_json = instance.custom_tags or []
-            for tag_name in existing:
-                if tag_name not in current_json:
-                    current_json.append(tag_name)
-            instance.custom_tags = current_json
-
-        if commit:
-            instance.save()
-
+        instance = super().save(commit=commit)
         return instance
 
 

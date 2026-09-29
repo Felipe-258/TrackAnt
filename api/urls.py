@@ -5,7 +5,7 @@ from django.db.models import Sum, Q
 from datetime import date
 
 from finances.models import Transaction, Category
-from goals.models import Goal
+from goals.models import Reserve
 from debts.models import Debt
 from subscriptions.models import Subscription
 
@@ -27,11 +27,13 @@ def api_stats(request):
     )
     balance = float((total['i'] or 0) - (total['e'] or 0))
 
+    reserved_total = float(Reserve.objects.filter(colony=colony).aggregate(s=Sum('current_amount'))['s'] or 0)
+
     return Response({
-        'balance': balance,
+        'balance': balance - reserved_total,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
-        'goals_count': Goal.objects.filter(colony=colony, is_achieved=False).count(),
+        'reserves_count': Reserve.objects.filter(colony=colony, is_achieved=False).count(),
         'debts_owe_count': Debt.objects.filter(colony=colony, debt_type='OWE', is_settled=False).count(),
         'debts_owed_count': Debt.objects.filter(colony=colony, debt_type='OWED', is_settled=False).count(),
         'active_subscriptions': Subscription.objects.filter(colony=colony, is_active=True).count(),
@@ -92,7 +94,6 @@ urlpatterns = [
     path('', include('budgets.api_urls')),
     path('', include('subscriptions.api_urls')),
     path('', include('installments.api_urls')),
-    path('', include('recurring.api_urls')),
     path('', include('splits.api_urls')),
     path('stats/', api_stats, name='api-stats'),
     path('stats/by-category/', api_stats_by_category, name='api-stats-category'),

@@ -1,12 +1,9 @@
-from datetime import timedelta
-from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.db.models import Q
 
 
 class Command(BaseCommand):
-    help = 'Procesa vencimientos de suscripciones, cuotas y gastos recurrentes'
+    help = 'Procesa vencimientos de suscripciones y cuotas'
 
     def handle(self, *args, **options):
         today = timezone.now().date()
@@ -14,7 +11,6 @@ class Command(BaseCommand):
 
         created += self._process_subscriptions(today)
         created += self._process_installments(today)
-        created += self._process_recurring(today)
 
         self.stdout.write(self.style.SUCCESS(f'Transacciones creadas: {created}'))
 
@@ -25,6 +21,7 @@ class Command(BaseCommand):
         subscriptions = Subscription.objects.filter(
             is_active=True,
             auto_debit=True,
+            is_variable=False,
             next_date__lte=today,
         ).select_related('currency', 'category')
 
@@ -64,7 +61,6 @@ class Command(BaseCommand):
                 category=get_expense_category(inst.purchase.colony_id, inst.purchase.category),
                 date=today,
                 note=f'Cuota {inst.number}/{inst.purchase.installments_count} - {inst.purchase.name}',
-                is_recurring=True,
             )
             inst.is_paid = True
             inst.paid_date = today
@@ -77,54 +73,3 @@ class Command(BaseCommand):
             count += 1
 
         return count
-
-    def _process_recurring(self, today):
-        from recurring.models import RecurringTransaction
-        from finances.models import Transaction
-        count = 0
-
-        rts = RecurringTransaction.objects.filter(
-            is_active=True,
-            next_date__lte=today,
-        ).filter(
-            Q(end_date__isnull=True) | Q(end_date__gte=today)
-        ).select_related('currency', 'category')
-
-        for rt in rts:
-            tx = Transaction.objects.create(
-                colony=rt.colony,
-                type='EXPENSE',
-                amount=rt.amount,
-                currency=rt.currency,
-                category=rt.category,
-                date=today,
-                note=rt.note or rt.name,
-                is_recurring=True,
-            )
-
-            rt.next_date = self._calc_next(rt)
-            rt.save(update_fields=['next_date'])
-            count += 1
-
-        return count
-
-    def _calc_next(self, rt):
-        from trackant.utils import cap_day
-        d = rt.next_date
-        if rt.cycle == 'WEEKLY':
-            return d + timedelta(weeks=1)
-        elif rt.cycle == 'BIWEEKLY':
-            return d + timedelta(weeks=2)
-        elif rt.cycle == 'MONTHLY':
-            next_d = d + relativedelta(months=1)
-            if rt.day_of_month:
-                next_d = next_d.replace(day=cap_day(next_d.year, next_d.month, rt.day_of_month))
-            return next_d
-        elif rt.cycle == 'BIMONTHLY':
-            next_d = d + relativedelta(months=2)
-            if rt.day_of_month:
-                next_d = next_d.replace(day=cap_day(next_d.year, next_d.month, rt.day_of_month))
-            return next_d
-        elif rt.cycle == 'YEARLY':
-            return d + relativedelta(years=1)
-        return d

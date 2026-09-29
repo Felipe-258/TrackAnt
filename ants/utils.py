@@ -1,11 +1,11 @@
 from datetime import date
 from django.db.models import Sum, Q
 from finances.models import Transaction
-from goals.models import Goal
+from goals.models import Reserve
 from budgets.models import Budget
 
 
-def get_colony_state(colony, goal_id=None):
+def get_colony_state(colony, reserve_id=None):
     today = date.today()
     year, month = today.year, today.month
 
@@ -19,17 +19,20 @@ def get_colony_state(colony, goal_id=None):
     )
     total_balance = float((total['i'] or 0) - (total['e'] or 0))
 
+    reserved_total = float(Reserve.objects.filter(colony=colony).aggregate(s=Sum('current_amount'))['s'] or 0)
+    total_balance = total_balance - reserved_total
+
     transaction_count = Transaction.objects.filter(colony=colony).count()
-    active_goals = Goal.objects.filter(colony=colony, is_achieved=False).count()
+    active_reserves = Reserve.objects.filter(colony=colony, is_achieved=False).count()
 
-    main_goal = None
-    if goal_id:
-        main_goal = Goal.objects.filter(id=goal_id, colony=colony, is_achieved=False).first()
-    if main_goal is None:
-        main_goal = Goal.objects.filter(colony=colony, is_achieved=False).first()
+    main_reserve = None
+    if reserve_id:
+        main_reserve = Reserve.objects.filter(id=reserve_id, colony=colony, is_achieved=False).first()
+    if main_reserve is None:
+        main_reserve = Reserve.objects.filter(colony=colony, is_achieved=False).first()
 
-    goal_progress = main_goal.progress_pct() if main_goal else 0
-    goal_color = main_goal.color if main_goal else '#C4943A'
+    goal_progress = main_reserve.progress_pct() if main_reserve and main_reserve.has_target else 0
+    goal_color = main_reserve.color if main_reserve else '#C4943A'
 
     over_budget = Budget.objects.filter(
         colony=colony, month=month, year=year
@@ -50,7 +53,7 @@ def get_colony_state(colony, goal_id=None):
     speed_map = {'despejado': 16, 'soleado': 16, 'nublado': 16, 'lluvioso': 22, 'tormenta': 28}
     ant_speed = speed_map.get(weather, 16)
 
-    # Leaf pile: proportional to goal progress
+    # Leaf pile: proportional to reserve progress
     leaf_total = max(2, int(goal_progress / 6.25)) if goal_progress > 0 else 2
     leaf_brown = min(leaf_total, 14)
     leaf_green = max(0, int(leaf_total * 0.35))
@@ -64,12 +67,12 @@ def get_colony_state(colony, goal_id=None):
         'weather': weather,
         'queen_size': queen_size,
         'queen_progress': goal_progress,
-        'active_goals': active_goals,
+        'active_reserves': active_reserves,
         'transaction_count': transaction_count,
-        'goal_name': main_goal.name if main_goal else None,
-        'goal_currency': str(main_goal.currency.symbol) if main_goal else '',
-        'goal_current': float(main_goal.current_amount) if main_goal else 0,
-        'goal_target': float(main_goal.target_amount) if main_goal else 0,
+        'goal_name': main_reserve.name if main_reserve else None,
+        'goal_currency': str(main_reserve.currency.symbol) if main_reserve else '',
+        'goal_current': float(main_reserve.current_amount) if main_reserve else 0,
+        'goal_target': float(main_reserve.target_amount) if main_reserve and main_reserve.has_target else 0,
         'goal_color': goal_color,
         'leaf_colors': leaf_colors,
         'leaf_brown_count': leaf_brown,

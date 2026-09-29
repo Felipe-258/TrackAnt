@@ -48,7 +48,7 @@ Se ejecuta en cada request. Flujo:
 
 ## Patrón de Filtros de Datos
 
-### Datos Privados (Transaction, Goal, Debt, Budget, etc.)
+### Datos Privados (Transaction, Reserve, Debt, Budget, etc.)
 ```python
 # En views:
 colony = request.colony
@@ -62,7 +62,7 @@ def perform_create(self, serializer):
     serializer.save(colony=self.request.colony)
 ```
 
-### Datos Globales (Currency, Category, Tag)
+### Datos Globales (Currency, Category)
 ```python
 # Muestran datos de la colonia DEL USUARIO + datos globales (sin colonia)
 from django.db.models import Q
@@ -87,18 +87,18 @@ Hay múltiples puntos de entrada que crean Transactions automáticamente:
   - Crea categoría "Gasto compartido" con `get_or_create`
   - Crea Transaction EXPENSE
 
-## Transaction.goal — Auto-actualización de Progreso
+## Transaction.reserve — Auto-actualización de Saldo
 
-El modelo `Transaction` tiene un FK opcional a `Goal`:
+El modelo `Transaction` tiene un FK opcional a `Reserve`:
 ```python
-goal = models.ForeignKey('goals.Goal', on_delete=models.SET_NULL, null=True, blank=True)
+reserve = models.ForeignKey('goals.Reserve', on_delete=models.SET_NULL, null=True, blank=True)
 ```
 
-Al crear/editar una transacción:
-1. `_update_goal_progress()` actualiza `current_amount` de la meta usando F() expressions
+Al crear/editar una transacción (solo INCOME, solo reservas con objetivo):
+1. `_update_reserve_progress()` actualiza `current_amount` de la reserva usando F() expressions
 2. Auto-setea `is_achieved=True` cuando `current_amount >= target_amount`
 
-**Ubicación**: `finances/views/pages.py:31-44`
+**Ubicación**: `finances/views/pages.py:36-53`
 
 ## SubscriptionPayment — Modelo No Documentado
 

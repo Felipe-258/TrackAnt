@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% block page_title %}Agregar progreso{% endblock %}
-{% block page_subtitle %}Sumá dinero a tu meta{% endblock %}
+{% block page_title %}Apartar dinero{% endblock %}
+{% block page_subtitle %}Sumá dinero a tu reserva{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-md">
@@ -8,24 +8,30 @@
     <div class="flex items-center gap-4 mb-5">
       <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-100 text-xl dark:bg-gold-900/50"><i data-lucide="banknote" class="lucide-lg"></i></span>
       <div>
-        <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ goal.name }}</h3>
+        <h3 class="font-semibold text-earth-900 dark:text-earth-100">{{ reserve.name }}</h3>
         <p class="text-sm text-earth-500 dark:text-earth-400">
-          {{ goal.currency.symbol }}{{ goal.current_amount|floatformat:0 }} de {{ goal.currency.symbol }}{{ goal.target_amount|floatformat:0 }}
+          {% if reserve.has_target %}
+          {{ reserve.currency.symbol }}{{ reserve.current_amount|floatformat:0 }} de {{ reserve.currency.symbol }}{{ reserve.target_amount|floatformat:0 }}
+          {% else %}
+          {{ reserve.currency.symbol }}{{ reserve.current_amount|floatformat:0 }}
+          {% endif %}
         </p>
       </div>
     </div>
 
+    {% if reserve.has_target and not reserve.is_achieved %}
     <div class="mb-5 h-3 w-full overflow-hidden rounded-full bg-earth-100 dark:bg-earth-800">
-      <div class="h-full rounded-full transition-all" style="width: {{ goal.progress_pct }}%; background-color: {{ goal.color }};"></div>
+      <div class="h-full rounded-full transition-all" style="width: {{ reserve.progress_pct }}%; background-color: {{ reserve.color }};"></div>
     </div>
+    {% endif %}
 
     <form method="post" class="space-y-4">
       {% csrf_token %}
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto a agregar</label>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto a apartar</label>
         <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-earth-400">{{ goal.currency.symbol }}</span>
-          <input type="number" name="amount" step="0.01" min="0.01" required
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-earth-400">{{ reserve.currency.symbol }}</span>
+          <input type="number" name="amount" step="0.01" min="0.01" required inputmode="decimal"
                  class="w-full rounded-lg border border-earth-300 bg-white px-8 py-2.5 text-sm text-earth-900 placeholder-earth-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"
                  placeholder="0.00" autofocus>
         </div>
@@ -34,9 +40,9 @@
         <button type="submit"
                 class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
           <i data-lucide="plus-circle" class="lucide-sm"></i>
-          Agregar
+          Apartar
         </button>
-        <a href="{% url 'goals:goal_list' %}"
+        <a href="{% url 'reserves:list' %}"
            class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
       </div>
     </form>

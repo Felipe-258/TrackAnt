@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
-from .views.api import GoalViewSet
+from .views.api import ReserveViewSet
 
 router = DefaultRouter()
-router.register('goals', GoalViewSet, basename='api-goal')
+router.register('reserves', ReserveViewSet, basename='api-reserve')
 urlpatterns = router.urls

@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'backups',
     'api',
     'installments',
-    'recurring',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +85,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.tab_config',
             ],
         },
     },

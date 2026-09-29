@@ -16,6 +16,7 @@ class Subscription(models.Model):
     next_date = models.DateField(verbose_name='Próximo cobro')
     category = models.ForeignKey('finances.Category', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Categoría')
     auto_debit = models.BooleanField(default=True, verbose_name='Débito automático')
+    is_variable = models.BooleanField(default=False, verbose_name='Costo variable')
     is_active = models.BooleanField(default=True, verbose_name='Activa', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -28,6 +29,8 @@ class Subscription(models.Model):
         return f'{self.name} — {self.currency.symbol}{self.amount}/{self.get_cycle_display().lower()}'
 
     def monthly_cost(self):
+        if self.is_variable:
+            return float(self.amount)
         if self.cycle == 'WEEKLY':
             return float(self.amount) * 4.33
         elif self.cycle == 'MONTHLY':

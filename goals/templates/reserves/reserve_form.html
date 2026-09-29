@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% block page_title %}{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Meta{% endblock %}
-{% block page_subtitle %}Definí un objetivo de ahorro{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Reserva{% endblock %}
+{% block page_subtitle %}Apartá dinero que no cuenta como disponible{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-2xl">
@@ -13,22 +13,22 @@
       {% endif %}
 
       <div class="flex items-center gap-4">
-        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-100 text-2xl dark:bg-gold-900/50"><i data-lucide="target" class="lucide-lg"></i></span>
+        <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-100 text-2xl dark:bg-gold-900/50"><i data-lucide="piggy-bank" class="lucide-lg"></i></span>
         <div>
-          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Nueva meta de ahorro</h3>
-          <p class="text-sm text-earth-500 dark:text-earth-400">Establecé un objetivo y seguí tu progreso</p>
+          <h3 class="font-semibold text-earth-900 dark:text-earth-100">Nueva reserva</h3>
+          <p class="text-sm text-earth-500 dark:text-earth-400">Fondo de emergencia, inversión o ahorro. Podés definirle un objetivo o dejarla libre.</p>
         </div>
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre de la meta</label>
+        <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Nombre</label>
         {{ form.name }}
         {% if form.name.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.name.errors.0 }}</p>{% endif %}
       </div>
 
       <div class="flex flex-col gap-4 sm:flex-row">
         <div class="sm:flex-1">
-          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto objetivo</label>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto objetivo <span class="text-earth-400 font-normal">(opcional, dejá vacío si no tiene)</span></label>
           {{ form.target_amount }}
           {% if form.target_amount.errors %}<p class="mt-1 text-xs text-clay-600">{{ form.target_amount.errors.0 }}</p>{% endif %}
         </div>
@@ -50,12 +50,12 @@
       </div>
 
       <div class="grid grid-cols-2 gap-3 border-t border-earth-200 pt-5 dark:border-earth-800">
-        <a href="{% url 'goals:goal_list' %}"
+        <a href="{% url 'reserves:list' %}"
            class="rounded-lg border border-earth-300 px-4 py-2.5 text-center text-sm font-medium text-earth-600 transition-colors hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</a>
         <button type="submit"
                 class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gold-600">
           <i data-lucide="check" class="lucide-sm"></i>
-          {% if form.instance.pk %}Actualizar{% else %}Crear meta{% endif %}
+          {% if form.instance.pk %}Actualizar{% else %}Crear reserva{% endif %}
         </button>
       </div>
     </form>

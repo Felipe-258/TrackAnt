@@ -4,7 +4,8 @@
 {% block page_subtitle %}Tus pagos recurrentes{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-6" x-data="variablePayModal()"
+     @open-pay-variable.window="openPay($event.detail)">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <span class="text-sm text-earth-500 dark:text-earth-400">Gasto mensual:</span>
@@ -25,43 +26,54 @@
     </div>
     <div class="grid gap-2">
       {% for payment in pending_payments %}
+      {% with sub=payment.subscription %}
       <div class="flex items-center justify-between rounded-lg border border-gold-200 bg-white p-3 dark:border-gold-800 dark:bg-earth-900">
         <div class="flex items-center gap-3">
           <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-100 dark:bg-gold-900/50">
             <i data-lucide="repeat" class="lucide text-gold-600 dark:text-gold-400"></i>
           </span>
           <div>
-            <h4 class="font-semibold text-earth-900 dark:text-earth-100">{{ payment.subscription.name }}</h4>
+            <h4 class="font-semibold text-earth-900 dark:text-earth-100">{{ sub.name }}
+              {% if sub.is_variable %}<span class="ml-1 rounded-full bg-gold-100 px-1.5 py-0.5 text-[10px] font-medium text-gold-700 dark:bg-gold-900/50 dark:text-gold-300">Variable</span>{% endif %}
+            </h4>
             <p class="text-xs text-earth-500 dark:text-earth-400">
-              {{ payment.subscription.currency.symbol }}{{ payment.subscription.amount|floatformat:2 }}
-              {% if payment.subscription.category %} · <i data-lucide="{{ payment.subscription.category.icon }}" class="lucide-sm"></i> {{ payment.subscription.category.name }}{% endif %}
+              {{ sub.currency.symbol }}{{ sub.amount|floatformat:2 }}{% if sub.is_variable %} aprox.{% endif %}
+              {% if sub.category %} · <i data-lucide="{{ sub.category.icon }}" class="lucide-sm"></i> {{ sub.category.name }}{% endif %}
             </p>
           </div>
         </div>
         <div class="flex items-center gap-3">
           <div class="text-right">
-            <p class="font-semibold text-gold-600 dark:text-gold-400">{{ payment.subscription.currency.symbol }}{{ payment.subscription.amount|floatformat:2 }}</p>
+            <p class="font-semibold text-gold-600 dark:text-gold-400">{{ sub.currency.symbol }}{% if sub.is_variable %}?{% else %}{{ sub.amount|floatformat:2 }}{% endif %}</p>
             <p class="text-xs {% if payment.status == 'overdue' %}text-clay-600 dark:text-clay-400{% elif payment.status == 'today' %}text-gold-600 dark:text-gold-400{% else %}text-earth-400 dark:text-earth-500{% endif %}">
               {{ payment.status_label }}
             </p>
           </div>
+          {% if sub.is_variable %}
+          <button type="button" @click="$dispatch('open-pay-variable', { pk: {{ payment.pk }}, name: '{{ sub.name|escapejs }}', symbol: '{{ sub.currency.symbol }}', estimate: '{{ sub.amount }}' })"
+                  class="rounded-lg bg-sage-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-600">
+            <i data-lucide="check" class="lucide-sm"></i> Pagar
+          </button>
+          {% else %}
           <form method="post" action="{% url 'subscriptions:payment_toggle' payment.pk %}" class="inline">
             {% csrf_token %}
             <button type="submit" class="rounded-lg bg-sage-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sage-600">
               <i data-lucide="check" class="lucide-sm"></i> Pagar
             </button>
           </form>
+          {% endif %}
         </div>
       </div>
-      {% if payment.available < payment.subscription.amount %}
+      {% if payment.available < sub.amount %}
       <div class="mt-1 flex items-start gap-2 rounded-lg border border-gold-200 bg-gold-50 px-3 py-2 text-xs text-gold-800 dark:border-gold-700 dark:bg-gold-950/30 dark:text-gold-200">
         <i data-lucide="alert-triangle" class="lucide-sm mt-0.5 shrink-0"></i>
         <span>
-          Tenés {{ payment.subscription.currency.symbol }}{{ payment.available|floatformat:2 }} disponibles en {{ payment.subscription.currency.code }}.
+          Tenés {{ sub.currency.symbol }}{{ payment.available|floatformat:2 }} disponibles en {{ sub.currency.code }}.
           <a href="{% url 'finances:conversion' %}" class="font-semibold underline">Convertí tu dinero →</a>
         </span>
       </div>
       {% endif %}
+      {% endwith %}
       {% endfor %}
     </div>
   </div>
@@ -145,7 +157,7 @@
         </div>
         <div class="flex items-center gap-3">
           <span class="text-sm text-earth-500 dark:text-earth-400">{{ payment.paid_date|date:"d/m/Y" }}</span>
-          <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">{{ payment.subscription.currency.symbol }}{{ payment.subscription.amount|floatformat:2 }}</span>
+          <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">{{ payment.subscription.currency.symbol }}{% if payment.transaction %}{{ payment.transaction.amount|floatformat:2 }}{% else %}{{ payment.subscription.amount|floatformat:2 }}{% endif %}</span>
           <form method="post" action="{% url 'subscriptions:payment_toggle' payment.pk %}" class="inline">
             {% csrf_token %}
             <button type="submit" class="touch-target rounded-lg p-1.5 text-earth-400 hover:text-clay-600 dark:hover:text-clay-400" title="Desmarcar como pagado">
@@ -164,10 +176,64 @@
     <summary class="cursor-pointer px-6 py-3 text-sm font-medium text-earth-500 dark:text-earth-400">{{ inactive|length }} inactivas</summary>
     <div class="border-t border-earth-200 px-6 py-3 dark:border-earth-800">
       {% for s in inactive %}
-      <div class="flex justify-between py-1 text-sm text-earth-400"><span>{{ s.name }}</span><span>{{ s.currency.symbol }}{{ s.amount|floatformat:2 }}/{{ s.get_cycle_display|lower }}</span></div>
+      <div class="flex justify-between py-1 text-sm text-earth-400"><span>{{ s.name }}{% if s.is_variable %} <span class="rounded-full bg-earth-100 px-1.5 py-0.5 text-[10px] font-medium text-earth-500 dark:bg-earth-800 dark:text-earth-400">Variable</span>{% endif %}</span><span>{{ s.currency.symbol }}{{ s.amount|floatformat:2 }}/{{ s.get_cycle_display|lower }}</span></div>
       {% endfor %}
     </div>
   </details>
   {% endif %}
+
+  <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style="view-transition-name: none;">
+    <div class="fixed inset-0 bg-earth-900/60 backdrop-blur-sm" @click="open = false"></div>
+    <div class="relative z-10 w-full max-w-md rounded-t-2xl bg-white p-6 shadow-xl dark:bg-earth-900 sm:rounded-2xl" style="padding-bottom: calc(1.5rem + var(--safe-bottom));">
+      <h3 class="text-lg font-semibold text-earth-900 dark:text-earth-100">Pagar <span x-text="name"></span></h3>
+      <p class="mt-1 text-xs text-earth-500 dark:text-earth-400">Ingresá el monto real de este período</p>
+      <form method="post" :action="payUrl" class="mt-4 space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-earth-400" x-text="symbol"></span>
+            <input type="number" name="amount" step="0.01" min="0.01" required x-model="amount" inputmode="decimal"
+                   class="w-full rounded-lg border border-earth-300 bg-white px-8 py-2.5 text-sm text-earth-900 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200"
+                   placeholder="0.00" @keydown.enter.prevent="$el.form.requestSubmit()" autofocus>
+          </div>
+          <p class="mt-1 text-xs text-earth-400 dark:text-earth-500" x-show="estimate">Estimación guardada: <span x-text="symbol + ' ' + estimate"></span></p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" @click="open = false" class="rounded-lg border border-earth-300 px-4 py-2.5 text-sm font-medium text-earth-600 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-400 dark:hover:bg-earth-800">Cancelar</button>
+          <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sage-600">
+            <i data-lucide="check" class="lucide-sm"></i> Confirmar pago
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function variablePayModal() {
+  return {
+    open: false,
+    pk: null,
+    name: '',
+    symbol: '',
+    amount: '',
+    estimate: '',
+    get payUrl() {
+      return this.pk ? `/subscriptions/payments/${this.pk}/toggle/` : '#';
+    },
+    openPay(detail) {
+      this.pk = detail.pk;
+      this.name = detail.name;
+      this.symbol = detail.symbol;
+      this.estimate = detail.estimate || '';
+      this.amount = this.estimate || '';
+      this.open = true;
+      this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    },
+  };
+}
+</script>
 {% endblock %}

@@ -42,21 +42,6 @@ class Category(models.Model):
         return self.name
 
 
-class Tag(models.Model):
-    colony = models.ForeignKey('users.Colony', on_delete=models.CASCADE, null=True, blank=True,
-                               verbose_name='Colonia')
-    name = models.CharField(max_length=50, verbose_name='Nombre')
-    color = models.CharField(max_length=7, blank=True, default='#8A6348', verbose_name='Color')
-
-    class Meta:
-        verbose_name = 'Etiqueta'
-        verbose_name_plural = 'Etiquetas'
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
 class Transaction(models.Model):
     class Type(models.TextChoices):
         INCOME = 'INCOME', 'Ingreso'
@@ -67,13 +52,10 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto')
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name='Moneda')
     category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Categoría')
-    tags = models.ManyToManyField(Tag, blank=True, verbose_name='Etiquetas')
-    custom_tags = models.JSONField(default=list, blank=True, verbose_name='Etiquetas personalizadas')
     date = models.DateField(verbose_name='Fecha', db_index=True)
     note = models.TextField(blank=True, verbose_name='Nota')
     receipt = models.ImageField(upload_to='receipts/', blank=True, null=True, verbose_name='Comprobante')
-    is_recurring = models.BooleanField(default=False, verbose_name='Es recurrente')
-    goal = models.ForeignKey('goals.Goal', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Meta')
+    reserve = models.ForeignKey('goals.Reserve', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Reserva')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

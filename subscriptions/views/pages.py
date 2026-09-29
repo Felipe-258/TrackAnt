@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils import timezone
@@ -27,7 +28,7 @@ def subscription_list(request):
         subscription__colony=colony,
         subscription__is_active=True,
         is_paid=True,
-    ).select_related('subscription__currency', 'subscription__category').order_by('-paid_date')[:10]
+    ).select_related('subscription__currency', 'subscription__category', 'transaction').order_by('-paid_date')[:10]
 
     balances = available_balances(colony)
 
@@ -107,12 +108,24 @@ def subscription_toggle_paid(request, pk):
             mark_as_unpaid(payment)
             messages.warning(request, f'Pago de {payment.subscription.name} marcado como no pagado')
         else:
-            if request.colony.require_funds_for_conversion:
-                avail = available_balances(request.colony).get(payment.subscription.currency.code, 0)
-                if payment.subscription.amount > avail:
-                    messages.error(request, f'No tenés suficientes {payment.subscription.currency.code} (disponible: {avail:,.2f}). Convertí tu dinero en la página de Conversión.')
+            sub = payment.subscription
+            amount = sub.amount
+            if sub.is_variable:
+                raw_amount = request.POST.get('amount', '').strip()
+                try:
+                    amount = Decimal(raw_amount)
+                except (InvalidOperation, ValueError):
+                    messages.error(request, 'Ingresá el monto real de este período')
                     return redirect('subscriptions:subscription_list')
-            mark_as_paid(payment)
-            messages.success(request, f'{payment.subscription.name} marcada como pagada')
+                if amount <= 0:
+                    messages.error(request, 'El monto debe ser mayor a cero')
+                    return redirect('subscriptions:subscription_list')
+            if request.colony.require_funds_for_conversion:
+                avail = available_balances(request.colony).get(sub.currency.code, 0)
+                if amount > avail:
+                    messages.error(request, f'No tenés suficientes {sub.currency.code} (disponible: {avail:,.2f}). Convertí tu dinero en la página de Conversión.')
+                    return redirect('subscriptions:subscription_list')
+            mark_as_paid(payment, amount=amount)
+            messages.success(request, f'{sub.name} marcada como pagada')
 
     return redirect('subscriptions:subscription_list')

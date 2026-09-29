@@ -3,74 +3,105 @@ from decimal import Decimal, InvalidOperation
 from django.db.models import F
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from ..models import Goal
-from ..forms import GoalForm
+from ..models import Reserve
+from ..forms import ReserveForm
 
 
-def goal_list(request):
-    goals = Goal.objects.filter(colony=request.colony).select_related('currency')
-    return render(request, 'goals/goal_list.html', {'goals': goals})
+def reserve_list(request):
+    reserves = Reserve.objects.filter(colony=request.colony).select_related('currency')
+    return render(request, 'reserves/reserve_list.html', {'reserves': reserves})
 
 
-def goal_add(request):
+def reserve_add(request):
     colony = request.colony
     if request.method == 'POST':
-        form = GoalForm(request.POST, colony=colony)
+        form = ReserveForm(request.POST, colony=colony)
         if form.is_valid():
-            g = form.save(commit=False)
-            g.colony = colony
-            g.save()
-            messages.success(request, f'Meta creada: {g.name}')
-            return redirect('goals:goal_list')
+            r = form.save(commit=False)
+            r.colony = colony
+            r.save()
+            messages.success(request, f'Reserva creada: {r.name}')
+            return redirect('reserves:list')
     else:
-        form = GoalForm(colony=colony)
-    return render(request, 'goals/goal_form.html', {'form': form})
+        form = ReserveForm(colony=colony)
+    return render(request, 'reserves/reserve_form.html', {'form': form})
 
 
-def goal_edit(request, pk):
+def reserve_edit(request, pk):
     colony = request.colony
-    g = get_object_or_404(Goal, pk=pk, colony=colony)
+    r = get_object_or_404(Reserve, pk=pk, colony=colony)
     if request.method == 'POST':
-        form = GoalForm(request.POST, instance=g, colony=colony)
+        form = ReserveForm(request.POST, instance=r, colony=colony)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Meta actualizada: {g.name}')
-            return redirect('goals:goal_list')
+            messages.success(request, f'Reserva actualizada: {r.name}')
+            return redirect('reserves:list')
     else:
-        form = GoalForm(instance=g, colony=colony)
-    return render(request, 'goals/goal_form.html', {'form': form, 'goal': g})
+        form = ReserveForm(instance=r, colony=colony)
+    return render(request, 'reserves/reserve_form.html', {'form': form, 'reserve': r})
 
 
-def goal_delete(request, pk):
-    g = get_object_or_404(Goal, pk=pk, colony=request.colony)
+def reserve_delete(request, pk):
+    r = get_object_or_404(Reserve, pk=pk, colony=request.colony)
     if request.method == 'POST':
-        g.delete()
-        messages.success(request, 'Meta eliminada')
-        return redirect('goals:goal_list')
-    return render(request, 'goals/goal_confirm_delete.html', {'goal': g})
+        r.delete()
+        messages.success(request, 'Reserva eliminada')
+        return redirect('reserves:list')
+    return render(request, 'reserves/reserve_confirm_delete.html', {'reserve': r})
 
 
-def goal_add_progress(request, pk):
+def reserve_deposit(request, pk):
     colony = request.colony
-    g = get_object_or_404(Goal.objects.filter(colony=colony).select_related('currency'), pk=pk)
+    r = get_object_or_404(Reserve.objects.filter(colony=colony).select_related('currency'), pk=pk)
     if request.method == 'POST':
         amount = request.POST.get('amount', '0')
         try:
             amount = Decimal(amount)
             if amount > 0:
-                if Goal.objects.filter(pk=pk, colony=colony).filter(current_amount__gte=F('target_amount') - amount).exists():
-                    Goal.objects.filter(pk=pk, colony=colony).update(
-                        current_amount=F('current_amount') + amount,
-                        is_achieved=True,
-                    )
+                if r.has_target:
+                    if Reserve.objects.filter(pk=pk, colony=colony).filter(current_amount__gte=F('target_amount') - amount).exists():
+                        Reserve.objects.filter(pk=pk, colony=colony).update(
+                            current_amount=F('current_amount') + amount,
+                            is_achieved=True,
+                        )
+                    else:
+                        Reserve.objects.filter(pk=pk, colony=colony).update(
+                            current_amount=F('current_amount') + amount,
+                        )
                 else:
-                    Goal.objects.filter(pk=pk, colony=colony).update(
+                    Reserve.objects.filter(pk=pk, colony=colony).update(
                         current_amount=F('current_amount') + amount,
                     )
-                messages.success(request, f'${amount} agregado a "{g.name}"')
+                messages.success(request, f'${amount} apartado en "{r.name}"')
             else:
                 messages.error(request, 'El monto debe ser mayor a cero')
         except (ValueError, InvalidOperation):
             messages.error(request, 'Monto invalido')
-        return redirect('goals:goal_list')
-    return render(request, 'goals/goal_add_progress.html', {'goal': g})
+        return redirect('reserves:list')
+    return render(request, 'reserves/reserve_deposit.html', {'reserve': r})
+
+
+def reserve_withdraw(request, pk):
+    colony = request.colony
+    r = get_object_or_404(Reserve.objects.filter(colony=colony).select_related('currency'), pk=pk)
+    if request.method == 'POST':
+        amount = request.POST.get('amount', '0')
+        try:
+            amount = Decimal(amount)
+            if amount <= 0:
+                messages.error(request, 'El monto debe ser mayor a cero')
+            else:
+                updated = Reserve.objects.filter(
+                    pk=pk, colony=colony, current_amount__gte=amount
+                ).update(
+                    current_amount=F('current_amount') - amount,
+                    is_achieved=False,
+                )
+                if updated:
+                    messages.success(request, f'${amount} retirado de "{r.name}"')
+                else:
+                    messages.error(request, 'No hay suficiente saldo en la reserva')
+        except (ValueError, InvalidOperation):
+            messages.error(request, 'Monto invalido')
+        return redirect('reserves:list')
+    return render(request, 'reserves/reserve_withdraw.html', {'reserve': r})

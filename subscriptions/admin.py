@@ -4,8 +4,8 @@ from .models import Subscription, SubscriptionPayment
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'amount', 'currency', 'cycle', 'next_date', 'is_active', 'days_until_next', 'colony']
-    list_filter = ['is_active', 'cycle', 'next_date', 'colony']
+    list_display = ['name', 'amount', 'currency', 'cycle', 'next_date', 'is_variable', 'is_active', 'days_until_next', 'colony']
+    list_filter = ['is_active', 'cycle', 'is_variable', 'next_date', 'colony']
     search_fields = ['name']
 
 

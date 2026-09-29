@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import pages
 
-app_name = 'goals'
+app_name = 'reserves'
 
 urlpatterns = [
-    path('goals/', pages.goal_list, name='goal_list'),
-    path('goals/add/', pages.goal_add, name='goal_add'),
-    path('goals/<int:pk>/edit/', pages.goal_edit, name='goal_edit'),
-    path('goals/<int:pk>/delete/', pages.goal_delete, name='goal_delete'),
-    path('goals/<int:pk>/add-progress/', pages.goal_add_progress, name='goal_add_progress'),
+    path('reservas/', pages.reserve_list, name='list'),
+    path('reservas/add/', pages.reserve_add, name='add'),
+    path('reservas/<int:pk>/edit/', pages.reserve_edit, name='edit'),
+    path('reservas/<int:pk>/delete/', pages.reserve_delete, name='delete'),
+    path('reservas/<int:pk>/deposit/', pages.reserve_deposit, name='deposit'),
+    path('reservas/<int:pk>/withdraw/', pages.reserve_withdraw, name='withdraw'),
 ]

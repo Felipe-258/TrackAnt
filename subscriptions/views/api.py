@@ -30,14 +30,25 @@ class SubscriptionPaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['post'])
     def toggle(self, request, pk=None):
+        from decimal import Decimal, InvalidOperation
         payment = self.get_object()
+        sub = payment.subscription
         if payment.is_paid:
             mark_as_unpaid(payment)
-            return Response({'status': 'unpaid', 'message': f'{payment.subscription.name} marcada como no pagada'})
+            return Response({'status': 'unpaid', 'message': f'{sub.name} marcada como no pagada'})
         else:
-            transaction = mark_as_paid(payment)
+            amount = None
+            if sub.is_variable:
+                raw = request.data.get('amount')
+                try:
+                    amount = Decimal(str(raw))
+                except (InvalidOperation, TypeError, ValueError):
+                    return Response({'status': 'error', 'message': 'Ingresá el monto real de este período'}, status=status.HTTP_400_BAD_REQUEST)
+                if amount <= 0:
+                    return Response({'status': 'error', 'message': 'El monto debe ser mayor a cero'}, status=status.HTTP_400_BAD_REQUEST)
+            transaction = mark_as_paid(payment, amount=amount)
             return Response({
                 'status': 'paid',
-                'message': f'{payment.subscription.name} marcada como pagada',
+                'message': f'{sub.name} marcada como pagada',
                 'transaction_id': transaction.id,
             })

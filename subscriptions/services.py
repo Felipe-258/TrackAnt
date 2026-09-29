@@ -14,12 +14,17 @@ def create_initial_payment(subscription):
         defaults={'is_paid': False}
     )
 
+    if subscription.is_variable:
+        return
+
     if subscription.auto_debit and subscription.next_date <= today and not payment.is_paid:
         _process_payment(payment, subscription)
 
 
 def process_due_payment(payment):
     subscription = payment.subscription
+    if subscription.is_variable:
+        return False
     if not subscription.auto_debit:
         return False
     if payment.is_paid:
@@ -29,6 +34,8 @@ def process_due_payment(payment):
 
 
 def _process_payment(payment, subscription):
+    if subscription.is_variable:
+        return
     if not subscription.colony_id:
         return
 
@@ -41,7 +48,6 @@ def _process_payment(payment, subscription):
         category=get_expense_category(subscription.colony_id, subscription.category),
         date=payment.due_date,
         note=f'Suscripción: {subscription.name}',
-        is_recurring=True,
     )
 
     payment.is_paid = True
@@ -71,20 +77,20 @@ def calculate_next_due_date(current_date, cycle):
     return current_date
 
 
-def mark_as_paid(payment):
+def mark_as_paid(payment, amount=None):
     from .models import SubscriptionPayment
     from trackant.utils import get_expense_category
     subscription = payment.subscription
+    paid_amount = amount if amount is not None else subscription.amount
 
     transaction = Transaction.objects.create(
         colony=subscription.colony,
         type='EXPENSE',
-        amount=subscription.amount,
+        amount=paid_amount,
         currency=subscription.currency,
         category=get_expense_category(subscription.colony_id, subscription.category),
         date=payment.due_date,
         note=f'Suscripción: {subscription.name}',
-        is_recurring=True,
     )
 
     payment.is_paid = True

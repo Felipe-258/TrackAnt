@@ -5,7 +5,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl">
   <div class="rounded-xl border border-earth-200 bg-white p-6 shadow-sm dark:border-earth-800 dark:bg-earth-900">
-    <form method="post" class="space-y-5">
+    <form method="post" class="space-y-5" x-data="{ isVariable: {{ form.is_variable.value|yesno:'true,false' }} }">
       {% csrf_token %}
       <div class="flex items-center gap-4">
         <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-100 text-2xl dark:bg-gold-900/50"><i data-lucide="repeat" class="lucide-lg"></i></span>
@@ -22,7 +22,7 @@
 
       <div class="flex flex-col gap-4 sm:flex-row">
         <div class="sm:flex-1">
-          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Monto</label>
+          <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300"><span x-text="isVariable ? 'Monto estimado (referencia)' : 'Monto'"></span></label>
           {{ form.amount }}
         </div>
         <div class="sm:w-32">
@@ -41,9 +41,9 @@
           {{ form.next_date }}
         </div>
         <div class="flex-1" x-data="categoryDropdown()" id="category-field-sub"
-             data-initial-category="{{ form.initial.category|default:'' }}"
-             data-initial-category-name="{{ form.initial.category.name|default:'Seleccionar categoría' }}"
-             data-initial-category-icon="{{ form.initial.category.icon|default:'' }}">
+             data-initial-category="{{ subscription.category.pk|default:'' }}"
+             data-initial-category-name="{{ subscription.category.name|default:'Seleccionar categoría' }}"
+             data-initial-category-icon="{{ subscription.category.icon|default:'' }}">
           <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoría <span class="text-earth-400 dark:text-earth-500">(opcional)</span></label>
           <div class="relative">
             <button type="button" @click="toggle()" @click.outside="open = false"
@@ -70,11 +70,16 @@
               </template>
             </div>
           </div>
-          <input type="hidden" name="category" id="id_category" value="{{ form.initial.category|default:'' }}">
+          <input type="hidden" name="category" id="id_category" value="{{ subscription.category.pk|default:'' }}">
         </div>
       </div>
 
       <div class="flex items-center gap-2">
+        {{ form.is_variable }}
+        <label for="{{ form.is_variable.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Monto variable (ej: luz, agua) — se pide el monto real al pagar</label>
+      </div>
+
+      <div class="flex items-center gap-2" x-show="!isVariable">
         {{ form.auto_debit }}
         <label for="{{ form.auto_debit.id_for_label }}" class="text-sm text-earth-600 dark:text-earth-400 cursor-pointer">Débito automático (generar gasto al vencer)</label>
       </div>
