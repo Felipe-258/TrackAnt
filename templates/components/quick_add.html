@@ -1,5 +1,6 @@
 {% load static %}
-<div x-data="quickAddModal()" @open-quick-add.window="open = true" x-cloak>
+<script src="{% static 'js/nl-parse.js' %}"></script>
+<div x-data="quickAddModal()" @open-quick-add.window="onOpen($event)" x-cloak>
   <!-- Backdrop + Centering wrapper -->
   <div x-show="open" x-transition:enter="transition-opacity duration-200"
        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -25,6 +26,23 @@
       <button @click="open = false" class="rounded-lg p-1.5 text-earth-400 hover:bg-earth-100 hover:text-earth-600 dark:hover:bg-earth-800 dark:hover:text-earth-300 touch-target" aria-label="Cerrar">
         <i data-lucide="x" class="lucide-sm"></i>
       </button>
+    </div>
+
+    <!-- Dictado / lenguaje natural -->
+    <div class="border-b border-earth-200 px-5 py-4 dark:border-earth-800">
+      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Dictá o escribí</label>
+      <div class="relative">
+        <textarea x-model="nlText" @input.debounce.500ms="applyNl()" rows="2"
+                  placeholder="Ej: hoy gasté 6000 en el bar"
+                  class="w-full rounded-lg border border-earth-300 bg-white px-3 py-2.5 pr-12 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"></textarea>
+        <button type="button" x-show="speechSupported" @click="toggleListen()"
+                :class="listening ? 'bg-clay-500 text-white animate-pulse' : 'bg-clay-50 text-clay-600 hover:bg-clay-100 dark:bg-clay-900/30 dark:text-clay-300'"
+                class="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-lg touch-target"
+                :aria-label="listening ? 'Detener dictado' : 'Dictar'">
+          <i data-lucide="mic" class="lucide-sm"></i>
+        </button>
+      </div>
+      <p x-show="!speechSupported" class="mt-1 text-xs text-earth-400 dark:text-earth-500">Usá el micrófono del teclado para dictar.</p>
     </div>
 
     <!-- Form -->
@@ -72,7 +90,7 @@
       </div>
 
       <!-- Category -->
-      <div x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="type = $event.detail; loadCategories($event.detail)">
+      <div id="quick-category-field" x-data="quickCategoryDropdown()" x-init="loadCategories()" @quick-type-change.window="type = $event.detail; loadCategories($event.detail)">
         <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Categoria</label>
         <div class="relative" @click.outside="open = false">
           <button type="button" @click="toggle(); $nextTick(() => positionDropdown($refs.dropdownBtn))"
@@ -151,6 +169,8 @@
                class="w-full rounded-lg border border-earth-300 bg-white px-4 py-3 text-base text-earth-900 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 sm:text-sm sm:py-2.5">
       </div>
 
+      <input type="hidden" name="note" id="quick_note" value="">
+
       <!-- Submit -->
       <button type="submit" :disabled="submitting"
               class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-clay-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-clay-600 disabled:opacity-50 disabled:cursor-not-allowed touch-target">
@@ -166,12 +186,69 @@
 <script>
 function quickAddModal() {
   const today = new Date().toISOString().split('T')[0];
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   return {
     open: false,
     type: 'EXPENSE',
     amount: '',
     date: today,
+    nlText: '',
+    listening: false,
+    speechSupported: !!SR,
+    recognition: null,
     submitting: false,
+    onOpen(evt) {
+      this.open = true;
+      if (evt && evt.detail && evt.detail.listen && this.speechSupported) {
+        this.$nextTick(() => this.toggleListen());
+      }
+    },
+    applyNl() {
+      const field = document.getElementById('quick-category-field');
+      const dd = field ? Alpine.$data(field) : null;
+      const res = window.nlParse(this.nlText || '', dd ? dd.categories : []);
+      if (!res) return;
+      if (res.amount) this.amount = res.amount;
+      if (res.type) this.type = res.type;
+      if (res.date) this.date = res.date;
+      const noteEl = document.getElementById('quick_note');
+      if (noteEl) noteEl.value = res.note || '';
+      if (dd) {
+        dd.type = this.type;
+        Promise.resolve(dd.loadCategories(this.type)).then(() => {
+          if (!res.categoryName) return;
+          const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const cat = dd.categories.find(c => norm(c.name) === norm(res.categoryName));
+          if (cat) dd.select(cat);
+        });
+      }
+    },
+    toggleListen() {
+      if (this.listening) { this.stopListening(); return; }
+      if (!this.speechSupported) return;
+      const rec = new SR();
+      rec.lang = 'es-AR';
+      rec.interimResults = true;
+      rec.continuous = false;
+      let finalText = '';
+      rec.onresult = (e) => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += t; else interim += t;
+        }
+        this.nlText = (finalText + interim).trim();
+      };
+      rec.onend = () => { this.listening = false; this.applyNl(); };
+      rec.onerror = () => { this.listening = false; };
+      this.recognition = rec;
+      this.listening = true;
+      try { rec.start(); } catch (e) { this.listening = false; }
+    },
+    stopListening() {
+      try { if (this.recognition) this.recognition.stop(); } catch (e) {}
+      this.listening = false;
+    },
     handleResponse(evt) {
       this.submitting = false;
       if (evt.detail.successful) {
@@ -223,7 +300,7 @@ function quickCategoryDropdown() {
     },
     loadCategories(type) {
       type = type || 'EXPENSE';
-      fetch(`/transactions/category-options/?type=${type}`)
+      return fetch(`/transactions/category-options/?type=${type}`)
         .then(r => r.text())
         .then(html => {
           const temp = document.createElement('div');

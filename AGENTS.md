@@ -291,3 +291,15 @@ python manage.py createsuperuser
 - **Decimal + float**: Siempre `Decimal(amount)`, nunca `float()` con DecimalField
 - **position: absolute en dropdowns**: Se corta por `overflow-y-auto`. Usar `position: fixed` + `getBoundingClientRect()`
 - **ants/utils.py hardcoded 80%**: `budget_alerts` usa 80% fijo, no `colony.budget_alert_threshold`
+
+## Aprendizajes
+
+- **Dictado NL (sin IA)**: parser puro en `static/js/nl-parse.js` (`window.nlParse(text, categories, now)` + `nlParseSelfTest()`). Self-test con `?nltest` en la URL. Devuelve `{type, amount, date(ISO), categoryId, categoryName, note}`; match de categoría por nombre normalizado (sin tildes) contra la lista pasada.
+- **UI dictado**: input grande + botón mic dentro del modal `templates/components/quick_add.html` (métodos `nlText/applyNl/toggleListen`, hidden `name="note" id="quick_note"`, div categoría `id="quick-category-field"`). Disparador en `finances/templates/finances/transaction_list.html`: FAB abajo-derecha (`bottom-32` en mobile para no quedar tapado por la tab bar PWA) que hace `$dispatch('open-quick-add', {listen:true})` (auto-arranca el mic).
+- **Mic Web Speech API** requiere contexto seguro: HTTPS o `localhost`. Por HTTP en LAN/Tailscale IP queda bloqueado. Chrome usa el servicio de Google → necesita internet, no offline.
+- **HTTPS en el TrueNAS (Tailscale)**: Tailscale corre como **contenedor** `ix-tailscale-tailscale-1` (NetworkMode=host, `TS_USERSPACE=false`, estado en `/var/lib/tailscale`), NO como binario en el host. El `tailscale` CLI se ejecuta con `sudo docker exec ix-tailscale-tailscale-1 tailscale ...`. Proxy persistente: `sudo docker exec ix-tailscale-tailscale-1 tailscale serve --bg --https=443 http://127.0.0.1:3200` → `https://truenas-scale.tail13097e.ts.net` (tailnet-only, cert Let's Encrypt). Ver/desactivar: `... tailscale serve status` / `... tailscale serve --https=443 off`. SOBREVIVE reinicios (vive en el volumen de estado).
+- **Gotcha IPv6 del serve**: usar `http://127.0.0.1:3200` como target, NO `localhost` — `localhost` resuelve a `::1` y el docker-proxy de la app resetea en IPv6 (`read tcp [::1]:...->[::1]:3200: connection reset by peer`), dando 502. Con `127.0.0.1` anda.
+- **Deploy compose TrueNAS**: `~/docker/web-apps/docker-compose.yml`, env de trackant inline (`TRACKANT_CSRF_TRUSTED_ORIGINS`, `TRACKANT_ALLOWED_HOSTS`). El contenedor `trackant` sale de `ghcr.io/felipe-258/trackant:latest` (pull automático con watchtower). SSH al TrueNAS: user `felipe` (password auth); su home `/mnt/media/stacks` es 777 y de owner `apps`, así que las claves SSH no funcionan (StrictModes).
+- **Alpine cross-component**: para setear la categoría del modal desde `quickAddModal` se usa `Alpine.$data(document.getElementById('quick-category-field')).select(cat)`; `loadCategories(type)` ahora devuelve la promesa del fetch.
+- **FAB/fixed + View Transitions**: elementos `fixed` nuevos necesitan `style="view-transition-name: none;"`.
+- **Pendiente dictado**: sinónimos de categoría en el parser (ej. `sueldo` → `Salarios`); hoy el match es por nombre normalizado exacto. Y multi-transacción en un mismo dictado.
