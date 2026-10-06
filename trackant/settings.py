@@ -25,7 +25,17 @@ SECRET_KEY = _load_secret_key()
 
 DEBUG = os.environ.get('TRACKANT_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = os.environ.get('TRACKANT_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+def _allowed_host(value):
+    return value.strip().removeprefix('http://').removeprefix('https://').rstrip('/')
+
+
+ALLOWED_HOSTS = [
+    h for h in (
+        _allowed_host(v)
+        for v in os.environ.get('TRACKANT_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    )
+    if h
+]
 if DEBUG:
     ALLOWED_HOSTS.extend(['*', '.local'])
 
