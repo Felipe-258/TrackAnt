@@ -28,21 +28,35 @@
       </button>
     </div>
 
-    <!-- Dictado / lenguaje natural -->
-    <div class="border-b border-earth-200 px-5 py-4 dark:border-earth-800">
-      <label class="mb-1.5 block text-sm font-medium text-earth-700 dark:text-earth-300">Dictá o escribí</label>
-      <div class="relative">
-        <textarea x-model="nlText" @input.debounce.500ms="applyNl()" rows="2"
-                  placeholder="Ej: hoy gasté 6000 en el bar"
-                  class="w-full rounded-lg border border-earth-300 bg-white px-3 py-2.5 pr-12 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"></textarea>
-        <button type="button" x-show="speechSupported" @click="toggleListen()"
-                :class="listening ? 'bg-clay-500 text-white animate-pulse' : 'bg-clay-50 text-clay-600 hover:bg-clay-100 dark:bg-clay-900/30 dark:text-clay-300'"
-                class="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-lg touch-target"
-                :aria-label="listening ? 'Detener dictado' : 'Dictar'">
-          <i data-lucide="mic" class="lucide-sm"></i>
-        </button>
+    <!-- Dictado / lenguaje natural (plegable) -->
+    <div class="border-b border-earth-200 dark:border-earth-800">
+      <button type="button" @click="nlOpen = !nlOpen"
+              class="flex w-full items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-earth-700 dark:text-earth-300 touch-target"
+              :aria-expanded="nlOpen">
+        <span class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="lucide-sm text-clay-500"></i>
+          Dictá o escribí
+        </span>
+        <span class="inline-flex transition-transform" :class="nlOpen ? 'rotate-180' : ''">
+          <i data-lucide="chevron-down" class="lucide-sm text-earth-400"></i>
+        </span>
+      </button>
+      <div x-show="nlOpen" x-cloak x-transition class="px-5 pb-4">
+        <div class="relative">
+          <textarea x-model="nlText" @input.debounce.500ms="applyNl()" rows="2"
+                    placeholder="Ej: hoy gasté 6000 en el bar"
+                    class="w-full rounded-lg border border-earth-300 bg-white px-3 py-2.5 pr-12 text-sm text-earth-900 placeholder-earth-400 focus:border-clay-400 focus:outline-none focus:ring-2 focus:ring-clay-400/20 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-200 dark:placeholder-earth-500"></textarea>
+          <button type="button" @click="toggleListen()"
+                  :class="listening ? 'bg-clay-500 text-white animate-pulse' : 'bg-clay-50 text-clay-600 hover:bg-clay-100 dark:bg-clay-900/30 dark:text-clay-300'"
+                  class="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-lg touch-target"
+                  :aria-label="listening ? 'Detener dictado' : 'Dictar'" title="Dictar (pide permiso de micrófono)">
+            <i data-lucide="mic" class="lucide-sm"></i>
+          </button>
+        </div>
+        <p x-show="micError" x-text="micError" class="mt-1.5 text-xs text-clay-600 dark:text-clay-400"></p>
+        <p x-show="micStatus && !micError" x-text="micStatus" class="mt-1.5 text-xs text-sage-600 dark:text-sage-400"></p>
+        <p x-show="!speechSupported && !micError && !micStatus" class="mt-1.5 text-xs text-earth-400 dark:text-earth-500">Este navegador no soporta dictado nativo; usá el micrófono del teclado.</p>
       </div>
-      <p x-show="!speechSupported" class="mt-1 text-xs text-earth-400 dark:text-earth-500">Usá el micrófono del teclado para dictar.</p>
     </div>
 
     <!-- Form -->
@@ -193,14 +207,18 @@ function quickAddModal() {
     amount: '',
     date: today,
     nlText: '',
+    nlOpen: false,
     listening: false,
     speechSupported: !!SR,
     recognition: null,
+    micStatus: '',
+    micError: '',
     submitting: false,
     onOpen(evt) {
       this.open = true;
-      if (evt && evt.detail && evt.detail.listen && this.speechSupported) {
-        this.$nextTick(() => this.toggleListen());
+      if (evt && evt.detail && evt.detail.listen) {
+        this.nlOpen = true;
+        this.toggleListen();
       }
     },
     applyNl() {
@@ -223,9 +241,42 @@ function quickAddModal() {
         });
       }
     },
-    toggleListen() {
+    async requestMic() {
+      this.micStatus = '';
+      this.micError = '';
+      if (!window.isSecureContext) {
+        this.micError = 'El micrófono necesita HTTPS o localhost. Estás en una conexión no segura.';
+        return false;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        this.micError = 'Este navegador no permite acceder al micrófono.';
+        return false;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        return true;
+      } catch (e) {
+        const name = (e && e.name) || 'Error';
+        const msgs = {
+          NotAllowedError: 'Permiso de micrófono denegado. Habilitalo en el navegador y reintentá.',
+          NotFoundError: 'No se encontró ningún micrófono.',
+          NotReadableError: 'El micrófono está en uso por otra app.',
+          SecurityError: 'Bloqueado por seguridad. Probá desde HTTPS.',
+          AbortError: 'No se pudo iniciar el micrófono.'
+        };
+        this.micError = msgs[name] || ('No se pudo acceder al micrófono (' + name + ').');
+        return false;
+      }
+    },
+    async toggleListen() {
       if (this.listening) { this.stopListening(); return; }
-      if (!this.speechSupported) return;
+      const ok = await this.requestMic();
+      if (!ok) return;
+      if (!this.speechSupported) {
+        this.micError = 'Tu navegador no soporta dictado nativo; usá el micrófono del teclado.';
+        return;
+      }
       const rec = new SR();
       rec.lang = 'es-AR';
       rec.interimResults = true;
@@ -239,15 +290,28 @@ function quickAddModal() {
         }
         this.nlText = (finalText + interim).trim();
       };
-      rec.onend = () => { this.listening = false; this.applyNl(); };
-      rec.onerror = () => { this.listening = false; };
+      rec.onend = () => { this.listening = false; this.micStatus = ''; this.applyNl(); };
+      rec.onerror = (e) => {
+        this.listening = false;
+        this.micStatus = '';
+        const codes = {
+          'not-allowed': 'Permiso de micrófono denegado.',
+          'service-not-allowed': 'El servicio de dictado no está permitido.',
+          'no-speech': 'No se escuchó nada. Reintentá.',
+          'audio-capture': 'No hay micrófono disponible.',
+          'network': 'Sin conexión para el dictado.'
+        };
+        this.micError = codes[e && e.error] || 'Error de dictado.';
+      };
       this.recognition = rec;
       this.listening = true;
-      try { rec.start(); } catch (e) { this.listening = false; }
+      this.micStatus = 'Escuchando…';
+      try { rec.start(); } catch (e) { this.listening = false; this.micStatus = ''; this.micError = 'No se pudo iniciar el dictado.'; }
     },
     stopListening() {
       try { if (this.recognition) this.recognition.stop(); } catch (e) {}
       this.listening = false;
+      this.micStatus = '';
     },
     handleResponse(evt) {
       this.submitting = false;
