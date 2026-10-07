@@ -221,24 +221,25 @@ function quickAddModal() {
         this.toggleListen();
       }
     },
-    applyNl() {
+    async applyNl() {
       const field = document.getElementById('quick-category-field');
       const dd = field ? Alpine.$data(field) : null;
-      const res = window.nlParse(this.nlText || '', dd ? dd.categories : []);
-      if (!res) return;
-      if (res.amount) this.amount = res.amount;
-      if (res.type) this.type = res.type;
-      if (res.date) this.date = res.date;
+      const base = window.nlParse(this.nlText || '', []);
+      if (!base) return;
+      if (base.amount) this.amount = base.amount;
+      if (base.type) this.type = base.type;
+      if (base.date) this.date = base.date;
       const noteEl = document.getElementById('quick_note');
-      if (noteEl) noteEl.value = res.note || '';
+      if (noteEl) noteEl.value = base.note || '';
       if (dd) {
         dd.type = this.type;
-        Promise.resolve(dd.loadCategories(this.type)).then(() => {
-          if (!res.categoryName) return;
+        await Promise.resolve(dd.loadCategories(this.type));
+        const res = window.nlParse(this.nlText || '', dd.categories);
+        if (res && res.categoryName) {
           const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
           const cat = dd.categories.find(c => norm(c.name) === norm(res.categoryName));
           if (cat) dd.select(cat);
-        });
+        }
       }
     },
     async requestMic() {
